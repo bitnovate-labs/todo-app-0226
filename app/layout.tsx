@@ -9,6 +9,8 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { PostHogProvider, PostHogPageView } from './providers';
+import { QueryProvider } from '@/components/providers/QueryProvider';
+import { TodosPrefetcher } from '@/components/providers/TodosPrefetcher';
 import { AnalyticsConsentGate } from '@/components/analytics/AnalyticsConsentGate';
 import { AuthEventTracker } from '@/components/analytics/AuthEventTracker';
 import { IdentifyUser } from '@/components/analytics/IdentifyUser';
@@ -42,6 +44,8 @@ export default async function RootLayout({
     <html lang="en">
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
+          <QueryProvider>
+          <TodosPrefetcher userId={user?.id ?? null} />
           <PostHogPageView />
           <AuthEventTracker />
           {user ? (
@@ -93,6 +97,7 @@ export default async function RootLayout({
         <PWAInstallPrompt />
         <ServiceWorkerRegister />
         <AnalyticsConsentGate />
+          </QueryProvider>
       </PostHogProvider>
       </body>
     </html>

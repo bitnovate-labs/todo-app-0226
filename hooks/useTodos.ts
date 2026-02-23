@@ -1,105 +1,131 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getTodosAction,
   addTodoAction,
   toggleTodoAction,
   updateTodoDateAction,
   deleteTodoAction,
 } from "@/app/actions/todos";
 import type { Todo } from "@/lib/todos";
+import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
 
 export function useTodos(userId: string | undefined | null) {
-  const [todos, setTodos] = useState<Todo[]>([]);
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = todosQueryKey(userId);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const fetchTodos = useCallback(async () => {
-    if (!userId) {
-      setTodos([]);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    const result = await getTodosAction();
-    setLoading(false);
-    if (result.error) {
-      setError(result.error);
-      setTodos([]);
-      return;
-    }
-    setTodos(result.data ?? []);
-  }, [userId]);
+  const {
+    data: todos = [],
+    isPending: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: fetchTodos,
+    enabled: mounted && !!userId,
+  });
 
-  useEffect(() => {
-    if (!mounted || !userId) {
-      setTodos([]);
-      setLoading(!mounted && !!userId);
-      return;
-    }
-    fetchTodos();
-  }, [userId, mounted, fetchTodos]);
+  const error = queryError ? String(queryError) : null;
+
+  const addTodoMutation = useMutation({
+    mutationFn: ({ title, date }: { title: string; date: string }) =>
+      addTodoAction(title, date),
+    onSuccess: (result) => {
+      if (result.data) {
+        queryClient.setQueryData<Todo[]>(queryKey, (prev) =>
+          prev ? [...prev, result.data!] : [result.data!]
+        );
+      }
+    },
+  });
+
+  const toggleTodoMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      toggleTodoAction(id, completed),
+    onMutate: async ({ id, completed }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old
+          ? old.map((t) => (t.id === id ? { ...t, completed } : t))
+          : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const updateTodoDateMutation = useMutation({
+    mutationFn: ({ id, date }: { id: string; date: string }) =>
+      updateTodoDateAction(id, date),
+    onMutate: async ({ id, date }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old ? old.map((t) => (t.id === id ? { ...t, date } : t)) : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const deleteTodoMutation = useMutation({
+    mutationFn: (id: string) => deleteTodoAction(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old ? old.filter((t) => t.id !== id) : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
 
   const addTodo = useCallback(
     async (title: string, date: string) => {
       if (!userId) return;
-      const result = await addTodoAction(title, date);
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      if (result.data) setTodos((prev) => [...prev, result.data!]);
+      const result = await addTodoMutation.mutateAsync({ title, date });
+      if (result.error) throw new Error(result.error);
     },
-    [userId]
+    [userId, addTodoMutation]
   );
 
-  const toggleTodo = useCallback(async (id: string) => {
-    const todo = todos.find((t) => t.id === id);
-    if (!todo) return;
-    const next = !todo.completed;
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: next } : t))
-    );
-    const result = await toggleTodoAction(id, next);
-    if (result.error) {
-      setError(result.error);
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, completed: !next } : t))
-      );
-    }
-  }, [todos]);
+  const toggleTodo = useCallback(
+    async (id: string, next?: boolean) => {
+      const todo = todos.find((t) => t.id === id);
+      if (!todo) return;
+      const nextCompleted = next ?? !todo.completed;
+      toggleTodoMutation.mutate({ id, completed: nextCompleted });
+    },
+    [todos, toggleTodoMutation]
+  );
 
-  const deleteTodo = useCallback(async (id: string) => {
-    const previous = todos.find((t) => t.id === id);
-    setTodos((prev) => prev.filter((t) => t.id !== id));
-    const result = await deleteTodoAction(id);
-    if (result.error) {
-      setError(result.error);
-      if (previous) setTodos((prev) => [...prev, previous]);
-    }
-  }, [todos]);
+  const deleteTodo = useCallback(
+    (id: string) => deleteTodoMutation.mutate(id),
+    [deleteTodoMutation]
+  );
 
-  const updateTodoDate = useCallback(async (id: string, date: string) => {
-    const todo = todos.find((t) => t.id === id);
-    if (!todo) return;
-    const prevDate = todo.date;
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, date } : t))
-    );
-    const result = await updateTodoDateAction(id, date);
-    if (result.error) {
-      setError(result.error);
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, date: prevDate } : t))
-      );
-    }
-  }, [todos]);
+  const updateTodoDate = useCallback(
+    (id: string, date: string) =>
+      updateTodoDateMutation.mutate({ id, date }),
+    [updateTodoDateMutation]
+  );
 
   const getByDate = useCallback(
     (dateKey: string) => todos.filter((t) => t.date === dateKey),
@@ -116,6 +142,6 @@ export function useTodos(userId: string | undefined | null) {
     mounted,
     loading,
     error,
-    refetch: fetchTodos,
+    refetch,
   };
 }

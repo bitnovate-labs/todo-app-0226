@@ -21,11 +21,14 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
     const t = title.trim();
     if (!t || !mounted) return;
     setSubmitting(true);
-    const date = useToday ? todayKey() : selectedDate;
-    await addTodo(t, date);
-    setTitle("");
-    setSubmitting(false);
-    router.push("/");
+    try {
+      const date = useToday ? todayKey() : selectedDate;
+      await addTodo(t, date);
+      setTitle("");
+      router.push("/");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!mounted) {
