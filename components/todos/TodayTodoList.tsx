@@ -2,15 +2,21 @@
 
 import { useTodos } from "@/hooks/useTodos";
 import { todayKey, formatDateDDMMMFromDate } from "@/lib/todos";
+import type { Todo } from "@/lib/todos";
 
-type TodayTodoListProps = { userId: string | undefined | null };
+type TodayTodoListProps = {
+  userId: string | undefined | null;
+  initialTodos?: Todo[];
+};
 
-export function TodayTodoList({ userId }: TodayTodoListProps) {
-  const { getByDate, toggleTodo, mounted } = useTodos(userId);
+export function TodayTodoList({ userId, initialTodos }: TodayTodoListProps) {
+  const { getByDate, toggleTodo, todos, loading } = useTodos(userId, {
+    initialData: initialTodos,
+  });
   const today = todayKey();
   const dayTodos = getByDate(today);
 
-  if (!mounted) {
+  if (loading && todos.length === 0) {
     return (
       <div className="py-8 text-center text-gray-500">
         Loading…

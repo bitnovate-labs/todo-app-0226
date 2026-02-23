@@ -11,7 +11,16 @@ import {
 import type { Todo } from "@/lib/todos";
 import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
 
-export function useTodos(userId: string | undefined | null) {
+export type UseTodosOptions = {
+  /** Server-fetched todos so the first paint has data (no loading flash). */
+  initialData?: Todo[] | undefined;
+};
+
+export function useTodos(
+  userId: string | undefined | null,
+  options: UseTodosOptions = {}
+) {
+  const { initialData } = options;
   const [mounted, setMounted] = useState(false);
   const queryClient = useQueryClient();
   const queryKey = todosQueryKey(userId);
@@ -28,7 +37,9 @@ export function useTodos(userId: string | undefined | null) {
   } = useQuery({
     queryKey,
     queryFn: fetchTodos,
-    enabled: mounted && !!userId,
+    enabled: !!userId,
+    initialData: initialData ?? undefined,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
   });
 
   const error = queryError ? String(queryError) : null;

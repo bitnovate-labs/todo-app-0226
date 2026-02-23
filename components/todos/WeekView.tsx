@@ -4,11 +4,17 @@ import { useState, useRef, useEffect } from "react";
 import { useTodos } from "@/hooks/useTodos";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 import { weekDatesForWeek, todayKey } from "@/lib/todos";
+import type { Todo } from "@/lib/todos";
 
-type WeekViewProps = { userId: string | undefined | null };
+type WeekViewProps = {
+  userId: string | undefined | null;
+  initialTodos?: Todo[];
+};
 
-export function WeekView({ userId }: WeekViewProps) {
-  const { getByDate, toggleTodo, mounted } = useTodos(userId);
+export function WeekView({ userId, initialTodos }: WeekViewProps) {
+  const { getByDate, toggleTodo, todos, loading } = useTodos(userId, {
+    initialData: initialTodos,
+  });
   const [weekStartsOn] = useWeekStartsOn();
   const days = weekDatesForWeek(weekStartsOn);
   const [layout, setLayout] = useState<"vertical" | "horizontal">("vertical");
@@ -29,7 +35,7 @@ export function WeekView({ userId }: WeekViewProps) {
     }
   }, [layout, days]);
 
-  if (!mounted) {
+  if (loading && todos.length === 0) {
     return <div className="py-8 text-center text-gray-500">Loading…</div>;
   }
 
