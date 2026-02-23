@@ -1,34 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
+import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 
 const navItemClass =
   "flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors min-w-0 flex-1 ";
 
+function NavTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${navItemClass} ${
+        active
+          ? "bg-blue-50 text-blue-600"
+          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100"
+      }`}
+      aria-current={active ? "page" : undefined}
+    >
+      {children}
+    </button>
+  );
+}
+
 /**
- * Client nav links; prefetches route + todos on hover so clicks feel instant.
+ * Dashboard tabs (/, /week, /history) use client-only navigation (pushState)
+ * so switching is instant. Add and Settings use real Link for full navigation.
  */
 export function BottomNavLinks({ userId }: { userId: string }) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const pathnameCtx = useDashboardPathname();
+  const pathname = pathnameCtx?.pathname ?? "/";
 
-  const prefetchRouteAndTodos = (path: string) => {
-    router.prefetch(path);
-    queryClient.prefetchQuery({
-      queryKey: todosQueryKey(userId),
-      queryFn: fetchTodos,
-    });
+  const handleDashboardTab = (path: string) => {
+    if (pathname === path) return;
+    pathnameCtx?.setPathname(path);
   };
 
   return (
     <div className="flex h-16 items-stretch">
-      <Link
-        href="/"
-        onPointerEnter={() => prefetchRouteAndTodos("/")}
-        className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
+      <NavTab
+        active={pathname === "/"}
+        onClick={() => handleDashboardTab("/")}
       >
         <svg
           className="h-6 w-6 shrink-0"
@@ -45,11 +65,10 @@ export function BottomNavLinks({ userId }: { userId: string }) {
           />
         </svg>
         <span>Home</span>
-      </Link>
-      <Link
-        href="/week"
-        onPointerEnter={() => prefetchRouteAndTodos("/week")}
-        className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
+      </NavTab>
+      <NavTab
+        active={pathname === "/week"}
+        onClick={() => handleDashboardTab("/week")}
       >
         <svg
           className="h-6 w-6 shrink-0"
@@ -66,10 +85,9 @@ export function BottomNavLinks({ userId }: { userId: string }) {
           />
         </svg>
         <span>Week</span>
-      </Link>
+      </NavTab>
       <Link
         href="/todo/new"
-        onPointerEnter={() => router.prefetch("/todo/new")}
         className={`${navItemClass} bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800`}
         aria-label="Add todo"
       >
@@ -89,10 +107,9 @@ export function BottomNavLinks({ userId }: { userId: string }) {
         </svg>
         <span>Add</span>
       </Link>
-      <Link
-        href="/history"
-        onPointerEnter={() => prefetchRouteAndTodos("/history")}
-        className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
+      <NavTab
+        active={pathname === "/history"}
+        onClick={() => handleDashboardTab("/history")}
       >
         <svg
           className="h-6 w-6 shrink-0"
@@ -109,11 +126,15 @@ export function BottomNavLinks({ userId }: { userId: string }) {
           />
         </svg>
         <span>History</span>
-      </Link>
+      </NavTab>
       <Link
         href="/settings"
-        onPointerEnter={() => router.prefetch("/settings")}
-        className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
+        className={`${navItemClass} ${
+          pathname === "/settings"
+            ? "bg-blue-50 text-blue-600"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100"
+        }`}
+        aria-current={pathname === "/settings" ? "page" : undefined}
       >
         <svg
           className="h-6 w-6 shrink-0"

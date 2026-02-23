@@ -132,7 +132,7 @@ function TodoHistoryItem({
       className={`flex items-center gap-3 rounded-lg border py-2.5 pl-3 pr-2 ${
         isIncomplete
           ? "cursor-pointer border-blue-200 bg-blue-50/80 hover:bg-blue-100/80"
-          : "cursor-pointer border-green-200 bg-green-50/80 hover:bg-green-100/80"
+          : "cursor-pointer border-green-400 bg-green-50/80 hover:bg-green-100/80"
       }`}
       onClick={() =>
         isIncomplete ? onReAdd(todo) : onUndoComplete(todo.id)
@@ -230,11 +230,15 @@ export function HistoryView({ userId }: HistoryViewProps) {
   })();
 
   if (loading && todos.length === 0) {
-    return <div className="py-8 text-center text-gray-500">Loading…</div>;
+    return (
+      <div className="animate-page-load py-8 text-center text-gray-500">
+        Loading…
+      </div>
+    );
   }
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 animate-page-load">
       <h1 className="mb-4 text-2xl font-bold text-gray-900">History</h1>
 
       {/* Tabs */}
@@ -265,7 +269,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Incomplete this week
             </h2>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {weekIncomplete.length === 0 ? (
                 <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
                   No incomplete todos this week
@@ -286,7 +290,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Completed this week
             </h2>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {weekCompleted.length === 0 ? (
                 <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
                   No completed todos this week
@@ -358,7 +362,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Incomplete in {monthLabel(monthCursor)}
             </h2>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {monthIncomplete.length === 0 ? (
                 <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
                   No incomplete todos this month
@@ -379,7 +383,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Completed in {monthLabel(monthCursor)}
             </h2>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {monthCompleted.length === 0 ? (
                 <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
                   No completed todos this month

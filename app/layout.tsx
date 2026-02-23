@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BottomNavShell } from "@/components/layout/BottomNavShell";
+import { DashboardPathnameProvider } from "@/components/layout/DashboardPathnameContext";
+import { MainContent } from "@/components/layout/DashboardContent";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
@@ -77,29 +79,33 @@ export default async function RootLayout({
         <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
           {user ? <Navbar /> : ""}
 
-          <main
-            className={`flex min-h-0 flex-1 flex-col ${
-              user
-                ? "pt-[calc(3.5rem+env(safe-area-inset-top,0px))]"
-                : "pt-0"
-            } safe-area-x ${
-              showBottomNav
-                ? "pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]"
-                : "pb-6"
-            }`}
-          >
-            <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
-              {children}
-            </div>
-          </main>
+          {user ? (
+            <DashboardPathnameProvider>
+              <main
+                className={`flex min-h-0 flex-1 flex-col pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-area-x pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]`}
+              >
+                <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
+                  <MainContent userId={user.id}>{children}</MainContent>
+                </div>
+              </main>
+              <BottomNavShell>
+                <Suspense fallback={null}>
+                  <BottomNav />
+                </Suspense>
+              </BottomNavShell>
+            </DashboardPathnameProvider>
+          ) : (
+            <>
+              <main
+                className={`flex min-h-0 flex-1 flex-col pt-0 safe-area-x pb-6`}
+              >
+                <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
+                  {children}
+                </div>
+              </main>
+            </>
+          )}
         </div>
-        {showBottomNav ? (
-          <BottomNavShell>
-            <Suspense fallback={null}>
-              <BottomNav />
-            </Suspense>
-          </BottomNavShell>
-        ) : null}
         <PWAInstallPrompt />
         <ServiceWorkerRegister />
         <AnalyticsConsentGate />

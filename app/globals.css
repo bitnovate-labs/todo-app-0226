@@ -100,3 +100,17 @@ nav[class*="fixed"][role="navigation"] {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
+
+/* Ease-in animation for loading states when switching pages (fade only, no slide) */
+@keyframes page-load-ease-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-page-load {
+  animation: page-load-ease-in 0.25s ease-in forwards;
+}

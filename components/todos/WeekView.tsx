@@ -30,7 +30,11 @@ export function WeekView({ userId }: WeekViewProps) {
   }, [layout, days]);
 
   if (loading && todos.length === 0) {
-    return <div className="py-8 text-center text-gray-500">Loading…</div>;
+    return (
+      <div className="animate-page-load py-8 text-center text-gray-500">
+        Loading…
+      </div>
+    );
   }
 
   const today = todayKey();
@@ -41,18 +45,26 @@ export function WeekView({ userId }: WeekViewProps) {
       <section
         key={dateKey}
         ref={isToday ? todayRef : undefined}
-        className={`min-h-0 shrink-0 rounded-xl border border-gray-200 bg-gray-50/50 p-4 ${
+        className={`min-h-0 shrink-0 rounded-2xl border bg-white/80 p-4 shadow-sm ${
+          isToday ? "border-blue-500/60" : "border-gray-300"
+        } ${
           layout === "horizontal"
             ? "min-w-[370px] w-[340px] snap-start"
             : "min-w-[200px]"
         }`}
       >
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-600">
+        <h2
+          className={`mb-4 text-base font-bold tracking-tight ${
+            isToday ? "text-blue-600" : "text-gray-700"
+          }`}
+        >
           {isToday ? "Today" : `${dayName} · ${label}`}
         </h2>
-        <ul className="space-y-2">
+        <ul className="space-y-4">
           {dayTodos.length === 0 ? (
-            <li className="text-sm text-gray-400">No todos</li>
+            <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 py-4 text-center text-sm text-gray-500">
+              No todos
+            </li>
           ) : (
             dayTodos
               .slice()
@@ -60,21 +72,31 @@ export function WeekView({ userId }: WeekViewProps) {
               .map((todo) => (
                 <li
                   key={todo.id}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-2"
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm transition-shadow ${
+                    todo.completed
+                      ? "border border-green-400/70 bg-green-50/70"
+                      : "border border-gray-200/80 bg-white"
+                  }`}
                 >
                   <span
-                    className={`min-w-0 flex-1 text-sm text-gray-900 ${
-                      todo.completed ? "text-gray-500 line-through" : ""
+                    className={`min-w-0 flex-1 text-[15px] font-medium leading-snug ${
+                      todo.completed
+                        ? "text-green-700 line-through opacity-90"
+                        : "text-gray-900"
                     }`}
                   >
                     {todo.title}
                   </span>
-                  <label className="shrink-0">
+                  <label className="shrink-0 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={todo.completed}
                       onChange={() => toggleTodo(todo.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className={`h-5 w-5 rounded-md border-gray-300 focus:ring-2 focus:ring-offset-0 ${
+                        todo.completed
+                          ? "accent-green-600"
+                          : "accent-blue-600 focus:ring-blue-500"
+                      }`}
                     />
                   </label>
                 </li>
@@ -86,7 +108,7 @@ export function WeekView({ userId }: WeekViewProps) {
   });
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 animate-page-load">
       <h1 className="mb-2 text-2xl font-bold text-gray-900">This week</h1>
       <p className="mb-2 text-sm text-gray-500">
         {layout === "vertical"

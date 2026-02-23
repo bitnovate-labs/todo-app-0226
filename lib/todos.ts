@@ -21,17 +21,24 @@ export function todayKey(): string {
   return dateKey(new Date());
 }
 
-/** Format a date key (YYYY-MM-DD) for display as DD MMM */
+const MONTH_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+/** Format a date key (YYYY-MM-DD) for display as DD MMM. Deterministic for hydration. */
 export function formatDateDDMMM(dateKey: string): string {
   const [y, m, d] = dateKey.split("-").map(Number);
   if (Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) return dateKey;
   const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
+  return formatDateDDMMMFromDate(date);
 }
 
-/** Format a Date for display as DD MMM */
+/** Format a Date for display as DD MMM. Deterministic (no locale) so server and client match. */
 export function formatDateDDMMMFromDate(d: Date): string {
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = MONTH_SHORT[d.getMonth()];
+  return `${day} ${month}`;
 }
 
 export type WeekStartsOn = "sunday" | "monday";
