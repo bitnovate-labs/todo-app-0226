@@ -82,15 +82,14 @@ export default async function RootLayout({
               {children}
             </div>
           </main>
-
-          {showBottomNav ? (
-            <BottomNavShell>
-              <Suspense fallback={null}>
-                <BottomNav />
-              </Suspense>
-            </BottomNavShell>
-          ) : null}
         </div>
+        {showBottomNav ? (
+          <BottomNavShell>
+            <Suspense fallback={null}>
+              <BottomNav />
+            </Suspense>
+          </BottomNavShell>
+        ) : null}
         <PWAInstallPrompt />
         <ServiceWorkerRegister />
         <AnalyticsConsentGate />
