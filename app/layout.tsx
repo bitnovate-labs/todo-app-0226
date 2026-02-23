@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
+import { Suspense } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { BottomNavShell } from "@/components/layout/BottomNavShell";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
@@ -72,7 +74,7 @@ export default async function RootLayout({
                 : "pt-0"
             } safe-area-x ${
               showBottomNav
-                ? "pb-[calc(3.5rem+env(safe-area-inset-bottom,0px)+0.5rem)]"
+                ? "pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]"
                 : "pb-6"
             }`}
           >
@@ -81,7 +83,13 @@ export default async function RootLayout({
             </div>
           </main>
 
-          <BottomNav />
+          {showBottomNav ? (
+            <BottomNavShell>
+              <Suspense fallback={null}>
+                <BottomNav />
+              </Suspense>
+            </BottomNavShell>
+          ) : null}
         </div>
         <PWAInstallPrompt />
         <ServiceWorkerRegister />

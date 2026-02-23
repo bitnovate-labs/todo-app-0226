@@ -8,7 +8,7 @@
   /* Mobile PWA: max content width (e.g. iPhone 14 Pro Max) */
   --app-max-width: 430px;
   --header-height: 3.5rem;
-  --bottom-nav-height: 3.5rem;
+  --bottom-nav-height: 4rem;
 }
 
 html {

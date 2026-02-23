@@ -9,14 +9,13 @@ export async function BottomNav() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 safe-area-b">
-      <nav
-        className="mx-auto max-w-[430px] border-t border-gray-200 bg-white"
-        role="navigation"
-        aria-label="Main"
-      >
+    <nav
+      className="mx-auto max-w-[430px] border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      role="navigation"
+      aria-label="Main"
+    >
         <div className="w-full">
-          <div className="flex h-14 items-stretch">
+          <div className="flex h-16 items-stretch">
             <Link href="/" className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}>
               <svg
                 className="h-6 w-6 shrink-0"
@@ -114,7 +113,6 @@ export async function BottomNav() {
             </Link>
           </div>
         </div>
-      </nav>
-    </div>
+    </nav>
   );
 }

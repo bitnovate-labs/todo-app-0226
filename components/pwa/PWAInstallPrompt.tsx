@@ -4,6 +4,25 @@ import { useState, useEffect, useRef } from 'react';
 import { trackEvent } from '@/lib/analytics/track';
 import { ANALYTICS_EVENTS } from '@/lib/analytics/events';
 
+const PWA_PROMPT_SEEN_KEY = 'pwa-install-prompt-seen';
+
+function hasSeenInstallPrompt(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(PWA_PROMPT_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markInstallPromptSeen(): void {
+  try {
+    localStorage.setItem(PWA_PROMPT_SEEN_KEY, '1');
+  } catch {
+    // ignore
+  }
+}
+
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
@@ -37,6 +56,8 @@ export function PWAInstallPrompt() {
       setInstalled(true);
       return;
     }
+    if (hasSeenInstallPrompt()) return;
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -45,7 +66,7 @@ export function PWAInstallPrompt() {
     window.addEventListener('beforeinstallprompt', handler);
     // Fallback: show install UI after a short delay if browser never fires beforeinstallprompt (e.g. Safari)
     const fallbackTimer = window.setTimeout(() => {
-      if (!isStandalone()) setShowFallback(true);
+      if (!isStandalone() && !hasSeenInstallPrompt()) setShowFallback(true);
     }, 2500);
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
@@ -67,6 +88,7 @@ export function PWAInstallPrompt() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       setInstalled(true);
+      markInstallPromptSeen();
       trackEvent({ name: ANALYTICS_EVENTS.PWA_INSTALL_INSTALLED });
     }
     setShowPrompt(false);
@@ -75,6 +97,7 @@ export function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
+    markInstallPromptSeen();
     trackEvent({ name: ANALYTICS_EVENTS.PWA_INSTALL_DISMISSED });
     setShowPrompt(false);
     setShowFallback(false);
