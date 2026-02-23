@@ -12,10 +12,7 @@ import {
   dateKey,
 } from "@/lib/todos";
 
-type HistoryViewProps = {
-  userId: string | undefined | null;
-  initialTodos?: Todo[];
-};
+type HistoryViewProps = { userId: string | undefined | null };
 
 type ReAddModalProps = {
   todo: Todo;
@@ -158,10 +155,8 @@ function TodoHistoryItem({
   );
 }
 
-export function HistoryView({ userId, initialTodos }: HistoryViewProps) {
-  const { todos, updateTodoDate, toggleTodo, loading } = useTodos(userId, {
-    initialData: initialTodos,
-  });
+export function HistoryView({ userId }: HistoryViewProps) {
+  const { todos, updateTodoDate, toggleTodo, loading } = useTodos(userId);
   const [tab, setTab] = useState<"week" | "month">("week");
   const [monthCursor, setMonthCursor] = useState(() => new Date());
   const [reAddTodo, setReAddTodo] = useState<Todo | null>(null);

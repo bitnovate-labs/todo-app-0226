@@ -16,6 +16,7 @@ import { AuthEventTracker } from '@/components/analytics/AuthEventTracker';
 import { IdentifyUser } from '@/components/analytics/IdentifyUser';
 import { APP_NAME } from "@/lib/constants";
 import { getUserOrNull } from "@/lib/auth";
+import { getTodosAction } from "@/app/actions/todos";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -39,12 +40,17 @@ export default async function RootLayout({
 }) {
   const user = await getUserOrNull();
   const showBottomNav = !!user;
+  const initialTodos =
+    user != null ? (await getTodosAction()).data ?? [] : undefined;
 
   return (
     <html lang="en">
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
-          <QueryProvider>
+          <QueryProvider
+            initialTodos={initialTodos}
+            userId={user?.id ?? null}
+          >
           <TodosPrefetcher userId={user?.id ?? null} />
           <PostHogPageView />
           <AuthEventTracker />

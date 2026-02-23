@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
 
@@ -8,13 +9,14 @@ const navItemClass =
   "flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors min-w-0 flex-1 ";
 
 /**
- * Client nav links; prefetches todos when user hovers over the nav so
- * Home / Week / History load from cache when clicked.
+ * Client nav links; prefetches route + todos on hover so clicks feel instant.
  */
 export function BottomNavLinks({ userId }: { userId: string }) {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
-  const prefetchTodos = () => {
+  const prefetchRouteAndTodos = (path: string) => {
+    router.prefetch(path);
     queryClient.prefetchQuery({
       queryKey: todosQueryKey(userId),
       queryFn: fetchTodos,
@@ -22,9 +24,10 @@ export function BottomNavLinks({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex h-16 items-stretch" onPointerEnter={prefetchTodos}>
+    <div className="flex h-16 items-stretch">
       <Link
         href="/"
+        onPointerEnter={() => prefetchRouteAndTodos("/")}
         className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
       >
         <svg
@@ -45,6 +48,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       </Link>
       <Link
         href="/week"
+        onPointerEnter={() => prefetchRouteAndTodos("/week")}
         className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
       >
         <svg
@@ -65,6 +69,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       </Link>
       <Link
         href="/todo/new"
+        onPointerEnter={() => router.prefetch("/todo/new")}
         className={`${navItemClass} bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800`}
         aria-label="Add todo"
       >
@@ -86,6 +91,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       </Link>
       <Link
         href="/history"
+        onPointerEnter={() => prefetchRouteAndTodos("/history")}
         className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
       >
         <svg
@@ -106,6 +112,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       </Link>
       <Link
         href="/settings"
+        onPointerEnter={() => router.prefetch("/settings")}
         className={`${navItemClass} text-gray-600 hover:text-gray-900 active:text-blue-600`}
       >
         <svg

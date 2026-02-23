@@ -2,17 +2,11 @@
 
 import { useTodos } from "@/hooks/useTodos";
 import { todayKey, formatDateDDMMMFromDate } from "@/lib/todos";
-import type { Todo } from "@/lib/todos";
 
-type TodayTodoListProps = {
-  userId: string | undefined | null;
-  initialTodos?: Todo[];
-};
+type TodayTodoListProps = { userId: string | undefined | null };
 
-export function TodayTodoList({ userId, initialTodos }: TodayTodoListProps) {
-  const { getByDate, toggleTodo, todos, loading } = useTodos(userId, {
-    initialData: initialTodos,
-  });
+export function TodayTodoList({ userId }: TodayTodoListProps) {
+  const { getByDate, toggleTodo, todos, loading } = useTodos(userId);
   const today = todayKey();
   const dayTodos = getByDate(today);
 
