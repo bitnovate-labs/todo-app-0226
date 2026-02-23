@@ -17,6 +17,9 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
+  /* Use dynamic viewport so height matches visible area (no extra scroll on mobile/PWA) */
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 body {
@@ -29,6 +32,8 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   /* Prevent mobile browser UI from affecting layout */
   -webkit-overflow-scrolling: touch;
 }
@@ -40,8 +45,14 @@ main {
   scroll-behavior: auto;
 }
 
+/* App container: use dynamic viewport height to avoid extra scroll on mobile/PWA */
+.min-h-dynamic-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* Ensure the app container doesn't preserve scroll position */
-.mx-auto.flex.min-h-screen {
+.mx-auto.flex.min-h-dynamic-screen {
   scroll-behavior: auto;
 }
 

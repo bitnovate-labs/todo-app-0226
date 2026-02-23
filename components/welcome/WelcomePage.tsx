@@ -11,7 +11,7 @@ export function WelcomePage() {
   }, []);
 
   return (
-    <div className="flex min-h-[calc(100vh-6rem)] flex-1 flex-col items-center justify-center px-4">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
       <WelcomeSlides />
     </div>
   );

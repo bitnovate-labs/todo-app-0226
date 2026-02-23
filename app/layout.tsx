@@ -38,7 +38,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
+      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
           <PostHogPageView />
           <AuthEventTracker />
@@ -62,7 +62,7 @@ export default async function RootLayout({
           }}
         />
         <ScrollToTop />
-        <div className="mx-auto flex min-h-screen max-w-[430px] flex-col bg-white shadow-lg">
+        <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
           {user ? <Navbar /> : ""}
 
           <main
