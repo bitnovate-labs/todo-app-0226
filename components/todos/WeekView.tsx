@@ -254,13 +254,13 @@ export function WeekView({ userId }: WeekViewProps) {
 
       {editingTodo && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/20 backdrop-blur-[2px] sm:items-center"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-todo-title-week"
         >
           <div
-            className="w-full max-w-[430px] rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl"
+            className="w-full max-w-[430px] rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
