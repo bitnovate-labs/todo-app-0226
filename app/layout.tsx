@@ -25,6 +25,15 @@ export const metadata: Metadata = {
   description: "Next.js App Router + Supabase Auth + PWA boilerplate",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: APP_NAME },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
