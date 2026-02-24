@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const SPLASH_MIN_MS = 600;
+const SPLASH_MIN_MS = 800;
 const FADE_OUT_MS = 250;
 
 /**
