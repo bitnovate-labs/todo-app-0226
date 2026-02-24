@@ -119,30 +119,6 @@ nav[class*="fixed"][role="navigation"] {
   animation: page-load-ease-in 0.25s ease-in forwards;
 }
 
-/* Initial loading spinner for signed-in users */
-@keyframes initial-load-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-initial-load-spin {
-  animation: initial-load-spin 0.8s linear infinite;
-}
-
-@keyframes initial-load-dot {
-  0%,
-  80%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.9);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
-
 /* Prevent date input from overflowing on mobile (iOS Safari gives it a large min-width) */
 input[type="date"] {
   max-width: 100%;
