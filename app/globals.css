@@ -118,3 +118,31 @@ nav[class*="fixed"][role="navigation"] {
 .animate-page-load {
   animation: page-load-ease-in 0.25s ease-in forwards;
 }
+
+/* Prevent date input from overflowing on mobile (iOS Safari gives it a large min-width) */
+input[type="date"] {
+  max-width: 100%;
+  min-width: 0;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  display: block;
+}
+
+/* Create-todo calendar: mobile-friendly touch targets and no overflow on narrow screens */
+.create-todo-calendar .rdp-root {
+  width: 100%;
+  min-width: 0;
+  --rdp-nav_button-height: 2.75rem;
+  --rdp-nav_button-width: 2.75rem;
+}
+
+@media (max-width: 400px) {
+  .create-todo-calendar .rdp-root {
+    --rdp-day-width: 38px;
+    --rdp-day-height: 38px;
+    --rdp-day_button-width: 36px;
+    --rdp-day_button-height: 36px;
+  }
+}

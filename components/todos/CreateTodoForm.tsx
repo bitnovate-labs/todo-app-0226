@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
-import { todayKey } from "@/lib/todos";
+import { todayKey, dateKey } from "@/lib/todos";
 
 type CreateTodoFormProps = { userId: string | undefined | null };
 
@@ -39,16 +41,15 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
     );
   }
 
-  const todayStr = todayKey();
-  const minDate = todayStr;
-  const maxDate = (() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 365);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  })();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const endMonth = new Date(today);
+  endMonth.setDate(endMonth.getDate() + 365);
+
+  const selectedDateObj = selectedDate ? (() => {
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    return new Date(y, (m ?? 1) - 1, d ?? 1);
+  })() : undefined;
 
   return (
     <div className="min-w-0">
@@ -80,9 +81,9 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
             required
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="mb-2 block text-sm font-medium text-gray-700">When?</span>
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
               <input
                 type="radio"
@@ -104,14 +105,16 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
               <span className="text-gray-900">Select a date</span>
             </label>
             {!useToday && (
-              <div className="w-full">
-                <input
-                  type="date"
-                  value={selectedDate}
-                  min={minDate}
-                  max={maxDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              <div className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-300 bg-white p-4 [&_.rdp-root]:mx-0">
+                <DayPicker
+                  mode="single"
+                  weekStartsOn={0}
+                  selected={selectedDateObj}
+                  onSelect={(d) => d && setSelectedDate(dateKey(d))}
+                  startMonth={today}
+                  endMonth={endMonth}
+                  disabled={{ before: today }}
+                  defaultMonth={selectedDateObj ?? today}
                 />
               </div>
             )}
