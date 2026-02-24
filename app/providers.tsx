@@ -42,13 +42,25 @@ function optInIfConsented(): boolean {
   return false;
 }
 
+/** Defer work until after first paint so analytics don't contend with critical path. */
+function runAfterFirstPaint(fn: () => void): void {
+  if (typeof window === 'undefined') return;
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(fn, { timeout: 2000 });
+  } else {
+    setTimeout(fn, 0);
+  }
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    initPostHogOnce();
-    if (optInIfConsented()) {
-      trackEvent({ name: ANALYTICS_EVENTS.SESSION_START, path: window.location.pathname });
-      trackEvent({ name: ANALYTICS_EVENTS.APP_OPENED });
-    }
+    runAfterFirstPaint(() => {
+      initPostHogOnce();
+      if (optInIfConsented()) {
+        trackEvent({ name: ANALYTICS_EVENTS.SESSION_START, path: window.location.pathname });
+        trackEvent({ name: ANALYTICS_EVENTS.APP_OPENED });
+      }
+    });
   }, []);
 
   return <PHProvider client={posthog}>{children}</PHProvider>;

@@ -27,6 +27,26 @@ function mapRowToBlock(row: DbRow): TimeBlock {
 
 export type GetTimeBlocksResult = { data?: TimeBlock[]; error?: string };
 
+/**
+ * Server-only: fetch time blocks for a known user (e.g. from layout). Skips auth to avoid duplicate getUser().
+ * Use getTimeBlocksAction() when called from the client (needs auth).
+ */
+export async function getTimeBlocksForUser(
+  userId: string,
+  date: string
+): Promise<GetTimeBlocksResult> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('time_blocks')
+    .select('id, profile_id, date, start_time, end_time, label, color, created_at')
+    .eq('profile_id', userId)
+    .eq('date', date)
+    .order('start_time', { ascending: true });
+
+  if (error) return { error: error.message, data: [] };
+  return { data: (data ?? []).map((r) => mapRowToBlock(r as DbRow)) };
+}
+
 export async function getTimeBlocksAction(date: string): Promise<GetTimeBlocksResult> {
   const supabase = await createClient();
   const {
@@ -36,16 +56,7 @@ export async function getTimeBlocksAction(date: string): Promise<GetTimeBlocksRe
   if (authError || !user) {
     return { data: [], error: authError?.message ?? 'Not authenticated' };
   }
-
-  const { data, error } = await supabase
-    .from('time_blocks')
-    .select('id, profile_id, date, start_time, end_time, label, color, created_at')
-    .eq('profile_id', user.id)
-    .eq('date', date)
-    .order('start_time', { ascending: true });
-
-  if (error) return { error: error.message, data: [] };
-  return { data: (data ?? []).map((r) => mapRowToBlock(r as DbRow)) };
+  return getTimeBlocksForUser(user.id, date);
 }
 
 export type AddTimeBlockResult = { data?: TimeBlock; error?: string };

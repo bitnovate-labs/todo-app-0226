@@ -25,6 +25,23 @@ function mapRowToTodo(row: DbRow): Todo {
 
 export type GetTodosResult = { data?: Todo[]; error?: string };
 
+/**
+ * Server-only: fetch todos for a known user (e.g. from layout). Skips auth to avoid duplicate getUser().
+ * Use getTodosAction() when called from the client (needs auth).
+ */
+export async function getTodosForUser(userId: string): Promise<GetTodosResult> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('todos')
+    .select('id, profile_id, title, date, completed, created_at, updated_at')
+    .eq('profile_id', userId)
+    .order('date', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) return { error: error.message, data: [] };
+  return { data: (data ?? []).map(mapRowToTodo) };
+}
+
 export async function getTodosAction(): Promise<GetTodosResult> {
   const supabase = await createClient();
   const {
@@ -34,16 +51,7 @@ export async function getTodosAction(): Promise<GetTodosResult> {
   if (authError || !user) {
     return { data: [], error: authError?.message ?? 'Not authenticated' };
   }
-
-  const { data, error } = await supabase
-    .from('todos')
-    .select('id, profile_id, title, date, completed, created_at, updated_at')
-    .eq('profile_id', user.id)
-    .order('date', { ascending: true })
-    .order('created_at', { ascending: true });
-
-  if (error) return { error: error.message, data: [] };
-  return { data: (data ?? []).map(mapRowToTodo) };
+  return getTodosForUser(user.id);
 }
 
 export type AddTodoResult = { data?: Todo; error?: string };

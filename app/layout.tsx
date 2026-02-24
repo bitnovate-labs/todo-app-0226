@@ -2,26 +2,15 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { Suspense } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { BottomNavShell } from "@/components/layout/BottomNavShell";
-import { DashboardPathnameProvider } from "@/components/layout/DashboardPathnameContext";
-import { MainContent } from "@/components/layout/DashboardContent";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
-import { PostHogProvider, PostHogPageView } from './providers';
-import { QueryProvider } from '@/components/providers/QueryProvider';
-import { TodosPrefetcher } from '@/components/providers/TodosPrefetcher';
-import { AnalyticsConsentGate } from '@/components/analytics/AnalyticsConsentGate';
-import { AuthEventTracker } from '@/components/analytics/AuthEventTracker';
-import { IdentifyUser } from '@/components/analytics/IdentifyUser';
+import { PostHogProvider } from "./providers";
+import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { APP_NAME } from "@/lib/constants";
-import { getUserOrNull } from "@/lib/auth";
-import { getTodosAction } from "@/app/actions/todos";
-import { getTimeBlocksAction } from "@/app/actions/time-blocks";
-import { todayKey } from "@/lib/todos";
+import { ShellFallback } from "@/components/layout/ShellFallback";
+import { AuthBoundary } from "@/components/layout/AuthBoundary";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -49,88 +38,38 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUserOrNull();
-  const showBottomNav = !!user;
-  const initialTodos =
-    user != null ? (await getTodosAction()).data ?? [] : undefined;
-  const today = todayKey();
-  const initialTimeBlocks =
-    user != null ? (await getTimeBlocksAction(today)).data ?? [] : undefined;
-
   return (
     <html lang="en">
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
-          <QueryProvider
-            initialTodos={initialTodos}
-            initialTimeBlocks={initialTimeBlocks}
-            initialTimeBlocksDate={today}
-            userId={user?.id ?? null}
-          >
-          <TodosPrefetcher userId={user?.id ?? null} />
-          <PostHogPageView />
-          <AuthEventTracker />
-          {user ? (
-            <IdentifyUser
-              userId={user.id}
-              email={user.email}
-              createdAt={user.created_at}
-            />
-          ) : null}
-        <Script
-          id="scroll-restoration"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+          <Script
+            id="scroll-restoration"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
               // Disable automatic scroll restoration
               if ('scrollRestoration' in history) {
                 history.scrollRestoration = 'manual';
               }
             `,
-          }}
-        />
-        <ScrollToTop />
-        <PreventSwipeBack />
-        <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
-          {user ? <Navbar /> : ""}
-
-          {user ? (
-            <DashboardPathnameProvider>
-              <main
-                className={`flex min-h-0 flex-1 flex-col pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-area-x pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]`}
-              >
-                <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
-                  <MainContent userId={user.id}>{children}</MainContent>
-                </div>
-              </main>
-              <BottomNavShell>
-                <Suspense fallback={null}>
-                  <BottomNav />
-                </Suspense>
-              </BottomNavShell>
-            </DashboardPathnameProvider>
-          ) : (
-            <>
-              <main
-                className={`flex min-h-0 flex-1 flex-col pt-0 safe-area-x pb-6`}
-              >
-                <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
-                  {children}
-                </div>
-              </main>
-            </>
-          )}
-        </div>
-        <PWAInstallPrompt />
-        <ServiceWorkerRegister />
-        <AnalyticsConsentGate />
-          </QueryProvider>
-      </PostHogProvider>
+            }}
+          />
+          <ScrollToTop />
+          <PreventSwipeBack />
+          <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+            <Suspense fallback={<ShellFallback />}>
+              <AuthBoundary>{children}</AuthBoundary>
+            </Suspense>
+          </div>
+          <PWAInstallPrompt />
+          <ServiceWorkerRegister />
+          <AnalyticsConsentGate />
+        </PostHogProvider>
       </body>
     </html>
   );
