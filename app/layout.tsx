@@ -76,7 +76,7 @@ export default function RootLayout({
             alt=""
             width={96}
             height={96}
-            style={{ width: 96, height: 96 }}
+            style={{ width: 96, height: 96, borderRadius: '22%' }}
             fetchPriority="high"
           />
           <span style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>
