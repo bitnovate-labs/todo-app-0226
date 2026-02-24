@@ -1,27 +1,16 @@
-import Image from "next/image";
-import { APP_NAME } from "@/lib/constants";
-
 /**
  * Shown while initial data (todos, time blocks) is loading. Matches the shell layout
- * so the transition to real content is seamless. Displays app logo so the opening
- * screen is branded whenever the app opens.
+ * so the transition to real content is seamless.
  */
 export function ShellFallback() {
   return (
     <>
-      {/* Top bar with app logo (matches Navbar height) */}
-      <div className="fixed top-0 left-0 right-0 z-50 safe-area-t flex items-center justify-center bg-white border-b border-gray-200">
-        <div className="mx-auto flex h-14 max-w-[430px] flex-1 items-center justify-center gap-2 px-4">
-          <Image
-            src="/icon-192.png"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 shrink-0"
-            priority
-          />
-          <span className="text-lg font-semibold text-gray-900">{APP_NAME}</span>
-        </div>
+      {/* Placeholder matching Navbar height */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 safe-area-t animate-pulse bg-white"
+        style={{ height: '3.5rem' }}
+      >
+        <div className="mx-auto h-full max-w-[430px] border-b border-gray-200" />
       </div>
       <main
         className={`flex min-h-0 flex-1 flex-col pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-area-x pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]`}

@@ -61,10 +61,16 @@ export default function RootLayout({
           />
           <ScrollToTop />
           <PreventSwipeBack />
-          <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
-            <Suspense fallback={<ShellFallback />}>
-              <AuthBoundary>{children}</AuthBoundary>
-            </Suspense>
+          <div className="relative mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+            {/* Sync first-paint shell so the initial HTML chunk is never blank (avoids streaming/browser buffer delay). */}
+            <div className="absolute inset-0 z-0" aria-hidden="true">
+              <ShellFallback />
+            </div>
+            <div className="relative z-10 min-h-dynamic-screen">
+              <Suspense fallback={<ShellFallback />}>
+                <AuthBoundary>{children}</AuthBoundary>
+              </Suspense>
+            </div>
           </div>
           <PWAInstallPrompt />
           <ServiceWorkerRegister />
