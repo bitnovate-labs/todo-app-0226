@@ -6,6 +6,7 @@ import {
   addTodoAction,
   toggleTodoAction,
   updateTodoDateAction,
+  updateTodoTitleAction,
   deleteTodoAction,
 } from "@/app/actions/todos";
 import type { Todo } from "@/lib/todos";
@@ -92,6 +93,23 @@ export function useTodos(
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const updateTodoTitleMutation = useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) =>
+      updateTodoTitleAction(id, title),
+    onMutate: async ({ id, title }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old ? old.map((t) => (t.id === id ? { ...t, title } : t)) : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const deleteTodoMutation = useMutation({
     mutationFn: (id: string) => deleteTodoAction(id),
     onMutate: async (id) => {
@@ -138,6 +156,12 @@ export function useTodos(
     [updateTodoDateMutation]
   );
 
+  const updateTodoTitle = useCallback(
+    (id: string, title: string) =>
+      updateTodoTitleMutation.mutate({ id, title }),
+    [updateTodoTitleMutation]
+  );
+
   const getByDate = useCallback(
     (dateKey: string) => todos.filter((t) => t.date === dateKey),
     [todos]
@@ -149,6 +173,7 @@ export function useTodos(
     toggleTodo,
     deleteTodo,
     updateTodoDate,
+    updateTodoTitle,
     getByDate,
     mounted,
     loading,

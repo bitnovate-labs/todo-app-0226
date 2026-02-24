@@ -41,6 +41,13 @@ export function formatDateDDMMMFromDate(d: Date): string {
   return `${day} ${month}`;
 }
 
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Day of week (e.g. "Monday") for a Date. Deterministic for hydration. */
+export function dayNameFromDate(d: Date): string {
+  return DAY_NAMES[d.getDay()];
+}
+
 export type WeekStartsOn = "sunday" | "monday";
 
 /** Start of the current calendar week (Sunday or Monday). */

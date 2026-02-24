@@ -17,3 +17,4 @@ export function makeQueryClient() {
 }
 
 export const TODOS_QUERY_KEY = ["todos"] as const;
+export const TIME_BLOCKS_QUERY_KEY = ["time-blocks"] as const;

@@ -1,12 +1,14 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useDashboardPathname } from '@/components/layout/DashboardPathnameContext';
 
 const pathTitles: Record<string, string> = {
   '/': 'Home',
   '/week': 'Week',
   '/todo/new': 'New todo',
   '/history': 'History',
+  '/timeblock': 'Time block',
   '/settings': 'Settings',
   '/sign-in': 'Sign in',
   '/sign-up': 'Sign up',
@@ -19,7 +21,9 @@ function getTitle(pathname: string): string {
 }
 
 export function NavbarTitle() {
-  const pathname = usePathname();
+  const nextPathname = usePathname();
+  const ctx = useDashboardPathname();
+  const pathname = ctx?.pathname ?? nextPathname;
   const title = getTitle(pathname);
 
   return (

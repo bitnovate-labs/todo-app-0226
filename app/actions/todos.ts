@@ -88,6 +88,12 @@ export async function updateTodoDateAction(id: string, date: string): Promise<Up
   return error ? { error: error.message } : {};
 }
 
+export async function updateTodoTitleAction(id: string, title: string): Promise<UpdateTodoResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from('todos').update({ title: title.trim() || 'Untitled' }).eq('id', id);
+  return error ? { error: error.message } : {};
+}
+
 export async function deleteTodoAction(id: string): Promise<UpdateTodoResult> {
   const supabase = await createClient();
   const { error } = await supabase.from('todos').delete().eq('id', id);

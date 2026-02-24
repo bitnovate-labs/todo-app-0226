@@ -8,6 +8,7 @@ import {
 import { TodayTodoList } from "@/components/todos/TodayTodoList";
 import { WeekView } from "@/components/todos/WeekView";
 import { HistoryView } from "@/components/todos/HistoryView";
+import { TimeBlockView } from "@/components/todos/TimeBlockView";
 
 /**
  * Renders the main dashboard view based on current pathname (client state).
@@ -22,6 +23,8 @@ export function DashboardContent({ userId }: { userId: string }) {
       return <WeekView userId={userId} />;
     case "/history":
       return <HistoryView userId={userId} />;
+    case "/timeblock":
+      return <TimeBlockView userId={userId} />;
     case "/":
     default:
       return <TodayTodoList userId={userId} />;
