@@ -12,8 +12,8 @@
 }
 
 html {
-  /* Critical: avoid black first paint (e.g. PWA standalone, or before CSS/streaming chunk loads) */
-  background-color: #f9fafb;
+  /* Match body so viewport is never black before CSS paints (fixes PWA startup flash) */
+  background: var(--background);
   /* Prevent automatic scroll restoration on mobile browsers */
   scroll-behavior: auto;
   margin: 0;
@@ -105,6 +105,13 @@ nav[class*="fixed"][role="navigation"] {
   margin: 0;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+}
+
+/* Splash screen: fade out before removal */
+#app-splash.splash-fade-out {
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+  pointer-events: none;
 }
 
 /* Ease-in animation for loading states when switching pages (fade only, no slide) */

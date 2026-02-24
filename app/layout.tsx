@@ -11,6 +11,7 @@ import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGat
 import { APP_NAME } from "@/lib/constants";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
+import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -44,8 +45,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" style={{ backgroundColor: "#f9fafb" }}>
-      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased" style={{ backgroundColor: "#f9fafb" }}>
+    <html lang="en" style={{ backgroundColor: '#f9fafb' }}>
+      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
+        {/* Launch splash: visible on first paint, hidden by SplashHideTrigger after mount */}
+        <div
+          id="app-splash"
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            background: '#f9fafb',
+            padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+          }}
+        >
+          <img
+            src="/icon-192.png"
+            alt=""
+            width={96}
+            height={96}
+            style={{ width: 96, height: 96 }}
+            fetchPriority="high"
+          />
+          <span style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>
+            {APP_NAME}
+          </span>
+        </div>
+        <SplashHideTrigger />
         <PostHogProvider>
           <Script
             id="scroll-restoration"
