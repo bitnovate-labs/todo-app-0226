@@ -217,28 +217,64 @@ export function WeekView({ userId }: WeekViewProps) {
           ? "Scroll down to see all 7 days"
           : "Scroll sideways to see all 7 days"}
       </p>
-      <div className="mb-4 flex w-full gap-2">
+      <div
+        className="mb-4 inline-flex rounded-xl border border-gray-200 bg-gray-100/80 p-1"
+        role="tablist"
+        aria-label="Week layout"
+      >
         <button
           type="button"
+          role="tab"
+          aria-selected={layout === "vertical"}
+          aria-label="Vertical layout — scroll down through days"
           onClick={() => setLayout("vertical")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
+          className={`flex items-center justify-center rounded-lg p-2.5 transition-colors ${
             layout === "vertical"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-white text-blue-600 shadow-sm ring-1 ring-gray-200/80"
+              : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          Vertical
+          <svg
+            className="h-5 w-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 10h16M4 14h16M4 18h16"
+            />
+          </svg>
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={layout === "horizontal"}
+          aria-label="Horizontal layout — scroll sideways through days"
           onClick={() => setLayout("horizontal")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
+          className={`flex items-center justify-center rounded-lg p-2.5 transition-colors ${
             layout === "horizontal"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-white text-blue-600 shadow-sm ring-1 ring-gray-200/80"
+              : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          Horizontal
+          <svg
+            className="h-5 w-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 4v16M12 4v16M18 4v16"
+            />
+          </svg>
         </button>
       </div>
       {layout === "vertical" ? (
