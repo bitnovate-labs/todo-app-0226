@@ -10,6 +10,7 @@ import { MainContent } from "@/components/layout/DashboardContent";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
 import { PostHogProvider, PostHogPageView } from './providers';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { TodosPrefetcher } from '@/components/providers/TodosPrefetcher';
@@ -87,6 +88,7 @@ export default async function RootLayout({
           }}
         />
         <ScrollToTop />
+        <PreventSwipeBack />
         <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
           {user ? <Navbar /> : ""}
 
