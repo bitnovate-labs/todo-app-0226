@@ -44,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ backgroundColor: "#f9fafb" }}>
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
           <Script

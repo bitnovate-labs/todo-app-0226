@@ -12,6 +12,8 @@
 }
 
 html {
+  /* Same as --background so first paint is never black (e.g. PWA standalone before CSS loads) */
+  background-color: #f9fafb;
   /* Prevent automatic scroll restoration on mobile browsers */
   scroll-behavior: auto;
   margin: 0;
