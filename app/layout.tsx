@@ -47,6 +47,13 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ backgroundColor: '#f9fafb' }}>
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
+        <Script
+          id="critical-bg"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.style.backgroundColor='#f9fafb';",
+          }}
+        />
         {/* Launch splash: visible on first paint, hidden by SplashHideTrigger after mount */}
         <div
           id="app-splash"
