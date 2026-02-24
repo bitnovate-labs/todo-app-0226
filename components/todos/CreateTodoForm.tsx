@@ -104,14 +104,14 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
               <span className="text-gray-900">Select a date</span>
             </label>
             {!useToday && (
-              <div className="pl-7">
+              <div className="w-full">
                 <input
                   type="date"
                   value={selectedDate}
                   min={minDate}
                   max={maxDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             )}

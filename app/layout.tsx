@@ -58,7 +58,7 @@ export default async function RootLayout({
     user != null ? (await getTodosAction()).data ?? [] : undefined;
 
   return (
-    <html lang="en">
+    <html lang="en-US">
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
         <PostHogProvider>
           <QueryProvider
