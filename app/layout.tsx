@@ -61,10 +61,17 @@ export default function RootLayout({
           />
           <ScrollToTop />
           <PreventSwipeBack />
-          <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
-            <Suspense fallback={<ShellFallback />}>
-              <AuthBoundary>{children}</AuthBoundary>
-            </Suspense>
+          <div className="relative mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+            {/* Shown in initial HTML so loading animation is visible on first paint */}
+            <div className="absolute inset-0 z-0 bg-white" aria-hidden="true">
+              <ShellFallback />
+            </div>
+            {/* Streamed content renders on top when ready; content has its own bg so it covers overlay */}
+            <div className="relative z-10 flex min-h-dynamic-screen min-w-0 flex-1 flex-col">
+              <Suspense fallback={null}>
+                <AuthBoundary>{children}</AuthBoundary>
+              </Suspense>
+            </div>
           </div>
           <PWAInstallPrompt />
           <ServiceWorkerRegister />
