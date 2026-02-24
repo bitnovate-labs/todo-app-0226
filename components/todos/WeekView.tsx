@@ -284,7 +284,7 @@ export function WeekView({ userId }: WeekViewProps) {
           ref={horizontalScrollRef}
           className="w-full min-w-0 overflow-x-auto overflow-y-hidden px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-          <div className="flex gap-4">{dayBlocks}</div>
+          <div className="flex items-start gap-4">{dayBlocks}</div>
         </div>
       )}
 
