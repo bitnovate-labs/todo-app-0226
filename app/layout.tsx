@@ -45,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ backgroundColor: "#f9fafb" }}>
-      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
+      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased" style={{ backgroundColor: "#f9fafb" }}>
         <PostHogProvider>
           <Script
             id="scroll-restoration"

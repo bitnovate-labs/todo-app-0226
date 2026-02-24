@@ -12,7 +12,7 @@
 }
 
 html {
-  /* Same as --background so first paint is never black (e.g. PWA standalone before CSS loads) */
+  /* Critical: avoid black first paint (e.g. PWA standalone, or before CSS/streaming chunk loads) */
   background-color: #f9fafb;
   /* Prevent automatic scroll restoration on mobile browsers */
   scroll-behavior: auto;
