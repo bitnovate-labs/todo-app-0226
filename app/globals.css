@@ -20,13 +20,17 @@ html {
   /* Use dynamic viewport so height matches visible area (no extra scroll on mobile/PWA) */
   min-height: 100vh;
   min-height: 100dvh;
+  /* Prevent overscroll/swipe-back on mobile (e.g. iOS swipe-from-edge) */
+  overscroll-behavior: none;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   /* Prevent overscroll on mobile */
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
+  /* Disable pinch-zoom and restrict touch to vertical pan only (reduces accidental swipe-back) */
+  touch-action: pan-y;
   /* Ensure body starts at top */
   scroll-behavior: auto;
   margin: 0;
