@@ -20,6 +20,8 @@ import { IdentifyUser } from '@/components/analytics/IdentifyUser';
 import { APP_NAME } from "@/lib/constants";
 import { getUserOrNull } from "@/lib/auth";
 import { getTodosAction } from "@/app/actions/todos";
+import { getTimeBlocksAction } from "@/app/actions/time-blocks";
+import { todayKey } from "@/lib/todos";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -56,6 +58,9 @@ export default async function RootLayout({
   const showBottomNav = !!user;
   const initialTodos =
     user != null ? (await getTodosAction()).data ?? [] : undefined;
+  const today = todayKey();
+  const initialTimeBlocks =
+    user != null ? (await getTimeBlocksAction(today)).data ?? [] : undefined;
 
   return (
     <html lang="en">
@@ -63,6 +68,8 @@ export default async function RootLayout({
         <PostHogProvider>
           <QueryProvider
             initialTodos={initialTodos}
+            initialTimeBlocks={initialTimeBlocks}
+            initialTimeBlocksDate={today}
             userId={user?.id ?? null}
           >
           <TodosPrefetcher userId={user?.id ?? null} />

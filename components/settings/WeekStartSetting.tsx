@@ -3,12 +3,18 @@
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 
 export function WeekStartSetting() {
-  const [weekStartsOn, setWeekStartsOn] = useWeekStartsOn();
+  const [weekStartsOn, setWeekStartsOn, mounted] = useWeekStartsOn();
 
   return (
     <div className="border-t border-gray-200 pt-6 text-left">
       <p className="mb-3 text-sm font-medium text-gray-700">Start week on</p>
-      <div className="space-y-2">
+      {!mounted ? (
+        <div className="space-y-2">
+          <div className="h-[52px] animate-pulse rounded-xl bg-gray-100" />
+          <div className="h-[52px] animate-pulse rounded-xl bg-gray-100" />
+        </div>
+      ) : (
+        <div className="space-y-2">
         <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
           <input
             type="radio"
@@ -30,6 +36,7 @@ export function WeekStartSetting() {
           <span className="text-gray-900">Monday</span>
         </label>
       </div>
+      )}
       <p className="mt-2 text-xs text-gray-500">
         Affects the Week view and History week tab.
       </p>

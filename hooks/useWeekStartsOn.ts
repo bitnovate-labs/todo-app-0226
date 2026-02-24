@@ -26,7 +26,7 @@ function save(value: WeekStartsOn): void {
   }
 }
 
-export function useWeekStartsOn(): [WeekStartsOn, (value: WeekStartsOn) => void] {
+export function useWeekStartsOn(): [WeekStartsOn, (value: WeekStartsOn) => void, boolean] {
   const [value, setValueState] = useState<WeekStartsOn>("sunday");
   const [mounted, setMounted] = useState(false);
 
@@ -44,5 +44,5 @@ export function useWeekStartsOn(): [WeekStartsOn, (value: WeekStartsOn) => void]
     save(next);
   }, []);
 
-  return [mounted ? value : "sunday", setValue];
+  return [mounted ? value : "sunday", setValue, mounted];
 }
