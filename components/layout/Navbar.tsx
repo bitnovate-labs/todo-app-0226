@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getUserOrNull } from "@/lib/auth";
 import { NavbarTitle } from "./NavbarTitle";
 
@@ -40,15 +39,7 @@ export async function Navbar() {
                 </svg>
               </Link>
             </div>
-            <div className="flex min-w-0 items-center justify-center gap-2">
-              <Image
-                src="/icon-192.png"
-                alt=""
-                width={28}
-                height={28}
-                className="shrink-0"
-                aria-hidden
-              />
+            <div className="flex min-w-0 justify-center">
               <NavbarTitle />
             </div>
             <div />

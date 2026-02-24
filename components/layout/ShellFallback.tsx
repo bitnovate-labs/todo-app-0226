@@ -1,26 +1,26 @@
 import Image from "next/image";
+import { APP_NAME } from "@/lib/constants";
 
 /**
  * Shown while initial data (todos, time blocks) is loading. Matches the shell layout
- * so the transition to real content is seamless. Displays the app logo for branding.
+ * so the transition to real content is seamless. Displays app logo so the opening
+ * screen is branded whenever the app opens.
  */
 export function ShellFallback() {
   return (
     <>
-      {/* Header with app logo, matching Navbar height */}
-      <div
-        className="fixed top-0 left-0 right-0 z-50 safe-area-t flex items-center justify-center bg-white"
-        style={{ height: '3.5rem' }}
-      >
-        <div className="mx-auto flex h-full max-w-[430px] items-center justify-center border-b border-gray-200">
+      {/* Top bar with app logo (matches Navbar height) */}
+      <div className="fixed top-0 left-0 right-0 z-50 safe-area-t flex items-center justify-center bg-white border-b border-gray-200">
+        <div className="mx-auto flex h-14 max-w-[430px] flex-1 items-center justify-center gap-2 px-4">
           <Image
             src="/icon-192.png"
-            alt="Todo PWA"
+            alt=""
             width={32}
             height={32}
-            className="shrink-0"
+            className="h-8 w-8 shrink-0"
             priority
           />
+          <span className="text-lg font-semibold text-gray-900">{APP_NAME}</span>
         </div>
       </div>
       <main
