@@ -39,9 +39,9 @@ function ReAddModal({ todo, onClose, onReAdd }: ReAddModalProps) {
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 px-5 sm:px-6">
       <div
-        className="w-full max-w-[430px] rounded-2xl bg-white shadow-xl"
+        className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-gray-200 p-4">
