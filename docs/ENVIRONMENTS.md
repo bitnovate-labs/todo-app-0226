@@ -20,7 +20,7 @@ Common practice for running **Production** and **Sandbox** (staging/preview) usi
 ### 2.1 Initialize Git (if not already)
 
 ```bash
-cd "/Users/apple/Desktop/BOILERPLATES/next-js auth PWA"
+cd "/Users/apple/Desktop/Todo PWA"
 git init
 ```
 

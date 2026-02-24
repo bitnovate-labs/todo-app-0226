@@ -14,17 +14,17 @@ interface Slide {
 const slides: Slide[] = [
   {
     title: 'Welcome to Todo PWA',
-    description: 'A production-ready boilerplate with secure authentication and PWA support.',
+    description: 'A simple todo list you can install on your phone or use in the browser. Add tasks, view by today or week, and check them off.',
     icon: '👋',
   },
   {
     title: 'Secure & Fast',
-    description: 'Built with Supabase Auth, server-side rendering, and cookie-based sessions.',
+    description: 'Your data is synced securely. Works offline and loads quickly so you can focus on getting things done.',
     icon: '🔒',
   },
   {
     title: 'Get Started',
-    description: 'Sign in to your account or create a new one to begin your journey.',
+    description: 'Sign in or create an account to start adding and managing your todos.',
     icon: '🚀',
   },
 ];

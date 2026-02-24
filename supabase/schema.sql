@@ -1,5 +1,5 @@
 -- =============================================================================
--- Next.js Auth PWA – Supabase schema and RLS (REFERENCE)
+-- Todo PWA – Supabase schema and RLS (REFERENCE)
 -- Authoritative schema is in supabase/migrations/. Use migrations to keep
 -- sandbox and production in sync. See docs/DATABASE_MIGRATIONS.md.
 -- You can still run this in SQL Editor for a one-off setup if needed.

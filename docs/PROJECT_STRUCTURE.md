@@ -80,4 +80,4 @@ Add new modules (e.g. `lib/hooks/`, `lib/utils/`) when a clear shared need appea
 | Is shared across 2+ domains            | `components/ui/`            |
 | Is new feature-specific UI             | New `components/<feature>/` |
 
-This keeps the boilerplate scalable and consistent across future projects.
+This keeps the app scalable and consistent across future projects.

@@ -1,6 +1,6 @@
-# Next.js Auth PWA Boilerplate (Todo PWA)
+# Todo PWA
 
-Production-ready boilerplate: **Next.js 16 App Router**, **Supabase Auth** (SSR, cookie-based), and **PWA** support. No tokens in `localStorage`; server verifies every request.
+A simple todo list PWA: add tasks, view by today or week, and track what's done. Install on your phone or use in the browser. Built with **Next.js 16** (App Router), **Supabase Auth**, and **PWA** support (offline shell, install prompt). Sessions are cookie-based; the server verifies every request.
 
 ## Stack
 
@@ -123,7 +123,7 @@ proxy.ts            # Session refresh + protect /profile
 
 ## Security checklist
 
-How this boilerplate meets the stated security goals:
+How this app meets the stated security goals:
 
 | Requirement                                  | Implementation                                                                                                                                                                                |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

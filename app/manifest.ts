@@ -5,11 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,
     short_name: APP_NAME,
-    description: 'Next.js App Router + Supabase Auth + PWA boilerplate',
+    description: 'A simple todo list PWA. Add tasks, view by day or week, and track what\'s done.',
     start_url: '/',
     scope: '/',
     display: 'standalone',
-    background_color: '#2563eb',
+    background_color: '#f9fafb',
     theme_color: '#2563eb',
     orientation: 'portrait-primary',
     icons: [
