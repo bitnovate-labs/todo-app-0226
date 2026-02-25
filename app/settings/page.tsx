@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { FeedbackDrawer } from "@/components/feedback/FeedbackDrawer";
 import { SignOutForm } from "@/components/auth/SignOutForm";
+import { LockRotationSetting } from "@/components/settings/LockRotationSetting";
 import { WeekStartSetting } from "@/components/settings/WeekStartSetting";
 
 export const metadata = {
@@ -20,6 +21,10 @@ export default async function SettingsPage() {
 
       <div className="mb-6 text-left">
         <WeekStartSetting />
+      </div>
+
+      <div className="mb-6 text-left">
+        <LockRotationSetting />
       </div>
 
       <div className="border-t border-gray-200 pt-6">
