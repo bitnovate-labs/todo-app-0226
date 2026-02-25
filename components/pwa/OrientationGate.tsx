@@ -1,25 +1,30 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { OrientationAPI } from '@/lib/orientation';
 
 /**
- * On iOS, the manifest "orientation" and Screen Orientation API are ignored.
- * When the device is in landscape, we show a full-screen "rotate to portrait"
- * overlay so the app is effectively portrait-only.
+ * When in landscape in the PWA:
+ * - iOS: manifest/orientation API are ignored; show "rotate to portrait" (user must rotate).
+ * - Android: show overlay with a "Lock rotation" button that enters fullscreen + locks to portrait.
  */
 export function OrientationGate({ children }: { children: React.ReactNode }) {
   const [showRotateOverlay, setShowRotateOverlay] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    const isStandalone =
+    const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     const ua = window.navigator.userAgent;
-    const isIOS =
+    const ios =
       /iPad|iPhone|iPod/.test(ua) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsStandalone(standalone);
+    setIsIOS(ios);
 
-    if (!isStandalone || !isIOS) {
+    if (!standalone) {
       setShowRotateOverlay(false);
       return;
     }
@@ -30,6 +35,22 @@ export function OrientationGate({ children }: { children: React.ReactNode }) {
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
+
+  const handleLockRotation = async () => {
+    const doc = document.documentElement as Element & { requestFullscreen?(): Promise<void> };
+    const orientation = screen.orientation as OrientationAPI | undefined;
+    try {
+      if (doc.requestFullscreen) await doc.requestFullscreen().catch(() => {});
+      if (orientation?.lock) {
+        await orientation.lock('portrait').catch(() => orientation.lock?.('portrait-primary'));
+      }
+      setShowRotateOverlay(false);
+    } catch {
+      setShowRotateOverlay(window.matchMedia('(orientation: landscape)').matches);
+    }
+  };
+
+  const canLock = isStandalone && !isIOS && typeof screen !== 'undefined' && 'orientation' in screen && (screen.orientation as OrientationAPI)?.lock;
 
   if (showRotateOverlay) {
     return (
@@ -63,9 +84,20 @@ export function OrientationGate({ children }: { children: React.ReactNode }) {
             />
           </svg>
         </div>
-        <p className="max-w-[260px] text-center text-lg font-medium text-gray-900">
-          Please rotate your device to portrait to use this app.
+        <p className="max-w-[280px] text-center text-lg font-medium text-gray-900">
+          {isIOS
+            ? "This app is portrait only. Rotate your device back to portrait to continue."
+            : "Please rotate your device to portrait to use this app."}
         </p>
+        {canLock && (
+          <button
+            type="button"
+            onClick={handleLockRotation}
+            className="rounded-xl bg-blue-600 px-5 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Lock rotation to portrait
+          </button>
+        )}
       </div>
     );
   }

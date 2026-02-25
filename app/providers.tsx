@@ -81,11 +81,6 @@ export function declineAnalyticsConsent(): void {
   // Do not opt in; no consent event sent to avoid tracking after decline
 }
 
-/** Whether to show the consent banner (no choice made yet). */
-export function shouldShowConsentBanner(): boolean {
-  return !hasConsentAnswer();
-}
-
 /**
  * Captures pageviews and MVP-specific events (home_viewed, profile_viewed, welcome_page_view),
  * time_on_page for the previous path, and session_end on leave.

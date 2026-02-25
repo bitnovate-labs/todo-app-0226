@@ -42,38 +42,6 @@ export function resetAnalyticsIdentity(): void {
   posthog.reset();
 }
 
-// --- Placeholder helpers: call these when you add checkout/payment/onboarding flows ---
-
-/** Call when user completes onboarding. */
-export function trackOnboardingCompleted(): void {
-  trackEvent({ name: ANALYTICS_EVENTS.ONBOARDING_COMPLETED });
-}
-
-/** Call when checkout starts (e.g. cart → checkout). */
-export function trackCheckoutStarted(properties?: Record<string, unknown>): void {
-  trackEvent({ name: ANALYTICS_EVENTS.CHECKOUT_STARTED, ...properties });
-}
-
-/** Call when checkout fails. */
-export function trackCheckoutFailed(reason?: string, properties?: Record<string, unknown>): void {
-  trackEvent({ name: ANALYTICS_EVENTS.CHECKOUT_FAILED, reason, ...properties });
-}
-
-/** Call when payment succeeds. */
-export function trackPaymentSuccess(properties?: Record<string, unknown>): void {
-  trackEvent({ name: ANALYTICS_EVENTS.PAYMENT_SUCCESS, ...properties });
-}
-
-/** Call when payment fails. */
-export function trackPaymentFailed(reason?: string, properties?: Record<string, unknown>): void {
-  trackEvent({ name: ANALYTICS_EVENTS.PAYMENT_FAILED, reason, ...properties });
-}
-
-/** Call when subscription is completed. */
-export function trackSubscriptionCompleted(properties?: Record<string, unknown>): void {
-  trackEvent({ name: ANALYTICS_EVENTS.SUBSCRIPTION_COMPLETED, ...properties });
-}
-
 /** Call when a non-fatal error occurs (e.g. form validation, API error). */
 export function trackError(message?: string, context?: string, properties?: Record<string, unknown>): void {
   trackEvent({ name: ANALYTICS_EVENTS.ERROR_OCCURRED, message, context, ...properties });

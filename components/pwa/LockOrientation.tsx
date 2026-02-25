@@ -1,16 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-
-type OrientationAPI = ScreenOrientation & {
-  lock?(mode: 'portrait' | 'portrait-primary'): Promise<void>;
-};
+import type { OrientationAPI } from '@/lib/orientation';
 
 /**
  * Locks screen orientation to portrait when the app is running as a PWA
- * (standalone display mode). Re-applies lock when the app becomes visible
- * or orientation changes so rotation stays locked on Android. iOS does not
- * support the Screen Orientation API but respects manifest orientation.
+ * (standalone). Re-applies lock when the app becomes visible or orientation
+ * changes (Android only). iOS does not support the Screen Orientation API
+ * and ignores manifest orientation.
  */
 export function LockOrientation() {
   const lockedRef = useRef(false);

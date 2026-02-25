@@ -16,9 +16,6 @@ export const SUPABASE_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
   "";
 
-/** @deprecated Use SUPABASE_PUBLISHABLE_KEY. Kept for compatibility. */
-export const SUPABASE_ANON_KEY = SUPABASE_PUBLISHABLE_KEY;
-
 /** App version for feedback context (optional env override) */
 export const APP_VERSION =
   process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0';

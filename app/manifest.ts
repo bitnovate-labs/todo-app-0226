@@ -8,7 +8,6 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'A simple todo list PWA. Add tasks, view by day or week, and track what\'s done.',
     start_url: '/',
     scope: '/',
-    display_override: ['fullscreen', 'standalone'],
     display: 'standalone',
     background_color: '#f9fafb',
     theme_color: '#2563eb',

@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-type OrientationAPI = ScreenOrientation & {
-  lock?(mode: 'portrait' | 'portrait-primary'): Promise<void>;
-};
+import type { OrientationAPI } from '@/lib/orientation';
 
 export function LockRotationSetting() {
   const [status, setStatus] = useState<'idle' | 'locking' | 'ok' | 'unsupported' | 'error'>('idle');
@@ -48,8 +45,7 @@ export function LockRotationSetting() {
     <div className="border-t border-gray-200 pt-6 text-left">
       <p className="mb-3 text-sm font-medium text-gray-700">Screen rotation</p>
       <p className="mb-3 text-xs text-gray-500">
-        On some Android devices, rotation stays locked only after tapping below. iOS uses the app&apos;s
-        portrait setting from the manifest.
+        On Android, tap below to lock rotation (fullscreen may be used). On iOS, rotation cannot be locked; rotate back to portrait when the message appears.
       </p>
       <button
         type="button"
