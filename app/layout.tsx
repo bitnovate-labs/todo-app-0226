@@ -13,6 +13,7 @@ import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
 import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
 import { LockOrientation } from "@/components/pwa/LockOrientation";
+import { OrientationGate } from "@/components/pwa/OrientationGate";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -100,11 +101,13 @@ export default function RootLayout({
           />
           <ScrollToTop />
           <PreventSwipeBack />
-          <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
-            <Suspense fallback={<ShellFallback />}>
-              <AuthBoundary>{children}</AuthBoundary>
-            </Suspense>
-          </div>
+          <OrientationGate>
+            <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+              <Suspense fallback={<ShellFallback />}>
+                <AuthBoundary>{children}</AuthBoundary>
+              </Suspense>
+            </div>
+          </OrientationGate>
           <PWAInstallPrompt />
           <ServiceWorkerRegister />
           <LockOrientation />
