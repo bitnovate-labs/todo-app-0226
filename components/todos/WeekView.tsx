@@ -376,114 +376,120 @@ export function WeekView({ userId }: WeekViewProps) {
 
   return (
     <div className="min-w-0 animate-page-load">
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-white pb-4 -mt-8 pt-6">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">This week</h1>
-        <p className="mb-2 text-sm text-gray-500">
-          {layout === "vertical"
-            ? "Scroll down to see all 7 days"
-            : "Scroll sideways to see all 7 days"}
-        </p>
-        <div
-          className="flex w-40 rounded-xl border border-gray-200 bg-gray-100/80 p-1"
-          role="tablist"
-          aria-label="Week layout"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={layout === "vertical"}
-            aria-label="Vertical layout — scroll down through days"
-            onClick={() => setLayout("vertical")}
-            className={`flex flex-1 min-w-0 items-center justify-center gap-1 rounded-lg p-2.5 transition-colors ${
-              layout === "vertical"
-                ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-white pb-2 -mt-8 pt-6">
+        <div className="flex flex-nowrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">
+              This week
+            </h1>
+            <p className="mb-2 text-sm text-gray-500">
+              {layout === "vertical"
+                ? "Scroll down to see all 7 days"
+                : "Scroll sideways to see all 7 days"}
+            </p>
+          </div>
+          <div
+            className="flex w-28 shrink-0 rounded-lg border border-gray-200 bg-gray-100/80 p-1"
+            role="tablist"
+            aria-label="Week layout"
           >
-            <svg
-              className="h-5 w-5 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
+            <button
+              type="button"
+              role="tab"
+              aria-selected={layout === "vertical"}
+              aria-label="Vertical layout — scroll down through days"
+              onClick={() => setLayout("vertical")}
+              className={`flex flex-1 min-w-0 items-center justify-center gap-0.5 rounded-md py-2 px-1.5 transition-colors ${
+                layout === "vertical"
+                  ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-            <svg
-              className="h-4 w-4 shrink-0 -mt-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
+              <svg
+                className="h-4 w-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                className="h-3 w-3 shrink-0 -mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={layout === "horizontal"}
+              aria-label="Horizontal layout — scroll sideways through days"
+              onClick={() => setLayout("horizontal")}
+              className={`flex flex-1 min-w-0 items-center justify-center gap-0.5 rounded-md py-2 px-1.5 transition-colors ${
+                layout === "horizontal"
+                  ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={layout === "horizontal"}
-            aria-label="Horizontal layout — scroll sideways through days"
-            onClick={() => setLayout("horizontal")}
-            className={`flex flex-1 min-w-0 items-center justify-center gap-1 rounded-lg p-2.5 transition-colors ${
-              layout === "horizontal"
-                ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <svg
-              className="h-4 w-4 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            <svg
-              className="h-5 w-5 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 4v16M12 4v16M18 4v16"
-              />
-            </svg>
-            <svg
-              className="h-4 w-4 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+              <svg
+                className="h-3 w-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <svg
+                className="h-4 w-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 4v16M12 4v16M18 4v16"
+                />
+              </svg>
+              <svg
+                className="h-3 w-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
       {layout === "vertical" ? (
