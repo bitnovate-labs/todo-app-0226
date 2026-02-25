@@ -14,7 +14,9 @@ export function LockOrientation() {
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     if (!isStandalone) return;
-    const orientation = screen.orientation;
+    const orientation = screen.orientation as
+      | (ScreenOrientation & { lock?(mode: 'portrait'): Promise<void> })
+      | undefined;
     if (orientation?.lock) {
       orientation.lock('portrait').catch(() => {});
     }
