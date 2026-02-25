@@ -239,7 +239,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
 
   return (
     <div className="min-w-0 animate-page-load">
-      <h1 className="mb-4 text-2xl font-bold text-gray-900">History</h1>
+      <h1 className="mb-4 text-xl font-semibold tracking-tight text-gray-900">History</h1>
 
       {/* Tabs */}
       <div className="mb-4 flex gap-2 rounded-xl bg-gray-100 p-1">

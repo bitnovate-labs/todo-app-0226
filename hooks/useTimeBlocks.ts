@@ -43,10 +43,16 @@ export function useTimeBlocks(userId: string | undefined | null, date: string) {
       color: string;
     }) => addTimeBlockAction(date, start, end, label, color),
     onSuccess: (result) => {
-      if (result.data) {
+      if (!result.data) return;
+      const addedDate = result.data.date;
+      if (addedDate === date) {
         queryClient.setQueryData<TimeBlock[]>(queryKey, (prev) =>
           prev ? [...prev, result.data!] : [result.data!]
         );
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: timeBlocksQueryKey(userId, addedDate),
+        });
       }
     },
   });

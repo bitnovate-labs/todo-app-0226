@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { dateKey, todayKey } from "@/lib/todos";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { dateKey, todayKey, addDaysToDateKey } from "@/lib/todos";
 import type { TimeBlock } from "@/lib/time-blocks";
-import { TIME_BLOCK_COLOR_KEYS, isValidTimeBlockColor } from "@/lib/time-blocks";
+import {
+  TIME_BLOCK_COLOR_KEYS,
+  isValidTimeBlockColor,
+} from "@/lib/time-blocks";
 import { useTimeBlocks } from "@/hooks/useTimeBlocks";
 
 const START_HOUR = 5;
@@ -14,9 +17,7 @@ function slotMinutes(): string[] {
   const slots: string[] = [];
   for (let h = START_HOUR; h < END_HOUR; h++) {
     for (let m = 0; m < 60; m += SLOT_MINUTES) {
-      slots.push(
-        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
-      );
+      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
     }
   }
   return slots;
@@ -74,7 +75,8 @@ const BLOCK_COLOR_MAP: Record<
 };
 
 function getBlockColors(block: TimeBlock) {
-  const key = block.color && isValidTimeBlockColor(block.color) ? block.color : "blue";
+  const key =
+    block.color && isValidTimeBlockColor(block.color) ? block.color : "blue";
   return BLOCK_COLOR_MAP[key] ?? BLOCK_COLOR_MAP.blue;
 }
 
@@ -82,7 +84,9 @@ function formatTimeLabel(time: string) {
   const [h, m] = time.split(":").map(Number);
   const period = h >= 12 ? "pm" : "am";
   const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2, "0")}${period}`;
+  return m === 0
+    ? `${hour}${period}`
+    : `${hour}:${String(m).padStart(2, "0")}${period}`;
 }
 
 type TimeBlockViewProps = { userId: string };
@@ -95,7 +99,7 @@ function buildSegments(blocks: TimeBlock[]): Segment[] {
   const segments: Segment[] = [];
   let cursor = 0;
   const sorted = [...blocks].sort(
-    (a, b) => SLOTS.indexOf(a.start) - SLOTS.indexOf(b.start)
+    (a, b) => SLOTS.indexOf(a.start) - SLOTS.indexOf(b.start),
   );
   for (const block of sorted) {
     const startIdx = SLOTS.indexOf(block.start);
@@ -148,6 +152,21 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
   } = useTimeBlocks(userId, date);
 
   const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [datePickBlockId, setDatePickBlockId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (menuOpenId === null && datePickBlockId === null) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null);
+        setDatePickBlockId(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [menuOpenId, datePickBlockId]);
 
   const dateDisplay = (() => {
     const [y, m, d] = date.split("-").map(Number);
@@ -186,9 +205,22 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
       if (newStart >= newEnd) return;
       try {
         if (editingBlock) {
-          await updateBlock(editingBlock.id, date, newStart, newEnd, newLabel.trim() || "Block", newColor);
+          await updateBlock(
+            editingBlock.id,
+            date,
+            newStart,
+            newEnd,
+            newLabel.trim() || "Block",
+            newColor,
+          );
         } else {
-          await addBlock(date, newStart, newEnd, newLabel.trim() || "Block", newColor);
+          await addBlock(
+            date,
+            newStart,
+            newEnd,
+            newLabel.trim() || "Block",
+            newColor,
+          );
         }
         setNewLabel("");
         setNewStart("09:00");
@@ -200,14 +232,23 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
         // error already surfaced or ignore
       }
     },
-    [date, newStart, newEnd, newLabel, newColor, editingBlock, addBlock, updateBlock]
+    [
+      date,
+      newStart,
+      newEnd,
+      newLabel,
+      newColor,
+      editingBlock,
+      addBlock,
+      updateBlock,
+    ],
   );
 
   const removeBlock = useCallback(
     (id: string) => {
       deleteBlock(id);
     },
-    [deleteBlock]
+    [deleteBlock],
   );
 
   const openAddAt = (start: string, end: string) => {
@@ -220,13 +261,37 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
   };
 
   const openEdit = (block: TimeBlock) => {
+    setMenuOpenId(null);
+    setDatePickBlockId(null);
     setEditingBlock(block);
     setNewStart(block.start);
     setNewEnd(block.end);
     setNewLabel(block.label);
-    setNewColor(block.color && isValidTimeBlockColor(block.color) ? block.color : "blue");
+    setNewColor(
+      block.color && isValidTimeBlockColor(block.color) ? block.color : "blue",
+    );
     setAddOpen(true);
   };
+
+  const copyBlockToDate = useCallback(
+    async (block: TimeBlock, targetDate: string) => {
+      try {
+        await addBlock(
+          targetDate,
+          block.start,
+          block.end,
+          block.label,
+          block.color && isValidTimeBlockColor(block.color)
+            ? block.color
+            : "blue",
+        );
+        setDatePickBlockId(null);
+      } catch {
+        // error already surfaced or ignore
+      }
+    },
+    [addBlock],
+  );
 
   const closeSheet = useCallback(() => {
     setAddOpen(false);
@@ -242,7 +307,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
       {/* Header: minimal */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold tracking-tight text-gray-900">
-          Time
+          Time Block
         </h1>
         <p className="mt-0.5 text-sm text-gray-500">Block your day</p>
       </div>
@@ -255,8 +320,18 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
           className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200"
           aria-label="Previous day"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
         <span className="min-w-[140px] text-center text-sm font-medium text-gray-700">
@@ -269,8 +344,18 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
           className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200 disabled:opacity-30 disabled:pointer-events-none"
           aria-label="Next day"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       </div>
@@ -297,33 +382,169 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                     <p className={`text-[15px] font-medium ${colors.label}`}>
                       {block.label}
                     </p>
-                    <p className={`mt-0.5 text-xs font-medium uppercase tracking-wider ${colors.time}`}>
-                      {formatTimeLabel(block.start)} – {formatTimeLabel(block.end)}
+                    <p
+                      className={`mt-0.5 text-xs font-medium uppercase tracking-wider ${colors.time}`}
+                    >
+                      {formatTimeLabel(block.start)} –{" "}
+                      {formatTimeLabel(block.end)}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-0.5">
+                  <div
+                    className="relative shrink-0"
+                    ref={
+                      menuOpenId === block.id || datePickBlockId === block.id
+                        ? menuRef
+                        : undefined
+                    }
+                  >
                     <button
                       type="button"
-                      onClick={() => openEdit(block)}
-                      disabled={updateBlockPending}
-                      className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-200/80 hover:text-gray-600 active:bg-gray-200 disabled:opacity-50"
-                      aria-label="Edit block"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenId((id) =>
+                          id === block.id ? null : block.id,
+                        );
+                      }}
+                      className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-200/80 hover:text-gray-600 active:bg-gray-200"
+                      aria-label="More actions"
+                      aria-expanded={menuOpenId === block.id}
+                      aria-haspopup="true"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                       </svg>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => removeBlock(block.id)}
-                      disabled={deleteBlockPending}
-                      className="rounded-full p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 active:bg-red-100 disabled:opacity-50"
-                      aria-label="Remove block"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    {menuOpenId === block.id && (
+                      <div
+                        className="absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+                        role="menu"
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => openEdit(block)}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <svg
+                            className="h-4 w-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpenId(null);
+                            copyBlockToDate(block, addDaysToDateKey(date, 1));
+                          }}
+                          disabled={addBlockPending}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          <svg
+                            className="h-4 w-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                          Copy to next day
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpenId(null);
+                            setDatePickBlockId(block.id);
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <svg
+                            className="h-4 w-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          Copy to date…
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpenId(null);
+                            removeBlock(block.id);
+                          }}
+                          disabled={deleteBlockPending}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                    {datePickBlockId === block.id && (
+                      <div
+                        className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+                        role="dialog"
+                        aria-label="Select date"
+                      >
+                        <input
+                          type="date"
+                          min={todayKey()}
+                          defaultValue={(() => {
+                            const next = addDaysToDateKey(date, 1);
+                            return next >= todayKey() ? next : todayKey();
+                          })()}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            if (next) {
+                              copyBlockToDate(block, next);
+                            }
+                          }}
+                          className="w-full rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-200"
+                          autoFocus
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -374,11 +595,17 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
-              <h2 id="add-block-title" className="text-lg font-semibold text-gray-900">
+              <h2
+                id="add-block-title"
+                className="text-lg font-semibold text-gray-900"
+              >
                 {editingBlock ? "Edit block" : "New block"}
               </h2>
             </div>
-            <form onSubmit={handleAddBlock} className="space-y-4 px-5 pb-8 pt-2">
+            <form
+              onSubmit={handleAddBlock}
+              className="space-y-4 px-5 pb-8 pt-2"
+            >
               <div>
                 <label htmlFor="block-label" className="sr-only">
                   What are you doing?
@@ -420,7 +647,10 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="block-start" className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <label
+                    htmlFor="block-start"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500"
+                  >
                     Start
                   </label>
                   <select
@@ -437,7 +667,10 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="block-end" className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <label
+                    htmlFor="block-end"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500"
+                  >
                     End
                   </label>
                   <select
@@ -452,7 +685,9 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                       </option>
                     ))}
                     {SLOTS.filter((s) => s > newStart).length === 0 && (
-                      <option value={newStart}>{formatTimeLabel(newStart)}</option>
+                      <option value={newStart}>
+                        {formatTimeLabel(newStart)}
+                      </option>
                     )}
                   </select>
                 </div>
@@ -467,11 +702,15 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                 </button>
                 <button
                   type="submit"
-                  disabled={newStart >= newEnd || addBlockPending || updateBlockPending}
+                  disabled={
+                    newStart >= newEnd || addBlockPending || updateBlockPending
+                  }
                   className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                 >
                   {addBlockPending || updateBlockPending
-                    ? (editingBlock ? "Saving…" : "Adding…")
+                    ? editingBlock
+                      ? "Saving…"
+                      : "Adding…"
                     : editingBlock
                       ? "Save"
                       : "Add"}

@@ -60,7 +60,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
 
   return (
     <div className="min-w-0 animate-page-load">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900">Today</h1>
+      <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">Today</h1>
       <p className="mb-4 text-sm text-gray-500">
         {dayNameFromDate(new Date())}, {formatDateDDMMMFromDate(new Date())}
       </p>

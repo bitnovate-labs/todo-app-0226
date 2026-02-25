@@ -21,6 +21,14 @@ export function todayKey(): string {
   return dateKey(new Date());
 }
 
+/** Add delta days to a date key (YYYY-MM-DD). Returns new date key. */
+export function addDaysToDateKey(dateKeyStr: string, delta: number): string {
+  const [y, m, d] = dateKeyStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() + delta);
+  return dateKey(date);
+}
+
 const MONTH_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",

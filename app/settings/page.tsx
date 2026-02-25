@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-w-0 text-center">
-      <h1 className="mb-4 text-2xl font-bold text-gray-900">Settings</h1>
+      <h1 className="mb-4 text-xl font-semibold tracking-tight text-gray-900">Settings</h1>
       <div className="mb-6">
         <p className="mb-2 text-sm text-gray-600">Email</p>
         <p className="break-all text-gray-900 sm:break-normal">{user.email}</p>

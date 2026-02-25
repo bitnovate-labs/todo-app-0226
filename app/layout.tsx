@@ -12,6 +12,7 @@ import { APP_NAME } from "@/lib/constants";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
 import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
+import { LockOrientation } from "@/components/pwa/LockOrientation";
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -106,6 +107,7 @@ export default function RootLayout({
           </div>
           <PWAInstallPrompt />
           <ServiceWorkerRegister />
+          <LockOrientation />
           <AnalyticsConsentGate />
         </PostHogProvider>
       </body>

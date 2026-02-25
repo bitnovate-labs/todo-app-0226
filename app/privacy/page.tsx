@@ -9,7 +9,7 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <div className="prose prose-sm max-w-none">
-      <h1 className="text-xl font-bold text-gray-900">Privacy</h1>
+      <h1 className="text-xl font-semibold tracking-tight text-gray-900">Privacy</h1>
       <p className="text-gray-600">
         This app respects your privacy. Below is a short summary of how we handle data and analytics.
       </p>
