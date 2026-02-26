@@ -48,6 +48,7 @@ export function useTodos(
   const addTodoMutation = useMutation({
     mutationFn: ({ title, date }: { title: string; date: string }) =>
       addTodoAction(title, date),
+    retry: 2,
     onSuccess: (result) => {
       if (result.data) {
         queryClient.setQueryData<Todo[]>(queryKey, (prev) =>
@@ -55,11 +56,15 @@ export function useTodos(
         );
       }
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
   });
 
   const toggleTodoMutation = useMutation({
     mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
       toggleTodoAction(id, completed),
+    retry: 2,
     onMutate: async ({ id, completed }) => {
       await queryClient.cancelQueries({ queryKey });
       const prev = queryClient.getQueryData<Todo[]>(queryKey);
@@ -72,8 +77,14 @@ export function useTodos(
     },
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+      queryClient.invalidateQueries({ queryKey });
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: (_data, { id, completed }) => {
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old
+          ? old.map((t) => (t.id === id ? { ...t, completed } : t)) : old
+      );
+    },
   });
 
   const updateTodoDateMutation = useMutation({
