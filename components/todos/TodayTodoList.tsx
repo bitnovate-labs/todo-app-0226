@@ -1,20 +1,184 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
+/** Cast for React 19 JSX compatibility with @dnd-kit return type */
+const SortableList = SortableContext as unknown as React.JSX.ElementType;
+import { CSS } from "@dnd-kit/utilities";
 import { useTodos } from "@/hooks/useTodos";
 import { todayKey, formatDateDDMMMFromDate, dayNameFromDate } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 
 type TodayTodoListProps = { userId: string | undefined | null };
 
+function SortableTodoItem({
+  todo,
+  menuRef,
+  menuOpen,
+  onToggle,
+  onOpenMenu,
+  onEdit,
+  onDelete,
+}: {
+  todo: Todo;
+  menuRef: React.RefObject<HTMLDivElement | null> | undefined;
+  menuOpen: boolean;
+  onToggle: (id: string) => void;
+  onOpenMenu: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 rounded-xl border py-3 pl-2 pr-2 shadow-sm ${
+        isDragging ? "z-50 opacity-90 shadow-md" : ""
+      } ${
+        todo.completed
+          ? "border-green-400 bg-green-50/80"
+          : "border-gray-200 bg-white"
+      }`}
+    >
+      <button
+        type="button"
+        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+      >
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm6-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </button>
+      <div
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-3"
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest("button, [role='menu']")) return;
+          onToggle(todo.id);
+        }}
+      >
+        <span
+          className={`min-w-0 flex-1 ${
+            todo.completed ? "text-green-700 line-through" : "text-gray-900"
+          }`}
+        >
+          {todo.title}
+        </span>
+      </div>
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenMenu();
+          }}
+          className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+          aria-label="More actions"
+          aria-expanded={menuOpen}
+          aria-haspopup="true"
+        >
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+          </svg>
+        </button>
+        {menuOpen && (
+          <div
+            className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+            role="menu"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onEdit}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onDelete}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
+  );
+}
+
 export function TodayTodoList({ userId }: TodayTodoListProps) {
-  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, todos, loading } = useTodos(userId);
+  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, reorderTodos, todos, loading } =
+    useTodos(userId);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const today = todayKey();
-  const dayTodos = getByDate(today);
+  const dayTodos = getByDate(today)
+    .slice()
+    .sort(
+      (a, b) =>
+        (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt
+    );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const ids = dayTodos.map((t) => t.id);
+      const oldIndex = ids.indexOf(active.id as string);
+      const newIndex = ids.indexOf(over.id as string);
+      if (oldIndex === -1 || newIndex === -1) return;
+      const newOrder = arrayMove(ids, oldIndex, newIndex);
+      reorderTodos(today, newOrder);
+    },
+    [dayTodos, today, reorderTodos]
+  );
 
   useEffect(() => {
     if (menuOpenId === null) return;
@@ -70,94 +234,32 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
             No todos for today. Tap + to add one.
           </li>
         ) : (
-          dayTodos
-            .slice()
-            .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-            .map((todo) => (
-              <li
-                key={todo.id}
-                onClick={(e) => {
-                  if ((e.target as HTMLElement).closest("button, [role='menu'], input")) return;
-                  toggleTodo(todo.id);
-                }}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl border py-3 pl-3 pr-2 shadow-sm ${
-                  todo.completed
-                    ? "border-green-400 bg-green-50/80"
-                    : "border-gray-200 bg-white"
-                }`}
-              >
-                <label className="mr-3 flex shrink-0 cursor-pointer items-center">
-                  <input
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => toggleTodo(todo.id)}
-                    className={`h-5 w-5 rounded border-gray-300 focus:ring-2 focus:ring-offset-0 ${
-                      todo.completed
-                        ? "accent-green-600"
-                        : "accent-blue-600 focus:ring-blue-500"
-                    }`}
-                  />
-                </label>
-                <span
-                  className={`min-w-0 flex-1 ${
-                    todo.completed
-                      ? "text-green-700 line-through"
-                      : "text-gray-900"
-                  }`}
-                >
-                  {todo.title}
-                </span>
-                <div className="relative shrink-0" ref={menuOpenId === todo.id ? menuRef : undefined}>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMenuOpenId((id) => (id === todo.id ? null : todo.id));
-                    }}
-                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                    aria-label="More actions"
-                    aria-expanded={menuOpenId === todo.id}
-                    aria-haspopup="true"
-                  >
-                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                    </svg>
-                  </button>
-                  {menuOpenId === todo.id && (
-                    <div
-                      className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
-                      role="menu"
-                    >
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => openEdit(todo)}
-                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpenId(null);
-                          deleteTodo(todo.id);
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableList
+              items={dayTodos.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {dayTodos.map((todo) => (
+                <SortableTodoItem
+                  key={todo.id}
+                  todo={todo}
+                  menuRef={menuOpenId === todo.id ? menuRef : undefined}
+                  menuOpen={menuOpenId === todo.id}
+                  onToggle={toggleTodo}
+                  onOpenMenu={() => setMenuOpenId((id) => (id === todo.id ? null : todo.id))}
+                  onEdit={() => openEdit(todo)}
+                  onDelete={() => {
+                    setMenuOpenId(null);
+                    deleteTodo(todo.id);
+                  }}
+                />
+              ))}
+            </SortableList>
+          </DndContext>
         )}
       </ul>
 

@@ -174,7 +174,12 @@ export function HistoryView({ userId }: HistoryViewProps) {
     () =>
       weekTodos
         .filter((t) => t.completed)
-        .sort((a, b) => b.createdAt - a.createdAt),
+        .sort(
+          (a, b) =>
+            a.date.localeCompare(b.date) ||
+            (a.position ?? 0) - (b.position ?? 0) ||
+            b.createdAt - a.createdAt,
+        ),
     [weekTodos],
   );
   const weekIncomplete = useMemo(
@@ -182,7 +187,10 @@ export function HistoryView({ userId }: HistoryViewProps) {
       weekTodos
         .filter((t) => !t.completed)
         .sort(
-          (a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt,
+          (a, b) =>
+            a.date.localeCompare(b.date) ||
+            (a.position ?? 0) - (b.position ?? 0) ||
+            a.createdAt - b.createdAt,
         ),
     [weekTodos],
   );
@@ -196,7 +204,12 @@ export function HistoryView({ userId }: HistoryViewProps) {
     () =>
       monthTodos
         .filter((t) => t.completed)
-        .sort((a, b) => b.createdAt - a.createdAt),
+        .sort(
+          (a, b) =>
+            a.date.localeCompare(b.date) ||
+            (a.position ?? 0) - (b.position ?? 0) ||
+            b.createdAt - a.createdAt,
+        ),
     [monthTodos],
   );
   const monthIncomplete = useMemo(
@@ -204,7 +217,10 @@ export function HistoryView({ userId }: HistoryViewProps) {
       monthTodos
         .filter((t) => !t.completed)
         .sort(
-          (a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt,
+          (a, b) =>
+            a.date.localeCompare(b.date) ||
+            (a.position ?? 0) - (b.position ?? 0) ||
+            a.createdAt - b.createdAt,
         ),
     [monthTodos],
   );

@@ -130,14 +130,14 @@ export function WeekView({ userId }: WeekViewProps) {
           ) : (
             dayTodos
               .slice()
-              .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+              .sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt)
               .map((todo) => (
                 <li
                   key={todo.id}
                   onClick={(e) => {
                     if (
                       (e.target as HTMLElement).closest(
-                        "button, [role='menu'], input",
+                        "button, [role='menu']",
                       )
                     )
                       return;
@@ -151,18 +151,6 @@ export function WeekView({ userId }: WeekViewProps) {
                         : "border border-gray-200/80 bg-white"
                   }`}
                 >
-                  <label className="mr-3 flex shrink-0 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={todo.completed}
-                      onChange={() => toggleTodo(todo.id)}
-                      className={`h-5 w-5 rounded-md border-gray-300 focus:ring-2 focus:ring-offset-0 ${
-                        todo.completed
-                          ? "accent-green-600"
-                          : "accent-blue-600 focus:ring-blue-500"
-                      }`}
-                    />
-                  </label>
                   <span
                     className={`min-w-0 flex-1 text-[15px] font-medium leading-snug ${
                       todo.completed

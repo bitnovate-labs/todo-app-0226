@@ -6,6 +6,8 @@ export type Todo = {
   date: string;
   completed: boolean;
   createdAt: number;
+  /** Display order within the same date (lower = higher in list). */
+  position: number;
 };
 
 /** Format date as YYYY-MM-DD (local date) */
@@ -33,14 +35,6 @@ const MONTH_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
-
-/** Format a date key (YYYY-MM-DD) for display as DD MMM. Deterministic for hydration. */
-export function formatDateDDMMM(dateKey: string): string {
-  const [y, m, d] = dateKey.split("-").map(Number);
-  if (Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) return dateKey;
-  const date = new Date(y, m - 1, d);
-  return formatDateDDMMMFromDate(date);
-}
 
 /** Format a Date for display as DD MMM. Deterministic (no locale) so server and client match. */
 export function formatDateDDMMMFromDate(d: Date): string {
@@ -95,24 +89,6 @@ export function weekDatesForWeek(weekStartsOn: WeekStartsOn): { dateKey: string;
   return weekDatesFrom(getCurrentWeekStart(weekStartsOn));
 }
 
-/** Get the 7 days of the week starting from today (or a given start). */
-export function weekDates(start?: Date): { dateKey: string; label: string; dayName: string }[] {
-  const base = start ? new Date(start) : new Date();
-  base.setHours(0, 0, 0, 0);
-  const out: { dateKey: string; label: string; dayName: string }[] = [];
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(base);
-    d.setDate(base.getDate() + i);
-    out.push({
-      dateKey: dateKey(d),
-      label: formatDateDDMMMFromDate(d),
-      dayName: dayNames[d.getDay()],
-    });
-  }
-  return out;
-}
-
 /** All date keys for the current calendar week (respects week start setting). */
 export function currentWeekDateKeys(weekStartsOn?: WeekStartsOn): string[] {
   const start = weekStartsOn ? getCurrentWeekStart(weekStartsOn) : new Date();
@@ -124,12 +100,6 @@ export function currentWeekDateKeys(weekStartsOn?: WeekStartsOn): string[] {
     keys.push(dateKey(d));
   }
   return keys;
-}
-
-/** Check if a date key (YYYY-MM-DD) falls in the current week. */
-export function isDateInCurrentWeek(dateKey: string, weekStartsOn?: WeekStartsOn): boolean {
-  const keys = currentWeekDateKeys(weekStartsOn);
-  return keys.includes(dateKey);
 }
 
 /** Start and end of month for a given date. Returns { start: YYYY-MM-DD, end: YYYY-MM-DD }. */
@@ -155,12 +125,6 @@ export function monthDateKeys(d: Date): string[] {
     keys.push(dateKey(new Date(year, month, day)));
   }
   return keys;
-}
-
-/** Check if a date key falls in the given month. */
-export function isDateInMonth(dateKey: string, monthDate: Date): boolean {
-  const keys = monthDateKeys(monthDate);
-  return keys.includes(dateKey);
 }
 
 /** Format month for display e.g. "February 2025". */

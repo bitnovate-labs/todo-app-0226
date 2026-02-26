@@ -9,6 +9,7 @@ type DbRow = {
   title: string;
   date: string;
   completed: boolean;
+  position: number;
   created_at: string;
   updated_at: string;
 };
@@ -20,6 +21,7 @@ function mapRowToTodo(row: DbRow): Todo {
     date: row.date,
     completed: row.completed,
     createdAt: new Date(row.created_at).getTime(),
+    position: row.position ?? 0,
   };
 }
 
@@ -33,9 +35,10 @@ export async function getTodosForUser(userId: string): Promise<GetTodosResult> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('todos')
-    .select('id, profile_id, title, date, completed, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, created_at, updated_at')
     .eq('profile_id', userId)
     .order('date', { ascending: true })
+    .order('position', { ascending: true })
     .order('created_at', { ascending: true });
 
   if (error) return { error: error.message, data: [] };
@@ -73,8 +76,9 @@ export async function addTodoAction(title: string, date: string): Promise<AddTod
       title,
       date,
       completed: false,
+      position: 0,
     })
-    .select('id, profile_id, title, date, completed, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, created_at, updated_at')
     .single();
 
   if (error) return { error: error.message };
@@ -106,4 +110,34 @@ export async function deleteTodoAction(id: string): Promise<UpdateTodoResult> {
   const supabase = await createClient();
   const { error } = await supabase.from('todos').delete().eq('id', id);
   return error ? { error: error.message } : {};
+}
+
+export type ReorderTodosResult = { error?: string };
+
+/**
+ * Reorder todos for a given date. todoIds must be the full ordered list of todo ids for that date.
+ * Updates position to 0, 1, 2, ... for each id.
+ */
+export async function reorderTodosAction(
+  date: string,
+  todoIds: string[]
+): Promise<ReorderTodosResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: authError?.message ?? 'Not authenticated' };
+  }
+  for (let i = 0; i < todoIds.length; i++) {
+    const { error } = await supabase
+      .from('todos')
+      .update({ position: i })
+      .eq('id', todoIds[i])
+      .eq('profile_id', user.id)
+      .eq('date', date);
+    if (error) return { error: error.message };
+  }
+  return {};
 }

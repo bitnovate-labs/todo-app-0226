@@ -8,20 +8,12 @@ import {
   updateTodoDateAction,
   updateTodoTitleAction,
   deleteTodoAction,
+  reorderTodosAction,
 } from "@/app/actions/todos";
 import type { Todo } from "@/lib/todos";
 import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
 
-export type UseTodosOptions = {
-  /** Server-fetched todos so the first paint has data (no loading flash). */
-  initialData?: Todo[] | undefined;
-};
-
-export function useTodos(
-  userId: string | undefined | null,
-  options: UseTodosOptions = {}
-) {
-  const { initialData } = options;
+export function useTodos(userId: string | undefined | null) {
   const [mounted, setMounted] = useState(false);
   const queryClient = useQueryClient();
   const queryKey = todosQueryKey(userId);
@@ -39,8 +31,6 @@ export function useTodos(
     queryKey,
     queryFn: fetchTodos,
     enabled: !!userId,
-    initialData: initialData ?? undefined,
-    initialDataUpdatedAt: initialData ? Date.now() : 0,
   });
 
   const error = queryError ? String(queryError) : null;
@@ -137,6 +127,34 @@ export function useTodos(
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const reorderTodosMutation = useMutation({
+    mutationFn: ({ date, todoIds }: { date: string; todoIds: string[] }) =>
+      reorderTodosAction(date, todoIds),
+    onMutate: async ({ date, todoIds }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) => {
+        if (!old) return old;
+        const updated = old.map((t) => {
+          const idx = todoIds.indexOf(t.id);
+          if (idx === -1) return t;
+          return { ...t, position: idx };
+        });
+        return updated.sort(
+          (a, b) =>
+            a.date.localeCompare(b.date) ||
+            (a.position - b.position) ||
+            a.createdAt - b.createdAt
+        );
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const addTodo = useCallback(
     async (title: string, date: string) => {
       if (!userId) return;
@@ -173,6 +191,12 @@ export function useTodos(
     [updateTodoTitleMutation]
   );
 
+  const reorderTodos = useCallback(
+    (date: string, todoIds: string[]) =>
+      reorderTodosMutation.mutate({ date, todoIds }),
+    [reorderTodosMutation]
+  );
+
   const getByDate = useCallback(
     (dateKey: string) => todos.filter((t) => t.date === dateKey),
     [todos]
@@ -185,6 +209,7 @@ export function useTodos(
     deleteTodo,
     updateTodoDate,
     updateTodoTitle,
+    reorderTodos,
     getByDate,
     mounted,
     loading,
