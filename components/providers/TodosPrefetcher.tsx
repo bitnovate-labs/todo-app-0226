@@ -12,20 +12,28 @@ import { todayKey } from "@/lib/todos";
 /**
  * Prefetch todos and today's time blocks when the app loads with a logged-in user
  * so navigation to Home / Week / History / Time shows data immediately from cache.
+ * Skips prefetch when the cache is already seeded (e.g. from InitialDataFetcher)
+ * to avoid a redundant client fetch and the resulting "data updates after a few seconds" flash.
  */
 export function TodosPrefetcher({ userId }: { userId: string | null }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!userId) return;
-    queryClient.prefetchQuery({
-      queryKey: todosQueryKey(userId),
-      queryFn: fetchTodos,
-    });
-    queryClient.prefetchQuery({
-      queryKey: timeBlocksQueryKey(userId, todayKey()),
-      queryFn: () => fetchTimeBlocks(userId, todayKey()),
-    });
+    const todosKey = todosQueryKey(userId);
+    const timeBlocksKey = timeBlocksQueryKey(userId, todayKey());
+    if (queryClient.getQueryData(todosKey) == null) {
+      queryClient.prefetchQuery({
+        queryKey: todosKey,
+        queryFn: fetchTodos,
+      });
+    }
+    if (queryClient.getQueryData(timeBlocksKey) == null) {
+      queryClient.prefetchQuery({
+        queryKey: timeBlocksKey,
+        queryFn: () => fetchTimeBlocks(userId, todayKey()),
+      });
+    }
   }, [userId, queryClient]);
 
   return null;
