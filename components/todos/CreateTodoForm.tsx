@@ -12,7 +12,7 @@ type CreateTodoFormProps = { userId: string | undefined | null };
 
 export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const router = useRouter();
-  const { addTodo, mounted } = useTodos(userId);
+  const { addTodo } = useTodos(userId);
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
@@ -21,7 +21,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const t = title.trim();
-    if (!t || !mounted) return;
+    if (!t || !userId) return;
     setSubmitting(true);
     try {
       const date = useToday ? todayKey() : selectedDate;
@@ -32,14 +32,6 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
       setSubmitting(false);
     }
   };
-
-  if (!mounted) {
-    return (
-      <div className="animate-page-load py-8 text-center text-gray-500">
-        Loading…
-      </div>
-    );
-  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
