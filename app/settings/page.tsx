@@ -1,22 +1,39 @@
-import { requireUser } from "@/lib/auth";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FeedbackDrawer } from "@/components/feedback/FeedbackDrawer";
 import { SignOutForm } from "@/components/auth/SignOutForm";
 import { LockRotationSetting } from "@/components/settings/LockRotationSetting";
 import { WeekStartSetting } from "@/components/settings/WeekStartSetting";
+import { useUser } from "@/components/layout/UserContext";
 
-export const metadata = {
-  title: "Settings",
-};
+export default function SettingsPage() {
+  const user = useUser();
+  const router = useRouter();
 
-export default async function SettingsPage() {
-  const user = await requireUser();
+  useEffect(() => {
+    if (user === null) {
+      router.replace("/sign-in?next=" + encodeURIComponent("/settings"));
+    }
+  }, [user, router]);
+
+  if (user === null) {
+    return (
+      <div className="animate-page-load py-8 text-center text-gray-500">
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0 text-center">
-      <h1 className="mb-4 text-xl font-semibold tracking-tight text-gray-900">Settings</h1>
+      <h1 className="mb-4 text-xl font-semibold tracking-tight text-gray-900">
+        Settings
+      </h1>
       <div className="mb-6">
         <p className="mb-2 text-sm text-gray-600">Email</p>
-        <p className="break-all text-gray-900 sm:break-normal">{user.email}</p>
+        <p className="break-all text-gray-900 sm:break-normal">{user.email ?? ""}</p>
       </div>
 
       <div className="mb-6 text-left">

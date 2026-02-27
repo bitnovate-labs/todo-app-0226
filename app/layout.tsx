@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { headers } from "next/headers";
 import "./globals.css";
 import { Suspense } from "react";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
@@ -10,7 +9,7 @@ import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
 import { PostHogProvider } from "./providers";
 import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { APP_NAME } from "@/lib/constants";
-import { ShellFallback, LightFallback } from "@/components/layout/ShellFallback";
+import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
 import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
 import { LockOrientation } from "@/components/pwa/LockOrientation";
@@ -42,14 +41,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = (await headers()).get("x-pathname");
-  const useLightFallback =
-    pathname === "/todo/new" || pathname === "/settings";
   return (
     <html lang="en" style={{ backgroundColor: '#f9fafb' }}>
       <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
@@ -107,7 +103,7 @@ export default async function RootLayout({
           <PreventSwipeBack />
           <OrientationGate>
             <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
-              <Suspense fallback={useLightFallback ? <LightFallback /> : <ShellFallback />}>
+              <Suspense fallback={<ShellFallback />}>
                 <AuthBoundary>{children}</AuthBoundary>
               </Suspense>
             </div>

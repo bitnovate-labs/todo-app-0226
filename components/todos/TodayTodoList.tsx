@@ -58,18 +58,16 @@ function SortableTodoItem({
     transition,
   };
 
+  const rowClass = [
+    "flex items-center gap-2 rounded-xl border py-3 pl-2 pr-2 shadow-sm",
+    isDragging && "z-50 opacity-90 shadow-md",
+    todo.completed ? "border-green-400 bg-green-50/80" : "border-gray-200 bg-white",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <li
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-2 rounded-xl border py-3 pl-2 pr-2 shadow-sm ${
-        isDragging ? "z-50 opacity-90 shadow-md" : ""
-      } ${
-        todo.completed
-          ? "border-green-400 bg-green-50/80"
-          : "border-gray-200 bg-white"
-      }`}
-    >
+    <li ref={setNodeRef} style={style} className={rowClass}>
       <button
         type="button"
         className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
@@ -235,6 +233,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
           </li>
         ) : (
           <DndContext
+            id="today-todos-dnd"
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}

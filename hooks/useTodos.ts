@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addTodoAction,
@@ -14,8 +14,13 @@ import type { Todo } from "@/lib/todos";
 import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
 
 export function useTodos(userId: string | undefined | null) {
+  const [mounted, setMounted] = useState(false);
   const queryClient = useQueryClient();
   const queryKey = todosQueryKey(userId);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     data: todos = [],
@@ -205,7 +210,7 @@ export function useTodos(userId: string | undefined | null) {
     updateTodoTitle,
     reorderTodos,
     getByDate,
-    mounted: true,
+    mounted,
     loading,
     error,
   };

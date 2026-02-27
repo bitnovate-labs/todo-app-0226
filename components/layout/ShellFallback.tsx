@@ -1,19 +1,4 @@
 /**
- * Minimal spinner for lightweight routes (e.g. /todo/new, /settings) so we don't
- * show the full skeleton while auth resolves.
- */
-export function LightFallback() {
-  return (
-    <div className="flex min-h-dynamic-screen flex-1 items-center justify-center">
-      <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600"
-        aria-hidden
-      />
-    </div>
-  );
-}
-
-/**
  * Shown while initial data (todos, time blocks) is loading. Matches the shell layout
  * so the transition to real content is seamless.
  */

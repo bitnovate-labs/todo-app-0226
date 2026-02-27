@@ -13,9 +13,7 @@ const SUPABASE_KEY =
  * and writes updated cookies to the response. Use this only in proxy.ts.
  */
 export async function updateSession(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
-  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  let response = NextResponse.next({ request });
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error(

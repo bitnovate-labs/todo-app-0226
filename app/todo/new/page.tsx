@@ -1,11 +1,27 @@
-import { requireUser } from "@/lib/auth";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { CreateTodoForm } from "@/components/todos/CreateTodoForm";
+import { useUser } from "@/components/layout/UserContext";
 
-export const metadata = {
-  title: "New todo",
-};
+export default function NewTodoPage() {
+  const user = useUser();
+  const router = useRouter();
 
-export default async function NewTodoPage() {
-  const user = await requireUser();
+  useEffect(() => {
+    if (user === null) {
+      router.replace("/sign-in?next=" + encodeURIComponent("/todo/new"));
+    }
+  }, [user, router]);
+
+  if (user === null) {
+    return (
+      <div className="animate-page-load py-8 text-center text-gray-500">
+        Loading…
+      </div>
+    );
+  }
+
   return <CreateTodoForm userId={user.id} />;
 }

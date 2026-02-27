@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { BottomNavShell } from "@/components/layout/BottomNavShell";
 import { DashboardPathnameProvider } from "@/components/layout/DashboardPathnameContext";
 import { MainContent } from "@/components/layout/DashboardContent";
+import { UserProvider } from "@/components/layout/UserContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { TodosPrefetcher } from "@/components/providers/TodosPrefetcher";
 import { PostHogPageView } from "@/app/providers";
@@ -39,6 +40,7 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
       initialTimeBlocksDate={today}
       userId={user.id}
     >
+      <UserProvider user={{ id: user.id, email: user.email ?? undefined }}>
       <TodosPrefetcher userId={user.id} />
       <PostHogPageView />
       <AuthEventTracker />
@@ -62,6 +64,7 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
           </Suspense>
         </BottomNavShell>
       </DashboardPathnameProvider>
+      </UserProvider>
     </QueryProvider>
   );
 }
