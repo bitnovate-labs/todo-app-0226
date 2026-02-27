@@ -26,7 +26,6 @@ export function useTodos(userId: string | undefined | null) {
     data: todos = [],
     isPending: loading,
     error: queryError,
-    refetch,
   } = useQuery({
     queryKey,
     queryFn: fetchTodos,
@@ -214,6 +213,5 @@ export function useTodos(userId: string | undefined | null) {
     mounted,
     loading,
     error,
-    refetch,
   };
 }
