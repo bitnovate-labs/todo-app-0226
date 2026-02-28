@@ -27,9 +27,9 @@ import type { Todo } from "@/lib/todos";
 
 type TodayTodoListProps = { userId: string | undefined | null };
 
-/** Priority todo styling (urgency: red) */
+/** Priority todo styling (urgency: darker amber) */
 const PRIORITY_ROW_CLASS =
-  "border-red-300/80 bg-red-50/80";
+  "border-amber-400/90 bg-amber-100/80";
 
 function SortableTodoItem({
   todo,
@@ -133,7 +133,7 @@ function SortableTodoItem({
             >
               {todo.priority ? (
                 <>
-                  <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Not priority
@@ -187,7 +187,8 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   const dayTodos = getByDate(today)
     .slice()
     .sort((a, b) => {
-      // Priority first, then position, then createdAt
+      // Completed at bottom, then priority first, then position, then createdAt
+      if (a.completed !== b.completed) return (a.completed ? 1 : 0) - (b.completed ? 1 : 0);
       if ((a.priority ?? false) !== (b.priority ?? false))
         return (a.priority ? 0 : 1) - (b.priority ? 0 : 1);
       return (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt;

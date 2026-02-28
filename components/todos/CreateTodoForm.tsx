@@ -136,7 +136,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
           htmlFor="priority"
           className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors touch-manipulation ${
             priority
-              ? "border-red-200/80 bg-red-50/70"
+              ? "border-amber-400/90 bg-amber-100/80"
               : "border-gray-200 bg-white"
           }`}
         >
@@ -150,7 +150,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
           <span
             className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 ${
               priority
-                ? "border-red-500 bg-red-500"
+                ? "border-amber-600 bg-amber-600"
                 : "border-gray-300 bg-white"
             }`}
             aria-hidden
