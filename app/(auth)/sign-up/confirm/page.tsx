@@ -1,20 +1,19 @@
 import Link from 'next/link';
-import { PasswordResetForm } from '@/components/auth/PasswordResetForm';
 
 export const metadata = {
-  title: 'Reset password',
+  title: 'Confirm your email',
 };
 
-export default function ResetPasswordPage() {
+export default function SignUpConfirmPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
       <h1 className="mb-6 text-xl font-semibold tracking-tight text-gray-900">
-        Reset your password
+        Confirm your email
       </h1>
       <p className="text-gray-600 mb-6 text-center max-w-sm">
-        Enter your email and we&apos;ll send you a link to set a new password.
+        The email confirmation has been sent to your email address. Please check your inbox and
+        click the link to activate your account. If you don&apos;t see it, check your spam folder.
       </p>
-      <PasswordResetForm />
       <p className="mt-4 text-sm text-gray-600">
         <Link href="/sign-in" className="text-blue-600 hover:underline">
           Back to sign in

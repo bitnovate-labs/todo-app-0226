@@ -8,6 +8,8 @@ export type Todo = {
   createdAt: number;
   /** Display order within the same date (lower = higher in list). */
   position: number;
+  /** When true, shown at top with highlight background. */
+  priority: boolean;
 };
 
 /** Format date as YYYY-MM-DD (local date) */

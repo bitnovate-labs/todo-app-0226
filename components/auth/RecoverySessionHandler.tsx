@@ -127,7 +127,7 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
 
   if (error) {
     return (
-      <div className="flex flex-col items-center px-4">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
         <div className="max-w-sm w-full">
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-800">{error}</p>

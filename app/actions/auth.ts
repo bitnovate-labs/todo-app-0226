@@ -132,10 +132,7 @@ export async function signUp(_prev: unknown, formData: FormData): Promise<SignUp
   }
 
   if (data.user && !data.session) {
-    return {
-      message:
-        'Check your email for the confirmation link to activate your account.',
-    };
+    redirect('/sign-up/confirm');
   }
 
   redirect('/?from=sign_up');
@@ -173,7 +170,7 @@ export async function resetPassword(
     return { error: authErrorMessage(error) };
   }
   logAuthEvent('reset_password_request', validatedEmail);
-  return {}; // Success: show "check your email"
+  redirect('/reset-password/sent');
 }
 
 export async function updatePassword(

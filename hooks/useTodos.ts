@@ -9,6 +9,7 @@ import {
   updateTodoTitleAction,
   deleteTodoAction,
   reorderTodosAction,
+  updateTodoPriorityAction,
 } from "@/app/actions/todos";
 import type { Todo } from "@/lib/todos";
 import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
@@ -35,8 +36,8 @@ export function useTodos(userId: string | undefined | null) {
   const error = queryError ? String(queryError) : null;
 
   const addTodoMutation = useMutation({
-    mutationFn: ({ title, date }: { title: string; date: string }) =>
-      addTodoAction(title, date),
+    mutationFn: ({ title, date, priority }: { title: string; date: string; priority?: boolean }) =>
+      addTodoAction(title, date, priority ?? false),
     retry: 2,
     onSuccess: (result) => {
       if (result.data) {
@@ -155,9 +156,13 @@ export function useTodos(userId: string | undefined | null) {
   });
 
   const addTodo = useCallback(
-    async (title: string, date: string) => {
+    async (title: string, date: string, priority?: boolean) => {
       if (!userId) return;
-      const result = await addTodoMutation.mutateAsync({ title, date });
+      const result = await addTodoMutation.mutateAsync({
+        title,
+        date,
+        priority: priority ?? false,
+      });
       if (result.error) throw new Error(result.error);
     },
     [userId, addTodoMutation]
@@ -196,6 +201,29 @@ export function useTodos(userId: string | undefined | null) {
     [reorderTodosMutation]
   );
 
+  const updateTodoPriorityMutation = useMutation({
+    mutationFn: ({ id, priority }: { id: string; priority: boolean }) =>
+      updateTodoPriorityAction(id, priority),
+    onMutate: async ({ id, priority }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Todo[]>(queryKey);
+      queryClient.setQueryData<Todo[]>(queryKey, (old) =>
+        old ? old.map((t) => (t.id === id ? { ...t, priority } : t)) : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const updateTodoPriority = useCallback(
+    (id: string, priority: boolean) =>
+      updateTodoPriorityMutation.mutate({ id, priority }),
+    [updateTodoPriorityMutation]
+  );
+
   const getByDate = useCallback(
     (dateKey: string) => todos.filter((t) => t.date === dateKey),
     [todos]
@@ -208,6 +236,7 @@ export function useTodos(userId: string | undefined | null) {
     deleteTodo,
     updateTodoDate,
     updateTodoTitle,
+    updateTodoPriority,
     reorderTodos,
     getByDate,
     mounted,

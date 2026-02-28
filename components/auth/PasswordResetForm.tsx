@@ -29,11 +29,6 @@ export function PasswordResetForm() {
           {state.error}
         </p>
       )}
-      {state && !state.error && (
-        <p className="text-sm text-green-700" role="status">
-          Check your email for a link to reset your password.
-        </p>
-      )}
       <button
         type="submit"
         onClick={() => trackEvent({ name: ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST })}

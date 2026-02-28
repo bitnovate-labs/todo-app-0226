@@ -16,6 +16,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
+  const [priority, setPriority] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
     setSubmitting(true);
     try {
       const date = useToday ? todayKey() : selectedDate;
-      await addTodo(t, date);
+      await addTodo(t, date, priority);
       setTitle("");
       router.push("/");
     } finally {
@@ -38,10 +39,12 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const endMonth = new Date(today);
   endMonth.setDate(endMonth.getDate() + 365);
 
-  const selectedDateObj = selectedDate ? (() => {
-    const [y, m, d] = selectedDate.split("-").map(Number);
-    return new Date(y, (m ?? 1) - 1, d ?? 1);
-  })() : undefined;
+  const selectedDateObj = selectedDate
+    ? (() => {
+        const [y, m, d] = selectedDate.split("-").map(Number);
+        return new Date(y, (m ?? 1) - 1, d ?? 1);
+      })()
+    : undefined;
 
   return (
     <div className="min-w-0">
@@ -51,15 +54,30 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
           className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           aria-label="Back"
         >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight text-gray-900">New todo</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-gray-900">
+          New todo
+        </h1>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="title" className="mb-1 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="title"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             What to do?
           </label>
           <input
@@ -74,7 +92,9 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
           />
         </div>
         <div className="min-w-0">
-          <span className="mb-2 block text-sm font-medium text-gray-700">When?</span>
+          <span className="mb-2 block text-sm font-medium text-gray-700">
+            When?
+          </span>
           <div className="space-y-3 min-w-0">
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
               <input
@@ -112,6 +132,47 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
             )}
           </div>
         </div>
+        <label
+          htmlFor="priority"
+          className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors touch-manipulation ${
+            priority
+              ? "border-red-200/80 bg-red-50/70"
+              : "border-gray-200 bg-white"
+          }`}
+        >
+          <input
+            id="priority"
+            type="checkbox"
+            checked={priority}
+            onChange={(e) => setPriority(e.target.checked)}
+            className="sr-only"
+          />
+          <span
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 ${
+              priority
+                ? "border-red-500 bg-red-500"
+                : "border-gray-300 bg-white"
+            }`}
+            aria-hidden
+          >
+            {priority && (
+              <svg
+                className="h-4 w-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </span>
+          <span className="text-sm font-medium text-gray-900">Priority?</span>
+        </label>
         <button
           type="submit"
           disabled={submitting || !title.trim()}

@@ -15,6 +15,7 @@ export function WeekView({ userId }: WeekViewProps) {
     deleteTodo,
     updateTodoTitle,
     updateTodoDate,
+    updateTodoPriority,
     todos,
     loading,
   } = useTodos(userId);
@@ -94,7 +95,13 @@ export function WeekView({ userId }: WeekViewProps) {
   const today = todayKey();
   const dayBlocks = days.map(({ dateKey, label, dayName }, index) => {
     const isToday = dateKey === today;
-    const dayTodos = getByDate(dateKey);
+    const dayTodos = getByDate(dateKey)
+      .slice()
+      .sort((a, b) => {
+        if ((a.priority ?? false) !== (b.priority ?? false))
+          return (a.priority ? 0 : 1) - (b.priority ? 0 : 1);
+        return (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt;
+      });
     return (
       <section
         key={dateKey}
@@ -128,10 +135,7 @@ export function WeekView({ userId }: WeekViewProps) {
               No todos
             </li>
           ) : (
-            dayTodos
-              .slice()
-              .sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt)
-              .map((todo) => (
+            dayTodos.map((todo) => (
                 <li
                   key={todo.id}
                   onClick={(e) => {
@@ -146,9 +150,11 @@ export function WeekView({ userId }: WeekViewProps) {
                   className={`flex cursor-pointer items-center gap-2 rounded-xl px-3 py-3 shadow-sm transition-shadow ${
                     todo.completed
                       ? "border border-green-400/70 bg-green-50/70"
-                      : isToday
-                        ? "border border-blue-400/80 bg-white"
-                        : "border border-gray-200/80 bg-white"
+                      :                       todo.priority
+                        ? "border border-red-300/80 bg-red-50/80"
+                        : isToday
+                          ? "border border-blue-400/80 bg-white"
+                          : "border border-gray-200/80 bg-white"
                   }`}
                 >
                   <span
@@ -195,6 +201,31 @@ export function WeekView({ userId }: WeekViewProps) {
                         className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
                         role="menu"
                       >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpenId(null);
+                            updateTodoPriority(todo.id, !todo.priority);
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          {todo.priority ? (
+                            <>
+                              <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Not priority
+                            </>
+                          ) : (
+                            <>
+                              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                              </svg>
+                              Priority
+                            </>
+                          )}
+                        </button>
                         <button
                           type="button"
                           role="menuitem"

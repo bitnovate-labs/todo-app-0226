@@ -27,6 +27,10 @@ import type { Todo } from "@/lib/todos";
 
 type TodayTodoListProps = { userId: string | undefined | null };
 
+/** Priority todo styling (urgency: red) */
+const PRIORITY_ROW_CLASS =
+  "border-red-300/80 bg-red-50/80";
+
 function SortableTodoItem({
   todo,
   menuRef,
@@ -35,6 +39,7 @@ function SortableTodoItem({
   onOpenMenu,
   onEdit,
   onDelete,
+  onTogglePriority,
 }: {
   todo: Todo;
   menuRef: React.RefObject<HTMLDivElement | null> | undefined;
@@ -43,6 +48,7 @@ function SortableTodoItem({
   onOpenMenu: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onTogglePriority: (id: string, priority: boolean) => void;
 }) {
   const {
     attributes,
@@ -61,7 +67,11 @@ function SortableTodoItem({
   const rowClass = [
     "flex items-center gap-2 rounded-xl border py-3 pl-2 pr-2 shadow-sm",
     isDragging && "z-50 opacity-90 shadow-md",
-    todo.completed ? "border-green-400 bg-green-50/80" : "border-gray-200 bg-white",
+    todo.completed
+      ? "border-green-400 bg-green-50/80"
+      : todo.priority
+        ? PRIORITY_ROW_CLASS
+        : "border-gray-200 bg-white",
   ]
     .filter(Boolean)
     .join(" ");
@@ -118,6 +128,28 @@ function SortableTodoItem({
             <button
               type="button"
               role="menuitem"
+              onClick={() => onTogglePriority(todo.id, !todo.priority)}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+            >
+              {todo.priority ? (
+                <>
+                  <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Not priority
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  Priority
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
               onClick={onEdit}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
             >
@@ -145,7 +177,7 @@ function SortableTodoItem({
 }
 
 export function TodayTodoList({ userId }: TodayTodoListProps) {
-  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, reorderTodos, todos, loading } =
+  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, updateTodoPriority, reorderTodos, todos, loading } =
     useTodos(userId);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -154,10 +186,12 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   const today = todayKey();
   const dayTodos = getByDate(today)
     .slice()
-    .sort(
-      (a, b) =>
-        (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt
-    );
+    .sort((a, b) => {
+      // Priority first, then position, then createdAt
+      if ((a.priority ?? false) !== (b.priority ?? false))
+        return (a.priority ? 0 : 1) - (b.priority ? 0 : 1);
+      return (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt;
+    });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -254,6 +288,10 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                   onDelete={() => {
                     setMenuOpenId(null);
                     deleteTodo(todo.id);
+                  }}
+                  onTogglePriority={(id, priority) => {
+                    setMenuOpenId(null);
+                    updateTodoPriority(id, priority);
                   }}
                 />
               ))}

@@ -10,6 +10,7 @@ type DbRow = {
   date: string;
   completed: boolean;
   position: number;
+  priority: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -22,6 +23,7 @@ function mapRowToTodo(row: DbRow): Todo {
     completed: row.completed,
     createdAt: new Date(row.created_at).getTime(),
     position: row.position ?? 0,
+    priority: row.priority ?? false,
   };
 }
 
@@ -35,7 +37,7 @@ export async function getTodosForUser(userId: string): Promise<GetTodosResult> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('todos')
-    .select('id, profile_id, title, date, completed, position, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, priority, created_at, updated_at')
     .eq('profile_id', userId)
     .order('date', { ascending: true })
     .order('position', { ascending: true })
@@ -59,7 +61,11 @@ export async function getTodosAction(): Promise<GetTodosResult> {
 
 export type AddTodoResult = { data?: Todo; error?: string };
 
-export async function addTodoAction(title: string, date: string): Promise<AddTodoResult> {
+export async function addTodoAction(
+  title: string,
+  date: string,
+  priority: boolean = false
+): Promise<AddTodoResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -77,8 +83,9 @@ export async function addTodoAction(title: string, date: string): Promise<AddTod
       date,
       completed: false,
       position: 0,
+      priority: !!priority,
     })
-    .select('id, profile_id, title, date, completed, position, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, priority, created_at, updated_at')
     .single();
 
   if (error) return { error: error.message };
@@ -109,6 +116,15 @@ export async function updateTodoTitleAction(id: string, title: string): Promise<
 export async function deleteTodoAction(id: string): Promise<UpdateTodoResult> {
   const supabase = await createClient();
   const { error } = await supabase.from('todos').delete().eq('id', id);
+  return error ? { error: error.message } : {};
+}
+
+export async function updateTodoPriorityAction(
+  id: string,
+  priority: boolean
+): Promise<UpdateTodoResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from('todos').update({ priority }).eq('id', id);
   return error ? { error: error.message } : {};
 }
 

@@ -73,11 +73,6 @@ export function AuthForm({ mode, initialEmail }: AuthFormProps) {
           {state.error}
         </p>
       )}
-      {state && 'message' in state && state.message && (
-        <p className="text-sm text-green-700" role="status">
-          {state.message}
-        </p>
-      )}
       <button
         type="submit"
         className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] touch-manipulation"
