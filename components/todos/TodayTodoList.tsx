@@ -177,7 +177,7 @@ function SortableTodoItem({
 }
 
 export function TodayTodoList({ userId }: TodayTodoListProps) {
-  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, updateTodoPriority, reorderTodos, todos, loading } =
+  const { getByDate, toggleTodo, deleteTodo, updateTodoTitle, updateTodoPriority, reorderTodos, todos, loading, mounted } =
     useTodos(userId);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -247,10 +247,26 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
     [editingTodo, editTitle, updateTodoTitle]
   );
 
+  // Always show placeholder until client mount so server and client first paint match
+  // (server may have prefetched todos and render date/list; client has mounted=false first).
+  if (!mounted) {
+    return (
+      <div className="min-w-0 animate-page-load">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">Today</h1>
+        <p className="mb-4 text-sm text-gray-500">—</p>
+        <div className="py-8 text-center text-gray-500">Loading…</div>
+      </div>
+    );
+  }
+
   if (loading && todos.length === 0) {
     return (
-      <div className="animate-page-load py-8 text-center text-gray-500">
-        Loading…
+      <div className="min-w-0 animate-page-load">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">Today</h1>
+        <p className="mb-4 text-sm text-gray-500">
+          {dayNameFromDate(new Date())}, {formatDateDDMMMFromDate(new Date())}
+        </p>
+        <div className="py-8 text-center text-gray-500">Loading…</div>
       </div>
     );
   }
