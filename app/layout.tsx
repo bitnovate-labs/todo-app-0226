@@ -9,6 +9,7 @@ import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
 import { PostHogProvider } from "./providers";
 import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { APP_NAME } from "@/lib/constants";
+import { THEME } from "@/lib/theme";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
 import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: THEME.primary,
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,

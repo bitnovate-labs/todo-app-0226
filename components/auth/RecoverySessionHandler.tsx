@@ -3,12 +3,16 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Alert } from '@/components/ui/Alert';
 
 interface RecoverySessionHandlerProps {
   children: React.ReactNode;
+  /** When true, server already verified session (httpOnly cookies); skip client getSession() so we don't show "No valid reset link". */
+  hasSessionFromServer?: boolean;
 }
 
-export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps) {
+export function RecoverySessionHandler({ children, hasSessionFromServer }: RecoverySessionHandlerProps) {
   const [isExchanging, setIsExchanging] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -71,25 +75,11 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
           return;
         }
 
-        // Method 3: PKCE flow — Supabase may redirect with ?code=... (no type in URL)
+        // Method 3: ?code= (PKCE) is handled on the server (update-password page or /auth/callback); not in browser (avoids storage full).
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) {
-            const isQuota = /quota|QuotaBytes|storage|exceeded/i.test(exchangeError.message ?? '');
-            setError(
-              isQuota
-                ? 'Browser storage is full. Clear this site’s data (or use a private window) and try again.'
-                : 'Invalid or expired reset link. Please request a new password reset.'
-            );
-            setIsExchanging(false);
-            return;
-          }
-          window.history.replaceState(null, '', window.location.pathname);
-          await new Promise(resolve => setTimeout(resolve, 100));
-          router.refresh();
-          setIsExchanging(false);
+          window.location.href = `/update-password?code=${encodeURIComponent(code)}`;
           return;
         }
 
@@ -119,12 +109,15 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
           return;
         }
 
-        // No recovery tokens found - check if user already has a session
+        // No recovery tokens found. If server already confirmed session (httpOnly cookies), don't call getSession() (client can't read httpOnly).
+        if (hasSessionFromServer) {
+          setIsExchanging(false);
+          return;
+        }
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           setError('No valid reset link found. Please request a new password reset.');
         }
-
         setIsExchanging(false);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -174,27 +167,18 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
 
     return (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
-        <div className="max-w-sm w-full">
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            {isQuotaError && (
-              <button
-                type="button"
-                onClick={clearStorageAndRetry}
-                className="w-full py-3 px-4 bg-amber-600 text-white font-medium rounded-md hover:bg-amber-700"
-              >
-                Clear storage and retry
-              </button>
-            )}
-            <a
-              href="/reset-password"
-              className="block w-full text-center py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
-            >
-              Request New Reset Link
-            </a>
-          </div>
+        <div className="max-w-sm w-full space-y-3">
+          <Alert variant="error">
+            <p className="text-sm">{error}</p>
+          </Alert>
+          {isQuotaError && (
+            <Button type="button" onClick={clearStorageAndRetry} variant="warning" fullWidth>
+              Clear storage and retry
+            </Button>
+          )}
+          <Button as="a" href="/reset-password" variant="primary" fullWidth>
+            Request New Reset Link
+          </Button>
         </div>
       </div>
     );

@@ -160,7 +160,8 @@ export async function resetPassword(
   const { email: validatedEmail } = validation.data;
 
   const supabase = await createClient();
-  const redirectTo = `${SITE_URL}/update-password`;
+  // Route via server callback so code is exchanged server-side (cookies only, no localStorage)
+  const redirectTo = `${SITE_URL}/auth/callback?next=${encodeURIComponent('/update-password')}`;
   const { error } = await supabase.auth.resetPasswordForEmail(validatedEmail, {
     redirectTo,
   });

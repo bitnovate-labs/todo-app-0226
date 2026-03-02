@@ -1,5 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/lib/constants';
 
 /**
  * Returns a safe redirect path: only allow relative paths (same-origin).
@@ -9,7 +11,6 @@ function getSafeNext(next: string | null, origin: string): string {
   if (!next || next === '/') return '/';
   try {
     const resolved = new URL(next, origin);
-    // Only allow same-origin (reject e.g. ?next=https://evil.com)
     if (resolved.origin !== origin) return '/';
     if (!resolved.pathname.startsWith('/')) return '/';
     return resolved.pathname + resolved.search;
@@ -19,24 +20,53 @@ function getSafeNext(next: string | null, origin: string): string {
 }
 
 /**
- * GET /auth/callback — Handles email confirmation and other auth callbacks
- * Supabase redirects here after email confirmation with tokens in the URL
+ * GET /auth/callback — Handles email confirmation and password reset (PKCE).
+ * Supabase redirects here with ?code=...; we exchange on the server and redirect
+ * with session cookies. Must use NextResponse.redirect() so Set-Cookie is sent
+ * (redirect() from next/navigation does not include cookies set in Route Handlers).
  */
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const nextParam = requestUrl.searchParams.get('next');
-  const safeNext = getSafeNext(nextParam, requestUrl.origin);
 
-  if (code) {
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error) {
-      redirect(safeNext);
-    }
+  if (!code) {
+    return NextResponse.redirect(new URL('/', requestUrl.origin));
   }
 
-  redirect('/');
+  const safeNext = getSafeNext(requestUrl.searchParams.get('next'), requestUrl.origin);
+  const cookieStore = await cookies();
+  const cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[] = [];
+
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(toSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+        toSet.forEach((c) => cookiesToSet.push(c));
+      },
+    },
+  });
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(new URL('/', requestUrl.origin));
+  }
+
+  const redirectUrl = new URL(safeNext, requestUrl.origin);
+  const response = NextResponse.redirect(redirectUrl);
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  for (const { name, value, options } of cookiesToSet) {
+    response.cookies.set(name, value, {
+      ...options,
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      path: '/',
+    });
+  }
+
+  return response;
 }

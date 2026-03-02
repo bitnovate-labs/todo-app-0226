@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { APP_NAME } from '@/lib/constants';
+import { THEME } from '@/lib/theme';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -10,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     background_color: '#f9fafb',
-    theme_color: '#2563eb',
+    theme_color: THEME.primary,
     orientation: 'portrait',
     icons: [
       {

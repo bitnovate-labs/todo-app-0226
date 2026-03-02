@@ -43,7 +43,7 @@ Components are grouped by **domain**. Each domain can have its own UI subcompone
 | **layout/**| Navbar, bottom nav, shell, headers | Global or section layout and navigation |
 | **welcome/** | Onboarding, landing, first-run experience | Unauthenticated landing / slides |
 | **pwa/**   | Install prompt, service worker registration | PWA-only behavior |
-| **ui/**    | Buttons, inputs, scroll behavior, shared primitives | Used by **two or more** domains |
+| **ui/**    | Buttons, inputs, alerts, scroll behavior, shared primitives | Used by **two or more** domains. See **[docs/DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** for theme colors and reusable components. |
 
 ### Adding new features
 

@@ -1,6 +1,6 @@
 # Todo PWA – Codebase Documentation
 
-This document describes the full codebase: structure, libraries, components, and key files. For setup and auth flows see [README.md](../README.md). For project conventions see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
+This document describes the full codebase: structure, libraries, components, and key files. For a **comprehensive walkthrough** (every file, code-level explanations, flows, and teaching notes for using the repo as a boilerplate or teaching material), see **[COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md)**. For setup and auth flows see [README.md](../README.md). For project conventions see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
 
 ---
 
@@ -94,13 +94,13 @@ Todo PWA/
 | **/sign-in** | app/(auth)/sign-in/page.tsx | Sign-in form (AuthForm). |
 | **/sign-up** | app/(auth)/sign-up/page.tsx | Sign-up form (AuthForm). |
 | **/reset-password** | app/(auth)/reset-password/page.tsx | Request password reset (PasswordResetForm). |
-| **/update-password** | app/(auth)/update-password/page.tsx | Set new password after reset link (UpdatePasswordForm). |
+| **/update-password** | app/(auth)/update-password/page.tsx | Set new password after reset link. If URL has `?code=`, exchanges on the server (cookies only); then checks session (getUserOrNull) and renders UpdatePasswordForm or “request new link” error. |
 
 ### Auth callback
 
 | Route | File | Purpose |
 |-------|------|---------|
-| **/auth/callback** | app/auth/callback/route.ts | OAuth/session callback; exchanges code for session and redirects. |
+| **/auth/callback** | app/auth/callback/route.ts | PKCE callback for email confirmation and password reset; exchanges `?code=` for session on the server, sets httpOnly cookies on `NextResponse.redirect()` (so cookies are sent), then redirects to `?next=` path (e.g. `/update-password`). |
 
 ### Dashboard & feature routes
 
@@ -148,7 +148,7 @@ All under **app/actions/**.
 | **EmailConfirmationHandler** | Handles “confirm your email” state and resend. |
 | **PasswordInput** | Reusable password input with show/hide toggle. |
 | **PasswordResetForm** | “Send reset link” form; calls resetPassword action. |
-| **RecoverySessionHandler** | Handles recovery session (e.g. after password reset link). |
+| **RecoverySessionHandler** | Handles recovery session: hash/query token flows (setSession, verifyOtp); defers `?code=` to server (full-page load to `/update-password?code=...`). Accepts `hasSessionFromServer` when session was already verified server-side (httpOnly cookies). |
 | **SignOutForm** | Sign-out button; calls signOut action. |
 | **UpdatePasswordForm** | Form on /update-password to set new password. |
 

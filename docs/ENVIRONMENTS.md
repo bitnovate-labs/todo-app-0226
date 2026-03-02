@@ -132,10 +132,11 @@ In **both** Supabase projects:
 2. Set **Site URL**:
    - **Production project:** your production domain (e.g. `https://yourapp.vercel.app`)
    - **Sandbox project:** your preview/sandbox domain (e.g. `https://yourapp-xxx-develop.vercel.app`)
-3. Under **Redirect URLs**, add:
-   - Production project: `https://yourapp.vercel.app/**`, `https://yourapp.vercel.app/update-password`
-   - Sandbox project: `https://yourapp-xxx-develop.vercel.app/**`, `https://yourapp-xxx-develop.vercel.app/update-password`
-   - Also add `http://localhost:3000/**` for local development in both
+3. Under **Redirect URLs**, add one entry per origin (Supabase supports `**` to match any path and query):
+   - Production: `https://yourapp.vercel.app/**`
+   - Sandbox/preview: `https://yourapp-xxx-develop.vercel.app/**` (or `https://*-.vercel.app/**` for all Vercel previews)
+   - Local: `http://localhost:3000/**`
+   You do not need separate entries for `/auth/callback` or `/update-password` when using `**`.
 
 ---
 

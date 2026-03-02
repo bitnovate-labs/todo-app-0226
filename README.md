@@ -37,12 +37,12 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 
 1. **Authentication** → **URL Configuration**.
 2. Set **Site URL** to your production URL (e.g. `https://yourdomain.com`) or for local dev use `http://localhost:3000`.
-3. Under **Redirect URLs**, add:
-   - `http://localhost:3000/**`
-   - `http://localhost:3000/update-password`
-   - Your production URLs, e.g. `https://yourdomain.com/**` and `https://yourdomain.com/update-password`.
+3. Under **Redirect URLs**, add one entry per origin (the `**` wildcard covers all paths and query params):
+   - Local: `http://localhost:3000/**`
+   - Production: `https://yourdomain.com/**`  
+   (For Vercel previews you can add `https://*-.vercel.app/**`; see [Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).)
 
-This allows sign-in redirects and password reset to land on your app.
+This allows sign-in, email confirmation, and password reset to land on your app.
 
 ### 4. Run the database schema
 
@@ -73,7 +73,7 @@ Session is stored in **cookies** for `localhost:3000`. When you reuse this repo 
 
 ## Project structure
 
-Components are grouped by **domain** for maintainability as the app grows. See **[docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)** for conventions and where to add new features.
+Components are grouped by **domain** for maintainability as the app grows. See **[docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)** for conventions and where to add new features. For a **full walkthrough** of every file and component (boilerplate or teaching), see **[docs/COMPREHENSIVE_GUIDE.md](docs/COMPREHENSIVE_GUIDE.md)**.
 
 ```
 /app
@@ -114,8 +114,8 @@ proxy.ts            # Session refresh + protect /profile
 | **Sign up**         | Form → Server Action → `supabase.auth.signUp`. If email confirmation is on, “check your email” is shown; trigger creates `profiles` row on insert into `auth.users`. |
 | **Sign in**         | Form → Server Action → `supabase.auth.signInWithPassword` → redirect to `/` (home). Session stored in cookies.                                                       |
 | **Sign out**        | Server Action → `supabase.auth.signOut` → redirect to `/`.                                                                                                           |
-| **Reset password**  | Form → Server Action → `supabase.auth.resetPasswordForEmail` with `redirectTo: /update-password`. User clicks link in email → `/update-password`.                    |
-| **Update password** | Form (on `/update-password`) → Server Action → `supabase.auth.updateUser({ password })` (recovery session from email link).                                          |
+| **Reset password**  | Form → Server Action → `supabase.auth.resetPasswordForEmail` with `redirectTo: /auth/callback?next=/update-password`. User clicks link in email → `/auth/callback?code=...` → server exchanges code (cookies only), redirects to `/update-password`. |
+| **Update password** | Form (on `/update-password`) → Server Action → `supabase.auth.updateUser({ password })` (recovery session in httpOnly cookies from callback).                                                                                              |
 | **Protected route** | `/profile` uses `requireUser()`; no session → redirect to `/sign-in`. The home route `/` is the same URL for both guests (welcome) and signed-in users (home).       |
 | **Current user (client)** | `getMe()` Server Action returns user + profile; used e.g. by analytics after sign-in/sign-up. Add API routes under `app/api/` when needed (webhooks, external clients). |
 
@@ -132,7 +132,7 @@ How this app meets the stated security goals:
 | **Privileged operations server-side**        | Sign-in, sign-up, sign-out, reset, update-password are **Server Actions** or server-side only. Credentials never handled in client JS.                                                        |
 | **Server-side auth for data**                | `getMe()` and other Server Actions use `createClient()` and `supabase.auth.getUser()`. No client JWTs; session from cookies, validated with Supabase. Future API routes under `app/api/` should do the same. |
 | **401/403 enforcement**                      | Unauthenticated requests → 401. RLS and server checks enforce authorization; mismatched access → 403.                                                                                         |
-| **Password reset SSR-compatible and secure** | Reset link uses `redirectTo: /update-password`. User sets new password via Server Action; recovery session is in cookies.                                                                     |
+| **Password reset SSR-compatible and secure** | Reset link uses `redirectTo: /auth/callback?next=/update-password`. Callback exchanges code on the server and sets session in httpOnly cookies, then redirects to `/update-password`; no client storage. User sets new password via Server Action. |
 | **Auth event logging**                       | `logAuthEvent()` in `lib/auth.ts` logs sign-in, sign-out, sign-up, reset, errors. Extend to persist to a table if needed.                                                                     |
 | **HTTPS in production**                      | Assume HTTPS for production. Set `NEXT_PUBLIC_SITE_URL` to your `https://` URL so redirects and cookies are correct.                                                                          |
 
