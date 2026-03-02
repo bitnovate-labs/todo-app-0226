@@ -1,13 +1,10 @@
 // Minimal service worker: cache app shell for offline and start URL for instant splash.
 const CACHE_NAME = 'todo-pwa-v2';
 const SHELL_URLS = ['/sign-in', '/sign-up', '/profile', '/manifest.webmanifest'];
-const START_URL = '/';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(SHELL_URLS).then(() => cache.add(START_URL)).catch(() => {})
-    )
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_URLS).catch(() => {}))
   );
   self.skipWaiting();
 });
@@ -30,25 +27,20 @@ self.addEventListener('fetch', (event) => {
   const isStartUrl = url.pathname === '/' || url.pathname === '';
 
   if (isStartUrl) {
-    // Start URL: cache-first so the first paint is instant (no black screen).
-    // Revalidate in background so the next launch gets fresh content.
+    // Start URL: network-first so we always get correct auth state (logged-in vs welcome).
+    // Cache-first would serve stale "/" (e.g. welcome page cached at install) after login.
+    // Fallback to cache only when offline.
     event.respondWith(
-      caches.match(request).then((cached) => {
-        const revalidate = () =>
-          fetch(request)
-            .then((res) => {
-              if (res.ok) {
-                caches.open(CACHE_NAME).then((c) => c.put(request, res.clone()));
-              }
-              return res;
-            })
-            .catch(() => null);
-        if (cached) {
-          revalidate();
-          return cached;
-        }
-        return revalidate().then((r) => r || caches.match('/sign-in'));
-      })
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            caches.open(CACHE_NAME).then((c) => c.put(request, res.clone()));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(request).then((r) => r || caches.match('/sign-in'))
+        )
     );
     return;
   }

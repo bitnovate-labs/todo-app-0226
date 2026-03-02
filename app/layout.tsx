@@ -29,6 +29,8 @@ export const metadata: Metadata = {
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
   },
+  // Preload with correct as="image" so the icon is used within the load window (splash + PWA)
+  links: [{ rel: "preload", href: "/icon-192.png", as: "image" }],
 };
 
 export const viewport: Viewport = {

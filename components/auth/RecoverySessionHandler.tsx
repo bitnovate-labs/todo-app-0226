@@ -71,8 +71,29 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
           return;
         }
 
-        // Check query parameters as well (some email templates use query params)
+        // Method 3: PKCE flow — Supabase may redirect with ?code=... (no type in URL)
         const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get('code');
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            const isQuota = /quota|QuotaBytes|storage|exceeded/i.test(exchangeError.message ?? '');
+            setError(
+              isQuota
+                ? 'Browser storage is full. Clear this site’s data (or use a private window) and try again.'
+                : 'Invalid or expired reset link. Please request a new password reset.'
+            );
+            setIsExchanging(false);
+            return;
+          }
+          window.history.replaceState(null, '', window.location.pathname);
+          await new Promise(resolve => setTimeout(resolve, 100));
+          router.refresh();
+          setIsExchanging(false);
+          return;
+        }
+
+        // Method 4: Query token_hash (some email templates use query params)
         const queryTokenHash = searchParams.get('token_hash');
         const queryType = searchParams.get('type');
 
@@ -106,7 +127,13 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
 
         setIsExchanging(false);
       } catch (err) {
-        setError('An error occurred while processing the reset link.');
+        const message = err instanceof Error ? err.message : String(err);
+        const isQuota = /quota|QuotaBytes|storage|exceeded/i.test(message);
+        setError(
+          isQuota
+            ? 'Browser storage is full. Clear this site’s data (or use a private window) and try again.'
+            : 'An error occurred while processing the reset link.'
+        );
         setIsExchanging(false);
       }
     }
@@ -126,18 +153,48 @@ export function RecoverySessionHandler({ children }: RecoverySessionHandlerProps
   }
 
   if (error) {
+    const isQuotaError = /storage is full|Clear this site's data/i.test(error);
+
+    const clearStorageAndRetry = () => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if (typeof indexedDB !== 'undefined' && indexedDB.databases) {
+          indexedDB.databases().then((dbs) => {
+            dbs.forEach((db) => db.name && indexedDB.deleteDatabase(db.name));
+            window.location.reload();
+          }).catch(() => window.location.reload());
+        } else {
+          window.location.reload();
+        }
+      } catch {
+        window.location.reload();
+      }
+    };
+
     return (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
         <div className="max-w-sm w-full">
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-800">{error}</p>
           </div>
-          <a
-            href="/reset-password"
-            className="block w-full text-center py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
-          >
-            Request New Reset Link
-          </a>
+          <div className="flex flex-col gap-3">
+            {isQuotaError && (
+              <button
+                type="button"
+                onClick={clearStorageAndRetry}
+                className="w-full py-3 px-4 bg-amber-600 text-white font-medium rounded-md hover:bg-amber-700"
+              >
+                Clear storage and retry
+              </button>
+            )}
+            <a
+              href="/reset-password"
+              className="block w-full text-center py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
+            >
+              Request New Reset Link
+            </a>
+          </div>
         </div>
       </div>
     );
