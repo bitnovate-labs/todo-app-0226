@@ -6,7 +6,7 @@ import Link from "next/link";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
-import { todayKey, dateKey } from "@/lib/todos";
+import { todayKey, dateKey, dayNameFromDate, formatDateDDMMMFromDate } from "@/lib/todos";
 
 type CreateTodoFormProps = { userId: string | undefined | null };
 
@@ -16,6 +16,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [priority, setPriority] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -101,7 +102,10 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
                 type="radio"
                 name="when"
                 checked={useToday}
-                onChange={() => setUseToday(true)}
+                onChange={() => {
+                  setUseToday(true);
+                  setDatePickerOpen(false);
+                }}
                 className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-gray-900">Today (default)</span>
@@ -111,23 +115,51 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
                 type="radio"
                 name="when"
                 checked={!useToday}
-                onChange={() => setUseToday(false)}
+                onChange={() => {
+                  setUseToday(false);
+                  setDatePickerOpen(true);
+                }}
                 className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-gray-900">Select a date</span>
             </label>
             {!useToday && (
-              <div className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-300 bg-white p-4 [&_.rdp-root]:mx-0">
-                <DayPicker
-                  mode="single"
-                  weekStartsOn={0}
-                  selected={selectedDateObj}
-                  onSelect={(d) => d && setSelectedDate(dateKey(d))}
-                  startMonth={today}
-                  endMonth={endMonth}
-                  disabled={{ before: today }}
-                  defaultMonth={selectedDateObj ?? today}
-                />
+              <div className="space-y-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setDatePickerOpen((v) => !v)}
+                  className="flex w-full items-center justify-between rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3 text-left transition-colors hover:bg-blue-100/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-expanded={datePickerOpen}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-blue-900">
+                      {dayNameFromDate(selectedDateObj ?? today)},{" "}
+                      {formatDateDDMMMFromDate(selectedDateObj ?? today)}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-sm font-medium text-blue-700">
+                    {datePickerOpen ? "Close" : "Change"}
+                  </span>
+                </button>
+
+                {datePickerOpen && (
+                  <div className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-300 bg-white p-4 [&_.rdp-root]:mx-0">
+                    <DayPicker
+                      mode="single"
+                      weekStartsOn={0}
+                      selected={selectedDateObj}
+                      onSelect={(d) => {
+                        if (!d) return;
+                        setSelectedDate(dateKey(d));
+                        setDatePickerOpen(false);
+                      }}
+                      startMonth={today}
+                      endMonth={endMonth}
+                      disabled={{ before: today }}
+                      defaultMonth={selectedDateObj ?? today}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
