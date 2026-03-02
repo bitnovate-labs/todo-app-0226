@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 
 type Variant = "primary" | "secondary" | "danger" | "warning";
 
@@ -50,7 +50,7 @@ export function Button({
   if (As === "a" && href != null) {
     const { type: _t, ...anchorRest } = rest as ButtonHTMLAttributes<HTMLButtonElement> & Record<string, unknown>;
     return (
-      <a href={href} className={combined} {...anchorRest}>
+      <a href={href} className={combined} {...(anchorRest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
         {children}
       </a>
     );
