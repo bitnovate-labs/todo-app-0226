@@ -406,8 +406,8 @@ export function WeekView({ userId }: WeekViewProps) {
   const isCurrentWeek = weekOffset === 0;
 
   return (
-    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "-mx-4 -my-6 min-h-screen bg-primary px-4 py-6" : ""}`}>
-      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-primary" : "bg-white"}`}>
+    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "-mx-4 -my-6 min-h-screen bg-primary px-4 py-6" : "-mx-4 -my-6 min-h-screen bg-gray-100 px-4 py-6"}`}>
+      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-primary" : "bg-gray-100"}`}>
         <div className="flex flex-nowrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-center">
@@ -419,7 +419,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o - 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
                 aria-label="Previous week"
               >
                 ← Previous week
@@ -427,7 +427,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o + 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
                 aria-label="Next week"
               >
                 Next week →
