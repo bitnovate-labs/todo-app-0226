@@ -38,9 +38,9 @@ const MONTH_SHORT = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-/** Format a Date for display as DD MMM. Deterministic (no locale) so server and client match. */
+/** Format a Date for display as D MMM (no leading zero on day). Deterministic (no locale) so server and client match. */
 export function formatDateDDMMMFromDate(d: Date): string {
-  const day = String(d.getDate()).padStart(2, "0");
+  const day = d.getDate();
   const month = MONTH_SHORT[d.getMonth()];
   return `${day} ${month}`;
 }
@@ -89,6 +89,34 @@ function weekDatesFrom(start: Date): { dateKey: string; label: string; dayName: 
 /** Get the 7 days of the current calendar week (Sun–Sat or Mon–Sun). */
 export function weekDatesForWeek(weekStartsOn: WeekStartsOn): { dateKey: string; label: string; dayName: string }[] {
   return weekDatesFrom(getCurrentWeekStart(weekStartsOn));
+}
+
+/** Week start for a week that is `offset` weeks from current (0 = this week, -1 = last, +1 = next). */
+export function getWeekStartWithOffset(weekStartsOn: WeekStartsOn, offset: number): Date {
+  const start = getCurrentWeekStart(weekStartsOn);
+  const d = new Date(start);
+  d.setDate(d.getDate() + offset * 7);
+  return d;
+}
+
+/** Get the 7 days for a week that is `offset` weeks from current. */
+export function weekDatesForWeekWithOffset(
+  weekStartsOn: WeekStartsOn,
+  offset: number
+): { dateKey: string; label: string; dayName: string }[] {
+  return weekDatesFrom(getWeekStartWithOffset(weekStartsOn, offset));
+}
+
+/** Format week range for display e.g. "2 Mar – 8 Mar 2025" or "30 Dec 2024 – 5 Jan 2025". */
+export function formatWeekRangeLabel(weekStartsOn: WeekStartsOn, offset: number): string {
+  const start = getWeekStartWithOffset(weekStartsOn, offset);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const startStr = formatDateDDMMMFromDate(start);
+  const endStr = formatDateDDMMMFromDate(end);
+  if (sameYear) return `${startStr} – ${endStr} ${start.getFullYear()}`;
+  return `${startStr} ${start.getFullYear()} – ${endStr} ${end.getFullYear()}`;
 }
 
 /** All date keys for the current calendar week (respects week start setting). */

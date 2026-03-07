@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTodos } from "@/hooks/useTodos";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
-import { weekDatesForWeek, todayKey, addDaysToDateKey } from "@/lib/todos";
+import { useWeekViewLayout } from "@/hooks/useWeekViewLayout";
+import { weekDatesForWeekWithOffset, todayKey, addDaysToDateKey, formatWeekRangeLabel } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 
 type WeekViewProps = { userId: string | undefined | null };
@@ -20,8 +21,9 @@ export function WeekView({ userId }: WeekViewProps) {
     loading,
   } = useTodos(userId);
   const [weekStartsOn] = useWeekStartsOn();
-  const days = weekDatesForWeek(weekStartsOn);
-  const [layout, setLayout] = useState<"vertical" | "horizontal">("vertical");
+  const [layout] = useWeekViewLayout();
+  const [weekOffset, setWeekOffset] = useState(0);
+  const days = weekDatesForWeekWithOffset(weekStartsOn, weekOffset);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLElement | null>(null);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
@@ -95,6 +97,7 @@ export function WeekView({ userId }: WeekViewProps) {
   const today = todayKey();
   const dayBlocks = days.map(({ dateKey, label, dayName }, index) => {
     const isToday = dateKey === today;
+    const isPast = dateKey < today;
     const dayTodos = getByDate(dateKey)
       .slice()
       .sort((a, b) => {
@@ -107,10 +110,12 @@ export function WeekView({ userId }: WeekViewProps) {
       <section
         key={dateKey}
         ref={isToday ? todayRef : undefined}
-        className={`min-h-0 shrink-0 rounded-2xl border p-4 shadow-sm ${
+        className={`min-h-0 shrink-0 rounded-2xl p-4 ${
           isToday
-            ? "border-blue-500/60 bg-blue-50"
-            : "border-gray-300 bg-white/80"
+            ? "border-2 border-primary bg-white shadow-md ring-2 ring-primary/20"
+            : isPast
+              ? "border border-gray-200 bg-gray-50/70 shadow-none"
+              : "border border-gray-300 bg-white/80 shadow-sm"
         } ${
           layout === "horizontal"
             ? "min-w-[370px] w-[340px] snap-start"
@@ -119,7 +124,7 @@ export function WeekView({ userId }: WeekViewProps) {
       >
         <h2
           className={`mb-4 text-base font-bold tracking-tight ${
-            isToday ? "text-blue-600" : "text-gray-700"
+            isToday ? "text-primary" : isPast ? "text-gray-400" : "text-gray-700"
           }`}
         >
           {isToday ? "Today" : `${dayName} · ${label}`}
@@ -129,8 +134,10 @@ export function WeekView({ userId }: WeekViewProps) {
             <li
               className={`rounded-xl border border-dashed py-4 text-center text-sm ${
                 isToday
-                  ? "border-blue-300 bg-blue-50/50 text-gray-600"
-                  : "border-gray-200 bg-gray-50/80 text-gray-500"
+                  ? "border-primary/40 bg-primary/5 text-gray-600"
+                  : isPast
+                    ? "border-gray-200 bg-gray-100/60 text-gray-400"
+                    : "border-gray-200 bg-gray-50/80 text-gray-500"
               }`}
             >
               No todos
@@ -148,14 +155,16 @@ export function WeekView({ userId }: WeekViewProps) {
                       return;
                     toggleTodo(todo.id);
                   }}
-                  className={`flex cursor-pointer items-center gap-2 rounded-xl px-3 py-3 shadow-sm transition-shadow ${
+                  className={`flex cursor-pointer items-center gap-2 rounded-xl px-3 py-3 transition-shadow ${
                     todo.completed
                       ? "border border-green-400/70 bg-green-50/70"
-                      :                       todo.priority
+                      : todo.priority
                         ? "border border-amber-400/90 bg-amber-100/80"
                         : isToday
-                          ? "border border-blue-400/80 bg-white"
-                          : "border border-gray-200/80 bg-white"
+                          ? "border border-primary/50 bg-primary/5 shadow-sm"
+                          : isPast
+                            ? "border border-gray-200 bg-gray-100/80"
+                            : "border border-gray-200/80 bg-white shadow-sm"
                   }`}
                 >
                   <span
@@ -394,121 +403,36 @@ export function WeekView({ userId }: WeekViewProps) {
     );
   });
 
+  const isCurrentWeek = weekOffset === 0;
+
   return (
-    <div className="min-w-0 animate-page-load">
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-white pb-2 -mt-8 pt-6">
+    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "-mx-4 -my-6 min-h-screen bg-primary px-4 py-6" : ""}`}>
+      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-primary" : "bg-white"}`}>
         <div className="flex flex-nowrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="mb-2 text-xl font-semibold tracking-tight text-gray-900">
-              This week
-            </h1>
-            <p className="mb-2 text-sm text-gray-500">
-              {layout === "vertical"
-                ? "Scroll down to see all 7 days"
-                : "Scroll sideways to see all 7 days"}
-            </p>
-          </div>
-          <div
-            className="flex w-28 shrink-0 rounded-lg border border-gray-200 bg-gray-100/80 p-1"
-            role="tablist"
-            aria-label="Week layout"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={layout === "vertical"}
-              aria-label="Vertical layout — scroll down through days"
-              onClick={() => setLayout("vertical")}
-              className={`flex flex-1 min-w-0 items-center justify-center gap-0.5 rounded-md py-2 px-1.5 transition-colors ${
-                layout === "vertical"
-                  ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <svg
-                className="h-4 w-4 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
+            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-center">
+              <h1 className={`text-lg font-semibold tracking-tight ${isCurrentWeek ? "text-white" : "text-gray-900"}`}>
+                {weekOffset === 0 ? "This week" : formatWeekRangeLabel(weekStartsOn, weekOffset)}
+              </h1>
+            </div>
+            <div className="mt-2 flex w-full gap-2" role="group" aria-label="Change week">
+              <button
+                type="button"
+                onClick={() => setWeekOffset((o) => o - 1)}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900"}`}
+                aria-label="Previous week"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <svg
-                className="h-3 w-3 shrink-0 -mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
+                ← Previous week
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset((o) => o + 1)}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900"}`}
+                aria-label="Next week"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={layout === "horizontal"}
-              aria-label="Horizontal layout — scroll sideways through days"
-              onClick={() => setLayout("horizontal")}
-              className={`flex flex-1 min-w-0 items-center justify-center gap-0.5 rounded-md py-2 px-1.5 transition-colors ${
-                layout === "horizontal"
-                  ? "bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/80"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <svg
-                className="h-3 w-3 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              <svg
-                className="h-4 w-4 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 4v16M12 4v16M18 4v16"
-                />
-              </svg>
-              <svg
-                className="h-3 w-3 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                Next week →
+              </button>
+            </div>
           </div>
         </div>
       </div>

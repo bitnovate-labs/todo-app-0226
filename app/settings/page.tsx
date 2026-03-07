@@ -6,6 +6,7 @@ import { FeedbackDrawer } from "@/components/feedback/FeedbackDrawer";
 import { SignOutForm } from "@/components/auth/SignOutForm";
 import { LockRotationSetting } from "@/components/settings/LockRotationSetting";
 import { WeekStartSetting } from "@/components/settings/WeekStartSetting";
+import { WeekViewLayoutSetting } from "@/components/settings/WeekViewLayoutSetting";
 import { useUser } from "@/components/layout/UserContext";
 
 export default function SettingsPage() {
@@ -38,6 +39,10 @@ export default function SettingsPage() {
 
       <div className="mb-6 text-left">
         <WeekStartSetting />
+      </div>
+
+      <div className="mb-6 text-left">
+        <WeekViewLayoutSetting />
       </div>
 
       <div className="mb-6 text-left">
