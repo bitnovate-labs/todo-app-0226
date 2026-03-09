@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTodos } from "@/hooks/useTodos";
+import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 import type { Todo } from "@/lib/todos";
 import {
@@ -121,10 +122,12 @@ function TodoHistoryItem({
   todo,
   onReAdd,
   onUndoComplete,
+  listFontSizeClass,
 }: {
   todo: Todo;
   onReAdd: (todo: Todo) => void;
   onUndoComplete: (todoId: string) => void;
+  listFontSizeClass: string;
 }) {
   const isIncomplete = !todo.completed;
   return (
@@ -140,7 +143,7 @@ function TodoHistoryItem({
       role="button"
     >
       <span
-        className={`min-w-0 flex-1 text-sm ${
+        className={`min-w-0 flex-1 ${listFontSizeClass} ${
           todo.completed ? "text-green-700 line-through" : "text-gray-900"
         }`}
       >
@@ -156,6 +159,8 @@ function TodoHistoryItem({
 }
 
 export function HistoryView({ userId }: HistoryViewProps) {
+  const [listFontSize] = useListFontSize();
+  const listFontSizeClass = LIST_FONT_SIZE_CLASSES[listFontSize];
   const { todos, updateTodoDate, toggleTodo, loading } = useTodos(userId);
   const [tab, setTab] = useState<"week" | "month">("week");
   const [monthCursor, setMonthCursor] = useState(() => new Date());
@@ -297,6 +302,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
                     todo={todo}
                     onReAdd={setReAddTodo}
                     onUndoComplete={toggleTodo}
+                    listFontSizeClass={listFontSizeClass}
                   />
                 ))
               )}
@@ -318,6 +324,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
                     todo={todo}
                     onReAdd={setReAddTodo}
                     onUndoComplete={toggleTodo}
+                    listFontSizeClass={listFontSizeClass}
                   />
                 ))
               )}
@@ -390,6 +397,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
                     todo={todo}
                     onReAdd={setReAddTodo}
                     onUndoComplete={toggleTodo}
+                    listFontSizeClass={listFontSizeClass}
                   />
                 ))
               )}
@@ -411,6 +419,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
                     todo={todo}
                     onReAdd={setReAddTodo}
                     onUndoComplete={toggleTodo}
+                    listFontSizeClass={listFontSizeClass}
                   />
                 ))
               )}

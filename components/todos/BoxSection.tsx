@@ -4,6 +4,10 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
+import {
+  useListFontSize,
+  LIST_FONT_SIZE_CLASSES,
+} from "@/hooks/useListFontSize";
 import type { Todo } from "@/lib/todos";
 import { todayKey, dateKey } from "@/lib/todos";
 
@@ -26,6 +30,7 @@ type BoxRowProps = {
   onScheduleToday: () => void;
   onScheduleDate: (dateKey: string) => void;
   onDelete: () => void;
+  listFontSizeClass: string;
 };
 
 const today = new Date();
@@ -50,11 +55,13 @@ function BoxRow({
   onScheduleToday,
   onScheduleDate,
   onDelete,
+  listFontSizeClass,
 }: BoxRowProps) {
-
   return (
-    <li className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white py-2 pl-3 pr-1 shadow-sm">
-      <span className="min-w-0 flex-1 text-gray-900">{todo.title}</span>
+    <li className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white py-2 pl-4 pr-1 shadow-sm">
+      <span className={`min-w-0 flex-1 ${listFontSizeClass} text-gray-900`}>
+        {todo.title}
+      </span>
       <div className="relative shrink-0 flex items-center">
         {/* + Schedule button */}
         <div className="relative" ref={scheduleRef}>
@@ -72,8 +79,19 @@ function BoxRow({
             aria-expanded={scheduleOpen}
             aria-haspopup="true"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
           </button>
           {scheduleOpen && (
@@ -146,7 +164,12 @@ function BoxRow({
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <svg
+              className="h-5 w-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
               <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
             </svg>
           </button>
@@ -164,8 +187,18 @@ function BoxRow({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
               >
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <svg
+                  className="h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
                 </svg>
                 Edit
               </button>
@@ -175,8 +208,18 @@ function BoxRow({
                 onClick={onDelete}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
                 Delete
               </button>
@@ -191,6 +234,8 @@ function BoxRow({
 type BoxSectionProps = { userId: string | undefined | null };
 
 export function BoxSection({ userId }: BoxSectionProps) {
+  const [listFontSize] = useListFontSize();
+  const listFontSizeClass = LIST_FONT_SIZE_CLASSES[listFontSize];
   const {
     getBoxTodos,
     addTodo,
@@ -212,7 +257,16 @@ export function BoxSection({ userId }: BoxSectionProps) {
   const savedScrollY = useRef(0);
   const bodyScrollLocked = useRef(false);
   const touchMoveHandlerRef = useRef<((e: TouchEvent) => void) | null>(null);
-  const appContainerStylesRef = useRef<{ position: string; top: string; left: string; right: string; width: string; maxWidth: string; marginLeft: string; marginRight: string } | null>(null);
+  const appContainerStylesRef = useRef<{
+    position: string;
+    top: string;
+    left: string;
+    right: string;
+    width: string;
+    maxWidth: string;
+    marginLeft: string;
+    marginRight: string;
+  } | null>(null);
 
   const boxTodos = getBoxTodos();
 
@@ -261,7 +315,9 @@ export function BoxSection({ userId }: BoxSectionProps) {
       e.preventDefault();
     };
     touchMoveHandlerRef.current = preventTouchMove;
-    document.addEventListener("touchmove", preventTouchMove, { passive: false });
+    document.addEventListener("touchmove", preventTouchMove, {
+      passive: false,
+    });
   }, []);
 
   const unlockBodyScroll = useCallback(() => {
@@ -360,10 +416,14 @@ export function BoxSection({ userId }: BoxSectionProps) {
   };
 
   return (
-    <section className="pt-6">
+    <section className="pt-2">
       <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-white pb-2 pt-4">
-        <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-gray-900">Box</h2>
-        <p className="mb-3 text-sm text-gray-500">Jot it down. Add a date when you’re ready.</p>
+        <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-gray-900">
+          Box
+        </h2>
+        <p className="mb-3 text-sm text-gray-500">
+          Jot it down. Add a date when you’re ready.
+        </p>
         <form onSubmit={handleQuickAdd} className="flex gap-2">
           <input
             type="text"
@@ -388,7 +448,8 @@ export function BoxSection({ userId }: BoxSectionProps) {
       <ul className="mt-2 space-y-3">
         {boxTodos.length === 0 ? (
           <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-6 text-center text-sm text-gray-500">
-            Nothing in Box yet. Type above to capture tasks and schedule them later.
+            Nothing in Box yet. Type above to capture tasks and schedule them
+            later.
           </li>
         ) : (
           boxTodos.map((todo) => (
@@ -400,8 +461,12 @@ export function BoxSection({ userId }: BoxSectionProps) {
               menuOpen={menuOpenId === todo.id}
               menuOpenUp={menuOpenUp}
               scheduleOpen={scheduleOpenId === todo.id}
-              schedulePickerOpen={scheduleOpenId === todo.id && schedulePickerOpen}
-              onOpenMenu={() => setMenuOpenId((id) => (id === todo.id ? null : todo.id))}
+              schedulePickerOpen={
+                scheduleOpenId === todo.id && schedulePickerOpen
+              }
+              onOpenMenu={() =>
+                setMenuOpenId((id) => (id === todo.id ? null : todo.id))
+              }
               onCloseMenu={() => setMenuOpenId(null)}
               onOpenSchedule={() => {
                 setScheduleOpenId((id) => (id === todo.id ? null : todo.id));
@@ -423,6 +488,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
                 setMenuOpenId(null);
                 deleteTodo(todo.id);
               }}
+              listFontSizeClass={listFontSizeClass}
             />
           ))
         )}
@@ -440,11 +506,17 @@ export function BoxSection({ userId }: BoxSectionProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
-              <h2 id="edit-box-todo-title" className="text-lg font-semibold text-gray-900">
+              <h2
+                id="edit-box-todo-title"
+                className="text-lg font-semibold text-gray-900"
+              >
                 Edit todo
               </h2>
             </div>
-            <form onSubmit={handleSaveEdit} className="space-y-4 px-5 pb-8 pt-2">
+            <form
+              onSubmit={handleSaveEdit}
+              className="space-y-4 px-5 pb-8 pt-2"
+            >
               <div>
                 <label htmlFor="edit-box-todo-input" className="sr-only">
                   Title
@@ -477,7 +549,12 @@ export function BoxSection({ userId }: BoxSectionProps) {
               </div>
             </form>
           </div>
-          <button type="button" aria-label="Close" className="absolute inset-0 -z-10" onClick={closeEdit} />
+          <button
+            type="button"
+            aria-label="Close"
+            className="absolute inset-0 -z-10"
+            onClick={closeEdit}
+          />
         </div>
       )}
     </section>

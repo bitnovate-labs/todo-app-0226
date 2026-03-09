@@ -22,6 +22,7 @@ import {
 const SortableList = SortableContext as unknown as React.JSX.ElementType;
 import { CSS } from "@dnd-kit/utilities";
 import { useTodos } from "@/hooks/useTodos";
+import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import {
   todayKey,
   formatDateDDMMMFromDate,
@@ -53,6 +54,7 @@ function SortableTodoItem({
   onDateChange,
   onDelete,
   onTogglePriority,
+  listFontSizeClass,
 }: {
   todo: Todo;
   menuRef: React.RefObject<HTMLDivElement | null> | undefined;
@@ -69,6 +71,7 @@ function SortableTodoItem({
   onDateChange: (dateKey: string) => void;
   onDelete: () => void;
   onTogglePriority: (id: string, priority: boolean) => void;
+  listFontSizeClass: string;
 }) {
   const {
     attributes,
@@ -85,7 +88,7 @@ function SortableTodoItem({
   };
 
   const rowClass = [
-    "flex items-center gap-2 rounded-xl border py-2 pl-2 pr-2 shadow-sm",
+    "flex items-center gap-1.5 rounded-xl border py-2.5 pl-2 pr-1.5 shadow-sm",
     isDragging && "z-50 opacity-90 shadow-md",
     todo.completed
       ? "border-green-400 bg-green-50/80"
@@ -114,17 +117,28 @@ function SortableTodoItem({
           <path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm6-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       </button>
-      <div
-        className={`flex min-w-0 flex-1 items-center gap-3 ${todo.completed ? "cursor-default" : "cursor-pointer"}`}
-        onClick={(e) => {
-          if ((e.target as HTMLElement).closest("button, [role='menu']"))
-            return;
-          if (todo.completed) return;
-          onToggle(todo.id);
-        }}
-      >
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(todo.id);
+          }}
+          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 touch-manipulation"
+          aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
+        >
+          {todo.completed ? (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+          ) : (
+            <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
+          )}
+        </button>
         <span
-          className={`min-w-0 flex-1 ${
+          className={`min-w-0 flex-1 break-words leading-snug ${listFontSizeClass} ${
             todo.completed ? "text-green-700 line-through" : "text-gray-900"
           }`}
         >
@@ -143,7 +157,7 @@ function SortableTodoItem({
             e.stopPropagation();
             onOpenMenu();
           }}
-          className="flex min-h-[52px] min-w-[52px] shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
           aria-label="More actions"
           aria-expanded={menuOpen}
           aria-haspopup="true"
@@ -342,6 +356,8 @@ function SortableTodoItem({
 }
 
 export function TodayTodoList({ userId }: TodayTodoListProps) {
+  const [listFontSize] = useListFontSize();
+  const listFontSizeClass = LIST_FONT_SIZE_CLASSES[listFontSize];
   const {
     getByDate,
     toggleTodo,
@@ -539,6 +555,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                     setMenuOpenId(null);
                     updateTodoPriority(id, priority);
                   }}
+                  listFontSizeClass={listFontSizeClass}
                 />
               ))}
             </SortableList>

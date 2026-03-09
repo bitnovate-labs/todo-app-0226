@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTodos } from "@/hooks/useTodos";
+import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 import { useWeekViewLayout } from "@/hooks/useWeekViewLayout";
 import { weekDatesForWeekWithOffset, todayKey, addDaysToDateKey, formatWeekRangeLabel } from "@/lib/todos";
@@ -10,6 +11,8 @@ import type { Todo } from "@/lib/todos";
 type WeekViewProps = { userId: string | undefined | null };
 
 export function WeekView({ userId }: WeekViewProps) {
+  const [listFontSize] = useListFontSize();
+  const listFontSizeClass = LIST_FONT_SIZE_CLASSES[listFontSize];
   const {
     getByDate,
     toggleTodo,
@@ -146,19 +149,7 @@ export function WeekView({ userId }: WeekViewProps) {
             dayTodos.map((todo) => (
                 <li
                   key={todo.id}
-                  onClick={(e) => {
-                    if (
-                      (e.target as HTMLElement).closest(
-                        "button, [role='menu']",
-                      )
-                    )
-                      return;
-                    if (todo.completed) return;
-                    toggleTodo(todo.id);
-                  }}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-3 transition-shadow ${
-                    todo.completed ? "cursor-default" : "cursor-pointer"
-                  } ${
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 transition-shadow ${
                     todo.completed
                       ? "border border-green-400/70 bg-green-50/70"
                       : todo.priority
@@ -170,15 +161,36 @@ export function WeekView({ userId }: WeekViewProps) {
                             : "border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-300"
                   }`}
                 >
-                  <span
-                    className={`min-w-0 flex-1 text-[15px] font-medium leading-snug ${
-                      todo.completed
-                        ? "text-green-700 line-through opacity-90"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {todo.title}
-                  </span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTodo(todo.id);
+                      }}
+                      className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 touch-manipulation"
+                      aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
+                    >
+                      {todo.completed ? (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
+                      )}
+                    </button>
+                    <span
+                      className={`min-w-0 flex-1 break-words font-medium leading-snug ${listFontSizeClass} ${
+                        todo.completed
+                          ? "text-green-700 line-through opacity-90"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      {todo.title}
+                    </span>
+                  </div>
                   <div
                     className="relative shrink-0"
                     ref={
@@ -195,7 +207,7 @@ export function WeekView({ userId }: WeekViewProps) {
                           id === todo.id ? null : todo.id,
                         );
                       }}
-                      className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
                       aria-label="More actions"
                       aria-expanded={menuOpenId === todo.id}
                       aria-haspopup="true"

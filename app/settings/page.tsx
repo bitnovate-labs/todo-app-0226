@@ -8,6 +8,7 @@ import { LockRotationSetting } from "@/components/settings/LockRotationSetting";
 import { WeekStartSetting } from "@/components/settings/WeekStartSetting";
 import { WeekViewLayoutSetting } from "@/components/settings/WeekViewLayoutSetting";
 import { CalendarViewSetting } from "@/components/settings/CalendarViewSetting";
+import { ListFontSizeSetting } from "@/components/settings/ListFontSizeSetting";
 import { useUser } from "@/components/layout/UserContext";
 
 export default function SettingsPage() {
@@ -48,6 +49,10 @@ export default function SettingsPage() {
 
       <div className="mb-6 text-left">
         <CalendarViewSetting />
+      </div>
+
+      <div className="mb-6 text-left">
+        <ListFontSizeSetting />
       </div>
 
       <div className="mb-6 text-left">
