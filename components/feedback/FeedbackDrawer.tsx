@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { X } from "lucide-react";
 import { FeedbackForm } from "./FeedbackForm";
 import { trackEvent } from "@/lib/analytics/track";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
@@ -64,19 +65,7 @@ export function FeedbackDrawer() {
             className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
             aria-label="Close"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </header>
 

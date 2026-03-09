@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Home, Package, Calendar, Clock, LayoutGrid, Plus } from "lucide-react";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 import { useAddDrawer } from "@/components/layout/AddDrawerContext";
 import { AddTodoDrawer } from "@/components/todos/AddTodoDrawer";
@@ -64,100 +65,35 @@ export function BottomNavLinks({ userId }: { userId: string }) {
         active={pathname === "/"}
         onClick={() => handleDashboardTab("/")}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
+        <Home className="h-6 w-6 shrink-0" aria-hidden />
         <span>Home</span>
       </NavTab>
       <NavTab
         active={pathname === "/box"}
         onClick={() => handleDashboardTab("/box")}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 7l-8 4-8-4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
+        <Package className="h-6 w-6 shrink-0" aria-hidden />
         <span>Box</span>
       </NavTab>
       <NavTab
         active={pathname === "/week"}
         onClick={() => handleDashboardTab("/week")}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
+        <Calendar className="h-6 w-6 shrink-0" aria-hidden />
         <span>Calendar</span>
       </NavTab>
       <NavTab
         active={pathname === "/history"}
         onClick={() => handleDashboardTab("/history")}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <Clock className="h-6 w-6 shrink-0" aria-hidden />
         <span>History</span>
       </NavTab>
       <NavTab
         active={pathname === "/timeblock"}
         onClick={() => handleDashboardTab("/timeblock")}
       >
-        <svg
-          className="h-6 w-6 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-          />
-        </svg>
+        <LayoutGrid className="h-6 w-6 shrink-0" aria-hidden />
         <span>Time</span>
       </NavTab>
     </div>
@@ -168,9 +104,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)] right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       aria-label="Add todo"
     >
-      <svg className="h-7 w-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-      </svg>
+      <Plus className="h-7 w-7 shrink-0" strokeWidth={2.5} aria-hidden />
     </button>
     {addDrawer && (
       <AddTodoDrawer

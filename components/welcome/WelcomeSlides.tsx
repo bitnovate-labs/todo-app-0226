@@ -1,31 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Hand, Lock, Rocket } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics/track';
 import { ANALYTICS_EVENTS } from '@/lib/analytics/events';
 
 interface Slide {
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const slides: Slide[] = [
   {
     title: 'Welcome to Todo PWA',
     description: 'A simple todo list you can install on your phone or use in the browser. Add tasks, view by today or week, and check them off.',
-    icon: '👋',
+    icon: <Hand className="h-16 w-16 text-blue-600" />,
   },
   {
     title: 'Secure & Fast',
     description: 'Your data is synced securely. Works offline and loads quickly so you can focus on getting things done.',
-    icon: '🔒',
+    icon: <Lock className="h-16 w-16 text-blue-600" />,
   },
   {
     title: 'Get Started',
     description: 'Sign in or create an account to start adding and managing your todos.',
-    icon: '🚀',
+    icon: <Rocket className="h-16 w-16 text-blue-600" />,
   },
 ];
 
@@ -96,7 +97,7 @@ export function WelcomeSlides() {
             isTransitioning ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          <div className="text-6xl mb-6">{slide.icon}</div>
+          <div className="flex justify-center mb-6">{slide.icon}</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:text-3xl">
             {slide.title}
           </h2>

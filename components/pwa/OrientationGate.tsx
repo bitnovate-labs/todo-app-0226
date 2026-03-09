@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Smartphone } from 'lucide-react';
 import type { OrientationAPI } from '@/lib/orientation';
 
 /**
@@ -69,20 +70,7 @@ export function OrientationGate({ children }: { children: React.ReactNode }) {
           className="flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 text-blue-600"
           aria-hidden
         >
-          <svg
-            className="h-10 w-10"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 18V6m0 12l-4-4m4 4l4-4"
-            />
-          </svg>
+          <Smartphone className="h-10 w-10" aria-hidden />
         </div>
         <p className="max-w-[280px] text-center text-lg font-medium text-gray-900">
           {isIOS

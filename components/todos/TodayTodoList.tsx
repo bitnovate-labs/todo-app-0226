@@ -21,6 +21,18 @@ import {
 /** Cast for React 19 JSX compatibility with @dnd-kit return type */
 const SortableList = SortableContext as unknown as React.JSX.ElementType;
 import { CSS } from "@dnd-kit/utilities";
+import {
+  GripVertical,
+  Check,
+  MoreVertical,
+  Undo2,
+  ArrowUp,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Trash2,
+} from "lucide-react";
 import { useTodos } from "@/hooks/useTodos";
 import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import {
@@ -108,14 +120,7 @@ function SortableTodoItem({
         {...attributes}
         {...listeners}
       >
-        <svg
-          className="h-5 w-5"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm6-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
+        <GripVertical className="h-5 w-5" aria-hidden />
       </button>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <button
@@ -129,9 +134,7 @@ function SortableTodoItem({
         >
           {todo.completed ? (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+              <Check className="h-4 w-4" strokeWidth={2.5} />
             </span>
           ) : (
             <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
@@ -162,14 +165,7 @@ function SortableTodoItem({
           aria-expanded={menuOpen}
           aria-haspopup="true"
         >
-          <svg
-            className="h-5 w-5"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden
-          >
-            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-          </svg>
+          <MoreVertical className="h-5 w-5" aria-hidden />
         </button>
         {menuOpen && (
           <div
@@ -188,9 +184,7 @@ function SortableTodoItem({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
               >
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                </svg>
+                <Undo2 className="h-4 w-4 text-gray-400" />
                 Mark incomplete
               </button>
             )}
@@ -202,36 +196,12 @@ function SortableTodoItem({
             >
               {todo.priority ? (
                 <>
-                  <svg
-                    className="h-4 w-4 text-amber-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <Check className="h-4 w-4 text-amber-700" />
                   Not priority
                 </>
               ) : (
                 <>
-                  <svg
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 10l7-7m0 0l7 7m-7-7v18"
-                    />
-                  </svg>
+                  <ArrowUp className="h-4 w-4 text-gray-400" />
                   Priority
                 </>
               )}
@@ -245,19 +215,7 @@ function SortableTodoItem({
               }}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
             >
-              <svg
-                className="h-4 w-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
+              <Pencil className="h-4 w-4 text-gray-400" />
               Edit
             </button>
             {!todo.completed && (
@@ -268,14 +226,7 @@ function SortableTodoItem({
                   onClick={onMovePrev}
                   className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  <svg
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ChevronLeft className="h-4 w-4 text-gray-400" />
                   Previous
                 </button>
                 <button
@@ -284,14 +235,7 @@ function SortableTodoItem({
                   onClick={onMoveNext}
                   className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  <svg
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
                   Next
                 </button>
                 <button
@@ -300,14 +244,7 @@ function SortableTodoItem({
                   onClick={onOpenDatePick}
                   className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  <svg
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <Calendar className="h-4 w-4 text-gray-400" />
                   Date…
                 </button>
               </>
@@ -318,19 +255,7 @@ function SortableTodoItem({
               onClick={onDelete}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+              <Trash2 className="h-4 w-4" />
               Delete
             </button>
           </div>

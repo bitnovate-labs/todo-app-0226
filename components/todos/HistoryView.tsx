@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTodos } from "@/hooks/useTodos";
 import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
@@ -342,19 +343,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
               className="rounded-lg p-2 text-gray-600 hover:bg-gray-200"
               aria-label="Previous month"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <span className="font-medium text-gray-900">
               {monthLabel(monthCursor)}
@@ -366,19 +355,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
               className="rounded-lg p-2 text-gray-600 hover:bg-gray-200 disabled:opacity-40 disabled:pointer-events-none"
               aria-label="Next month"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
           <section>

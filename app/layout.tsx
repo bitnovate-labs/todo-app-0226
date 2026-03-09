@@ -57,6 +57,56 @@ export default function RootLayout({
             __html: "document.documentElement.style.backgroundColor='#f9fafb';",
           }}
         />
+        <Script
+          id="chunk-load-error-handler"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+(function() {
+  function isChunkLoadError(msg) {
+    if (typeof msg !== 'string') return false;
+    return /ChunkLoadError|Loading chunk \\d+ failed|Loading CSS chunk \\d+ failed/i.test(msg);
+  }
+  function showRetryUI() {
+    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem;text-align:center;font-family:system-ui,sans-serif;background:#f9fafb;">' +
+      '<p style="margin:0 0 1rem;font-size:1.125rem;color:#111827;">Something went wrong loading the app.</p>' +
+      '<button type="button" onclick="sessionStorage.removeItem(\'chunkLoadRetry\');location.reload();" style="padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;color:#fff;background:#2563eb;border:none;border-radius:0.375rem;cursor:pointer;">Retry</button>' +
+      '</div>';
+  }
+  window.addEventListener('error', function(e) {
+    if (isChunkLoadError(e.message)) {
+      var key = 'chunkLoadRetry';
+      var retries = parseInt(sessionStorage.getItem(key) || '0', 10);
+      if (retries < 2) {
+        sessionStorage.setItem(key, String(retries + 1));
+        location.reload();
+      } else {
+        sessionStorage.removeItem(key);
+        showRetryUI();
+      }
+      e.preventDefault();
+      return true;
+    }
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    var msg = e.reason && (e.reason.message || String(e.reason));
+    if (isChunkLoadError(msg)) {
+      var key = 'chunkLoadRetry';
+      var retries = parseInt(sessionStorage.getItem(key) || '0', 10);
+      if (retries < 2) {
+        sessionStorage.setItem(key, String(retries + 1));
+        location.reload();
+      } else {
+        sessionStorage.removeItem(key);
+        showRetryUI();
+      }
+      e.preventDefault();
+    }
+  });
+})();
+            `.trim(),
+          }}
+        />
         {/* Launch splash: visible on first paint, hidden by SplashHideTrigger after mount */}
         <div
           id="app-splash"

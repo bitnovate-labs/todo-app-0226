@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, ChevronDown } from "lucide-react";
 
 const PULL_THRESHOLD = 72;
 const RESISTANCE = 2.5;
@@ -102,22 +103,7 @@ export function PullToRefresh({ children, onRefresh, disabled }: Props) {
         >
           {refreshing ? (
             <span className="flex items-center gap-2 text-sm">
-              <svg
-                className="h-5 w-5 animate-spin text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeDasharray="42 14"
-                />
-              </svg>
+              <Loader2 className="h-5 w-5 animate-spin text-gray-500" aria-hidden />
               Updating…
             </span>
           ) : (
@@ -127,7 +113,7 @@ export function PullToRefresh({ children, onRefresh, disabled }: Props) {
                 transform: `scale(${0.6 + 0.4 * progress}) rotate(${(1 - progress) * -180}deg)`,
               }}
             >
-              ↷
+              <ChevronDown className="h-5 w-5" />
             </span>
           )}
         </div>

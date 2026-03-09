@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft, Check } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
@@ -57,19 +58,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
           className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           aria-label="Back"
         >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <ChevronLeft className="h-6 w-6" />
         </Link>
         <h1 className="text-xl font-semibold tracking-tight text-gray-900">
           New todo
@@ -190,19 +179,7 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
             aria-hidden
           >
             {priority && (
-              <svg
-                className="h-4 w-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <Check className="h-4 w-4 text-white" strokeWidth={2.5} />
             )}
           </span>
           <span className="text-sm font-medium text-gray-900">Priority?</span>

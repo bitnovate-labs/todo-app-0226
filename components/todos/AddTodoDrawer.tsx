@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
+import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import { todayKey, dateKey, dayNameFromDate, formatDateDDMMMFromDate } from "@/lib/todos";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 
@@ -25,6 +26,7 @@ type AddTodoDrawerProps = {
 export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddTodoDrawerProps) {
   const { addTodo } = useTodos(userId);
   const pathnameCtx = useDashboardPathname();
+  const { lockBodyScroll, unlockBodyScroll } = useLockBodyScrollForKeyboard();
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
@@ -58,6 +60,7 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
   };
 
   const handleClose = () => {
+    unlockBodyScroll();
     setTitle("");
     setUseToday(true);
     setSelectedDate(todayKey());
@@ -73,7 +76,8 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
       return () => cancelAnimationFrame(id);
     }
     setMounted(false);
-  }, [open]);
+    unlockBodyScroll();
+  }, [open, unlockBodyScroll]);
 
   if (!open) return null;
 
@@ -119,6 +123,8 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onFocus={lockBodyScroll}
+                onBlur={unlockBodyScroll}
                 placeholder="e.g. Buy groceries"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required

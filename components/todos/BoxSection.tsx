@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Plus, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
@@ -8,6 +9,7 @@ import {
   useListFontSize,
   LIST_FONT_SIZE_CLASSES,
 } from "@/hooks/useListFontSize";
+import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import type { Todo } from "@/lib/todos";
 import { todayKey, dateKey } from "@/lib/todos";
 
@@ -79,20 +81,7 @@ function BoxRow({
             aria-expanded={scheduleOpen}
             aria-haspopup="true"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            <Plus className="h-5 w-5" strokeWidth={2.5} aria-hidden />
           </button>
           {scheduleOpen && (
             <div
@@ -164,14 +153,7 @@ function BoxRow({
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >
-            <svg
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-            </svg>
+            <MoreVertical className="h-5 w-5" aria-hidden />
           </button>
           {menuOpen && (
             <div
@@ -187,19 +169,7 @@ function BoxRow({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
               >
-                <svg
-                  className="h-4 w-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
+                <Pencil className="h-4 w-4 text-gray-400" />
                 Edit
               </button>
               <button
@@ -208,19 +178,7 @@ function BoxRow({
                 onClick={onDelete}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
+                <Trash2 className="h-4 w-4" />
                 Delete
               </button>
             </div>
@@ -254,105 +212,9 @@ export function BoxSection({ userId }: BoxSectionProps) {
   const [schedulePickerOpen, setSchedulePickerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const scheduleRef = useRef<HTMLDivElement>(null);
-  const savedScrollY = useRef(0);
-  const bodyScrollLocked = useRef(false);
-  const touchMoveHandlerRef = useRef<((e: TouchEvent) => void) | null>(null);
-  const appContainerStylesRef = useRef<{
-    position: string;
-    top: string;
-    left: string;
-    right: string;
-    width: string;
-    maxWidth: string;
-    marginLeft: string;
-    marginRight: string;
-  } | null>(null);
+  const { lockBodyScroll, unlockBodyScroll } = useLockBodyScrollForKeyboard();
 
   const boxTodos = getBoxTodos();
-
-  const lockBodyScroll = useCallback(() => {
-    if (typeof window === "undefined" || bodyScrollLocked.current) return;
-    const isMobile = "ontouchstart" in window;
-    if (!isMobile) return;
-    bodyScrollLocked.current = true;
-    const scrollY = window.scrollY;
-    savedScrollY.current = scrollY;
-
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-
-    const app = document.getElementById("app-container");
-    if (app) {
-      appContainerStylesRef.current = {
-        position: app.style.position,
-        top: app.style.top,
-        left: app.style.left,
-        right: app.style.right,
-        width: app.style.width,
-        maxWidth: app.style.maxWidth,
-        marginLeft: app.style.marginLeft,
-        marginRight: app.style.marginRight,
-      };
-      app.style.position = "fixed";
-      app.style.top = `-${scrollY}px`;
-      app.style.left = "0";
-      app.style.right = "0";
-      app.style.width = "100%";
-      app.style.maxWidth = "430px";
-      app.style.marginLeft = "auto";
-      app.style.marginRight = "auto";
-    }
-
-    const preventTouchMove = (e: TouchEvent) => {
-      const target = e.target as Node;
-      const active = document.activeElement;
-      if (active && (active === target || active.contains(target))) return;
-      e.preventDefault();
-    };
-    touchMoveHandlerRef.current = preventTouchMove;
-    document.addEventListener("touchmove", preventTouchMove, {
-      passive: false,
-    });
-  }, []);
-
-  const unlockBodyScroll = useCallback(() => {
-    if (typeof window === "undefined" || !bodyScrollLocked.current) return;
-    bodyScrollLocked.current = false;
-
-    document.documentElement.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.left = "";
-    document.body.style.right = "";
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
-
-    const app = document.getElementById("app-container");
-    if (app && appContainerStylesRef.current) {
-      const s = appContainerStylesRef.current;
-      app.style.position = s.position;
-      app.style.top = s.top;
-      app.style.left = s.left;
-      app.style.right = s.right;
-      app.style.width = s.width;
-      app.style.maxWidth = s.maxWidth;
-      app.style.marginLeft = s.marginLeft;
-      app.style.marginRight = s.marginRight;
-      appContainerStylesRef.current = null;
-    }
-
-    if (touchMoveHandlerRef.current) {
-      document.removeEventListener("touchmove", touchMoveHandlerRef.current);
-      touchMoveHandlerRef.current = null;
-    }
-
-    window.scrollTo(0, savedScrollY.current);
-  }, []);
 
   useEffect(() => {
     if (menuOpenId === null && scheduleOpenId === null) return;
