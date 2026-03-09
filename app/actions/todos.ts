@@ -7,7 +7,7 @@ type DbRow = {
   id: string;
   profile_id: string;
   title: string;
-  date: string;
+  date: string | null;
   completed: boolean;
   position: number;
   priority: boolean;
@@ -39,7 +39,7 @@ export async function getTodosForUser(userId: string): Promise<GetTodosResult> {
     .from('todos')
     .select('id, profile_id, title, date, completed, position, priority, created_at, updated_at')
     .eq('profile_id', userId)
-    .order('date', { ascending: true })
+    .order('date', { ascending: true, nullsFirst: true })
     .order('position', { ascending: true })
     .order('created_at', { ascending: true });
 
@@ -63,7 +63,7 @@ export type AddTodoResult = { data?: Todo; error?: string };
 
 export async function addTodoAction(
   title: string,
-  date: string,
+  date: string | null,
   priority: boolean = false
 ): Promise<AddTodoResult> {
   const supabase = await createClient();
@@ -131,11 +131,11 @@ export async function updateTodoPriorityAction(
 export type ReorderTodosResult = { error?: string };
 
 /**
- * Reorder todos for a given date. todoIds must be the full ordered list of todo ids for that date.
+ * Reorder todos for a given date (or null for Box). todoIds must be the full ordered list for that date.
  * Updates position to 0, 1, 2, ... for each id.
  */
 export async function reorderTodosAction(
-  date: string,
+  date: string | null,
   todoIds: string[]
 ): Promise<ReorderTodosResult> {
   const supabase = await createClient();
@@ -147,12 +147,17 @@ export async function reorderTodosAction(
     return { error: authError?.message ?? 'Not authenticated' };
   }
   for (let i = 0; i < todoIds.length; i++) {
-    const { error } = await supabase
+    let q = supabase
       .from('todos')
       .update({ position: i })
       .eq('id', todoIds[i])
-      .eq('profile_id', user.id)
-      .eq('date', date);
+      .eq('profile_id', user.id);
+    if (date === null) {
+      q = q.is('date', null);
+    } else {
+      q = q.eq('date', date);
+    }
+    const { error } = await q;
     if (error) return { error: error.message };
   }
   return {};

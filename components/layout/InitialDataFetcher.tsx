@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BottomNavShell } from "@/components/layout/BottomNavShell";
 import { DashboardPathnameProvider } from "@/components/layout/DashboardPathnameContext";
+import { AddDrawerProvider } from "@/components/layout/AddDrawerContext";
 import { MainContent } from "@/components/layout/DashboardContent";
 import { UserProvider } from "@/components/layout/UserContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -51,6 +52,7 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
       />
       <Navbar />
       <DashboardPathnameProvider>
+        <AddDrawerProvider>
         <main
           className={`flex min-h-0 flex-1 flex-col pt-[calc(3.5rem+env(safe-area-inset-top,0px))] safe-area-x pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)]`}
         >
@@ -63,6 +65,7 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
             <BottomNav />
           </Suspense>
         </BottomNavShell>
+        </AddDrawerProvider>
       </DashboardPathnameProvider>
       </UserProvider>
     </QueryProvider>

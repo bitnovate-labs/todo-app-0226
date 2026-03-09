@@ -5,11 +5,12 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { usePathname } from "next/navigation";
 
-const DASHBOARD_PATHS = ["/", "/week", "/history", "/timeblock"] as const;
+const DASHBOARD_PATHS = ["/", "/box", "/week", "/history", "/timeblock"] as const;
 export type DashboardPath = (typeof DASHBOARD_PATHS)[number];
 
 export function isDashboardPath(path: string): path is DashboardPath {
@@ -38,7 +39,17 @@ export function DashboardPathnameProvider({
   const nextPathname = usePathname();
   const [pathname, setPathnameState] = useState(nextPathname);
 
+  // On client mount (e.g. refresh), sync to the actual URL so we stay on the current page
   useEffect(() => {
+    setPathnameState(window.location.pathname);
+  }, []);
+
+  const isFirstPathSync = useRef(true);
+  useEffect(() => {
+    if (isFirstPathSync.current) {
+      isFirstPathSync.current = false;
+      return;
+    }
     setPathnameState(nextPathname);
   }, [nextPathname]);
 

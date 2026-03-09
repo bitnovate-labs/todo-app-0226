@@ -2,9 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 import { useDashboardPathname } from '@/components/layout/DashboardPathnameContext';
+import { useCalendarView } from '@/hooks/useCalendarView';
 
 const pathTitles: Record<string, string> = {
   '/': 'Home',
+  '/box': 'Box',
   '/week': 'Week',
   '/todo/new': 'New todo',
   '/history': 'History',
@@ -16,15 +18,17 @@ const pathTitles: Record<string, string> = {
   '/update-password': 'Update password',
 };
 
-function getTitle(pathname: string): string {
-  return pathTitles[pathname] ?? 'App';
-}
-
 export function NavbarTitle() {
   const nextPathname = usePathname();
   const ctx = useDashboardPathname();
   const pathname = ctx?.pathname ?? nextPathname;
-  const title = getTitle(pathname);
+  const [calendarView] = useCalendarView();
+  const title =
+    pathname === '/week'
+      ? calendarView === 'month'
+        ? 'Month'
+        : 'Week'
+      : pathTitles[pathname] ?? 'App';
 
   return (
     <span className="shrink-0 font-semibold text-gray-900" aria-hidden>

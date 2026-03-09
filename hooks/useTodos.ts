@@ -36,7 +36,7 @@ export function useTodos(userId: string | undefined | null) {
   const error = queryError ? String(queryError) : null;
 
   const addTodoMutation = useMutation({
-    mutationFn: ({ title, date, priority }: { title: string; date: string; priority?: boolean }) =>
+    mutationFn: ({ title, date, priority }: { title: string; date: string | null; priority?: boolean }) =>
       addTodoAction(title, date, priority ?? false),
     retry: 2,
     onSuccess: (result) => {
@@ -128,7 +128,7 @@ export function useTodos(userId: string | undefined | null) {
   });
 
   const reorderTodosMutation = useMutation({
-    mutationFn: ({ date, todoIds }: { date: string; todoIds: string[] }) =>
+    mutationFn: ({ date, todoIds }: { date: string | null; todoIds: string[] }) =>
       reorderTodosAction(date, todoIds),
     onMutate: async ({ date, todoIds }) => {
       await queryClient.cancelQueries({ queryKey });
@@ -142,7 +142,7 @@ export function useTodos(userId: string | undefined | null) {
         });
         return updated.sort(
           (a, b) =>
-            a.date.localeCompare(b.date) ||
+            (a.date ?? '').localeCompare(b.date ?? '') ||
             (a.position - b.position) ||
             a.createdAt - b.createdAt
         );
@@ -156,7 +156,7 @@ export function useTodos(userId: string | undefined | null) {
   });
 
   const addTodo = useCallback(
-    async (title: string, date: string, priority?: boolean) => {
+    async (title: string, date: string | null, priority?: boolean) => {
       if (!userId) return;
       const result = await addTodoMutation.mutateAsync({
         title,
@@ -196,7 +196,7 @@ export function useTodos(userId: string | undefined | null) {
   );
 
   const reorderTodos = useCallback(
-    (date: string, todoIds: string[]) =>
+    (date: string | null, todoIds: string[]) =>
       reorderTodosMutation.mutate({ date, todoIds }),
     [reorderTodosMutation]
   );
@@ -229,6 +229,15 @@ export function useTodos(userId: string | undefined | null) {
     [todos]
   );
 
+  const getBoxTodos = useCallback(
+    () =>
+      todos
+        .filter((t) => t.date == null)
+        .slice()
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.createdAt - b.createdAt),
+    [todos]
+  );
+
   return {
     todos,
     addTodo,
@@ -239,6 +248,7 @@ export function useTodos(userId: string | undefined | null) {
     updateTodoPriority,
     reorderTodos,
     getByDate,
+    getBoxTodos,
     mounted,
     loading,
     error,

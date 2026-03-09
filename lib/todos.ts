@@ -2,8 +2,8 @@
 export type Todo = {
   id: string;
   title: string;
-  /** Date in YYYY-MM-DD */
-  date: string;
+  /** Date in YYYY-MM-DD; null = unscheduled (Box) */
+  date: string | null;
   completed: boolean;
   createdAt: number;
   /** Display order within the same date (lower = higher in list). */
@@ -160,4 +160,42 @@ export function monthDateKeys(d: Date): string[] {
 /** Format month for display e.g. "February 2025". */
 export function monthLabel(d: Date): string {
   return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
+/** One cell in the month calendar grid. */
+export type MonthGridCell = {
+  dateKey: string;
+  dayNum: number;
+  isCurrentMonth: boolean;
+};
+
+/** Get 6 rows × 7 days for the month calendar (respects weekStartsOn). */
+export function getMonthCalendarGrid(
+  monthDate: Date,
+  weekStartsOn: WeekStartsOn
+): MonthGridCell[] {
+  const y = monthDate.getFullYear();
+  const m = monthDate.getMonth();
+  const first = new Date(y, m, 1);
+  first.setHours(0, 0, 0, 0);
+  const firstWeekday = first.getDay();
+  const startOffset =
+    weekStartsOn === "sunday"
+      ? firstWeekday
+      : (firstWeekday + 6) % 7;
+  const start = new Date(first);
+  start.setDate(first.getDate() - startOffset);
+  const out: MonthGridCell[] = [];
+  const today = dateKey(new Date());
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const key = dateKey(d);
+    out.push({
+      dateKey: key,
+      dayNum: d.getDate(),
+      isCurrentMonth: d.getMonth() === m,
+    });
+  }
+  return out;
 }

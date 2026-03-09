@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
@@ -12,6 +12,7 @@ type CreateTodoFormProps = { userId: string | undefined | null };
 
 export function CreateTodoForm({ userId }: CreateTodoFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { addTodo } = useTodos(userId);
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
@@ -29,7 +30,8 @@ export function CreateTodoForm({ userId }: CreateTodoFormProps) {
       const date = useToday ? todayKey() : selectedDate;
       await addTodo(t, date, priority);
       setTitle("");
-      router.push("/");
+      const next = searchParams.get("next");
+      router.push(next && next.startsWith("/") ? next : "/");
     } finally {
       setSubmitting(false);
     }

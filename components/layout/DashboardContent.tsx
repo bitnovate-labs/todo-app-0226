@@ -9,7 +9,10 @@ import {
 } from "@/components/layout/DashboardPathnameContext";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { TodayTodoList } from "@/components/todos/TodayTodoList";
+import { BoxSection } from "@/components/todos/BoxSection";
+import { useCalendarView } from "@/hooks/useCalendarView";
 import { WeekView } from "@/components/todos/WeekView";
+import { MonthView } from "@/components/todos/MonthView";
 import { HistoryView } from "@/components/todos/HistoryView";
 import { TimeBlockView } from "@/components/todos/TimeBlockView";
 import { todosQueryKey } from "@/lib/todos-query";
@@ -26,6 +29,7 @@ export function DashboardContent({ userId }: { userId: string }) {
   const queryClient = useQueryClient();
   const ctx = useDashboardPathname();
   const pathname = ctx?.pathname ?? "/";
+  const [calendarView] = useCalendarView();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -43,7 +47,15 @@ export function DashboardContent({ userId }: { userId: string }) {
 
   const content =
     pathname === "/week" ? (
-      <WeekView userId={userId} />
+      calendarView === "month" ? (
+        <MonthView userId={userId} />
+      ) : (
+        <WeekView userId={userId} />
+      )
+    ) : pathname === "/box" ? (
+      <div className="min-w-0 animate-page-load pt-2 pb-8">
+        <BoxSection userId={userId} />
+      </div>
     ) : pathname === "/history" ? (
       <HistoryView userId={userId} />
     ) : pathname === "/timeblock" ? (

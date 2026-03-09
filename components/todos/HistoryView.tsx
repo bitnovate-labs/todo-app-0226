@@ -167,7 +167,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
     [weekStartsOn],
   );
   const weekTodos = useMemo(
-    () => todos.filter((t) => weekKeys.includes(t.date)),
+    () => todos.filter((t) => t.date != null && weekKeys.includes(t.date)),
     [todos, weekKeys],
   );
   const weekCompleted = useMemo(
@@ -176,7 +176,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
         .filter((t) => t.completed)
         .sort(
           (a, b) =>
-            a.date.localeCompare(b.date) ||
+            (a.date ?? '').localeCompare(b.date ?? '') ||
             (a.position ?? 0) - (b.position ?? 0) ||
             b.createdAt - a.createdAt,
         ),
@@ -188,7 +188,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
         .filter((t) => !t.completed)
         .sort(
           (a, b) =>
-            a.date.localeCompare(b.date) ||
+            (a.date ?? '').localeCompare(b.date ?? '') ||
             (a.position ?? 0) - (b.position ?? 0) ||
             a.createdAt - b.createdAt,
         ),
@@ -197,7 +197,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
 
   const monthKeys = useMemo(() => monthDateKeys(monthCursor), [monthCursor]);
   const monthTodos = useMemo(
-    () => todos.filter((t) => monthKeys.includes(t.date)),
+    () => todos.filter((t) => t.date != null && monthKeys.includes(t.date)),
     [todos, monthKeys],
   );
   const monthCompleted = useMemo(
@@ -206,7 +206,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
         .filter((t) => t.completed)
         .sort(
           (a, b) =>
-            a.date.localeCompare(b.date) ||
+            (a.date ?? '').localeCompare(b.date ?? '') ||
             (a.position ?? 0) - (b.position ?? 0) ||
             b.createdAt - a.createdAt,
         ),
@@ -218,7 +218,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
         .filter((t) => !t.completed)
         .sort(
           (a, b) =>
-            a.date.localeCompare(b.date) ||
+            (a.date ?? '').localeCompare(b.date ?? '') ||
             (a.position ?? 0) - (b.position ?? 0) ||
             a.createdAt - b.createdAt,
         ),

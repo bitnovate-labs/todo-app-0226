@@ -112,7 +112,7 @@ export function WeekView({ userId }: WeekViewProps) {
         ref={isToday ? todayRef : undefined}
         className={`min-h-0 shrink-0 rounded-2xl p-4 ${
           isToday
-            ? "border-2 border-primary bg-white shadow-md ring-2 ring-primary/20"
+            ? "border border-gray-200 bg-primary/10 shadow-md"
             : isPast
               ? "border border-gray-200 bg-gray-50/70 shadow-none"
               : "border border-gray-300 bg-white/80 shadow-sm"
@@ -153,18 +153,21 @@ export function WeekView({ userId }: WeekViewProps) {
                       )
                     )
                       return;
+                    if (todo.completed) return;
                     toggleTodo(todo.id);
                   }}
-                  className={`flex cursor-pointer items-center gap-2 rounded-xl px-3 py-3 transition-shadow ${
+                  className={`flex items-center gap-2 rounded-xl px-3 py-3 transition-shadow ${
+                    todo.completed ? "cursor-default" : "cursor-pointer"
+                  } ${
                     todo.completed
                       ? "border border-green-400/70 bg-green-50/70"
                       : todo.priority
-                        ? "border border-amber-400/90 bg-amber-100/80"
+                        ? "border border-amber-400/90 bg-amber-100/80 ring-1 ring-amber-400/50"
                         : isToday
-                          ? "border border-primary/50 bg-primary/5 shadow-sm"
+                          ? "border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-300"
                           : isPast
-                            ? "border border-gray-200 bg-gray-100/80"
-                            : "border border-gray-200/80 bg-white shadow-sm"
+                            ? "border border-gray-200 bg-gray-100/80 ring-1 ring-gray-300"
+                            : "border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-300"
                   }`}
                 >
                   <span
@@ -211,6 +214,22 @@ export function WeekView({ userId }: WeekViewProps) {
                         className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
                         role="menu"
                       >
+                        {todo.completed && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setMenuOpenId(null);
+                              toggleTodo(todo.id);
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                            </svg>
+                            Mark incomplete
+                          </button>
+                        )}
                         <button
                           type="button"
                           role="menuitem"
@@ -258,6 +277,7 @@ export function WeekView({ userId }: WeekViewProps) {
                           Edit
                         </button>
                         {!todo.completed &&
+                          todo.date != null &&
                           (() => {
                             const dayIndex = days.findIndex(
                               (d) => d.dateKey === todo.date,
@@ -381,7 +401,7 @@ export function WeekView({ userId }: WeekViewProps) {
                       >
                         <input
                           type="date"
-                          value={todo.date}
+                          value={todo.date ?? ""}
                           onChange={(e) => {
                             const next = e.target.value;
                             if (next) {
@@ -406,12 +426,12 @@ export function WeekView({ userId }: WeekViewProps) {
   const isCurrentWeek = weekOffset === 0;
 
   return (
-    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "-mx-4 -my-6 min-h-screen bg-primary px-4 py-6" : "-mx-4 -my-6 min-h-screen bg-gray-100 px-4 py-6"}`}>
-      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-primary" : "bg-gray-100"}`}>
+    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "" : "-mx-4 -my-6 min-h-screen bg-gray-100 px-4 py-6"}`}>
+      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-white" : "bg-gray-100"}`}>
         <div className="flex flex-nowrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-center">
-              <h1 className={`text-lg font-semibold tracking-tight ${isCurrentWeek ? "text-white" : "text-gray-900"}`}>
+            <div className="mb-2 flex flex-wrap items-center justify-start gap-2 text-left">
+              <h1 className={`text-lg font-semibold tracking-tight ${weekOffset === 0 ? "text-primary" : "text-gray-900"}`}>
                 {weekOffset === 0 ? "This week" : formatWeekRangeLabel(weekStartsOn, weekOffset)}
               </h1>
             </div>
@@ -419,7 +439,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o - 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
                 aria-label="Previous week"
               >
                 ← Previous week
@@ -427,7 +447,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o + 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-white/40 bg-white/20 text-white hover:bg-white/30" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
                 aria-label="Next week"
               >
                 Next week →
