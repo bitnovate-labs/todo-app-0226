@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
@@ -209,8 +209,35 @@ export function BoxSection({ userId }: BoxSectionProps) {
   const [schedulePickerOpen, setSchedulePickerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const scheduleRef = useRef<HTMLDivElement>(null);
+  const savedScrollY = useRef(0);
+  const bodyScrollLocked = useRef(false);
 
   const boxTodos = getBoxTodos();
+
+  const lockBodyScroll = useCallback(() => {
+    if (typeof window === "undefined" || bodyScrollLocked.current) return;
+    const vv = window.visualViewport;
+    const isMobile = (vv != null && vv.width <= 768) || "ontouchstart" in window;
+    if (!isMobile) return;
+    bodyScrollLocked.current = true;
+    savedScrollY.current = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${savedScrollY.current}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const unlockBodyScroll = useCallback(() => {
+    if (typeof window === "undefined" || !bodyScrollLocked.current) return;
+    bodyScrollLocked.current = false;
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.overflow = "";
+    window.scrollTo(0, savedScrollY.current);
+  }, []);
 
   useEffect(() => {
     if (menuOpenId === null && scheduleOpenId === null) return;
@@ -260,6 +287,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
   };
 
   const closeEdit = () => {
+    unlockBodyScroll();
     setEditingTodo(null);
     setEditTitle("");
   };
@@ -282,6 +310,8 @@ export function BoxSection({ userId }: BoxSectionProps) {
             type="text"
             value={quickAdd}
             onChange={(e) => setQuickAdd(e.target.value)}
+            onFocus={lockBodyScroll}
+            onBlur={unlockBodyScroll}
             placeholder="Quick add…"
             disabled={!mounted}
             className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-2.5 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
@@ -365,6 +395,8 @@ export function BoxSection({ userId }: BoxSectionProps) {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
+                  onFocus={lockBodyScroll}
+                  onBlur={unlockBodyScroll}
                   placeholder="Todo title"
                   className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
                 />
