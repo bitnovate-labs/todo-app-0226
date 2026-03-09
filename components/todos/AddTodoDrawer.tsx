@@ -121,7 +121,6 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Buy groceries"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                autoFocus
                 required
               />
             </div>

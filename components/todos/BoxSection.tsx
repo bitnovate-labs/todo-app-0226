@@ -367,7 +367,6 @@ export function BoxSection({ userId }: BoxSectionProps) {
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Todo title"
                   className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
-                  autoFocus
                 />
               </div>
               <div className="flex gap-3 pt-2">
