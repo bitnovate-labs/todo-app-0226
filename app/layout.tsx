@@ -103,7 +103,7 @@ export default function RootLayout({
           <ScrollToTop />
           <PreventSwipeBack />
           <OrientationGate>
-            <div className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+            <div id="app-container" className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
               <Suspense fallback={<ShellFallback />}>
                 <AuthBoundary>{children}</AuthBoundary>
               </Suspense>
