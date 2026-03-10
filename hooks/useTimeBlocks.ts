@@ -26,6 +26,7 @@ export function useTimeBlocks(userId: string | undefined | null, date: string) {
     queryKey,
     queryFn: () => fetchTimeBlocks(userId!, date),
     enabled: !!userId && !!date,
+    staleTime: 60 * 1000, // 1 min: reuse cache when switching to Time tab so we don't show loading
   });
 
   const addBlockMutation = useMutation({

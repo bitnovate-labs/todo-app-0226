@@ -72,12 +72,17 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
   useEffect(() => {
     if (open) {
       setMounted(false);
-      const id = requestAnimationFrame(() => setMounted(true));
+      const id = requestAnimationFrame(() => {
+        setMounted(true);
+        // Lock body as soon as drawer opens so the panel stays above the keyboard
+        // when the user focuses the input (first open and every open).
+        lockBodyScroll();
+      });
       return () => cancelAnimationFrame(id);
     }
     setMounted(false);
     unlockBodyScroll();
-  }, [open, unlockBodyScroll]);
+  }, [open, unlockBodyScroll, lockBodyScroll]);
 
   if (!open) return null;
 
@@ -92,15 +97,17 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
 
   const panel = (
     <div
-      className="fixed inset-x-0 bottom-0 max-h-[85dvh] rounded-t-2xl bg-white shadow-xl transition-transform duration-300 ease-out safe-area-b"
-      style={{
-        zIndex: 9999,
-        transform: mounted ? "translateY(0)" : "translateY(100%)",
-      }}
+      className="fixed inset-x-0 bottom-0 z-[9999] md:left-1/2 md:right-auto md:max-w-[430px] md:-translate-x-1/2"
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-todo-drawer-title"
     >
+      <div
+        className="w-full max-h-[85dvh] rounded-t-2xl bg-white shadow-xl transition-transform duration-300 ease-out safe-area-b"
+        style={{
+          transform: mounted ? "translateY(0)" : "translateY(100%)",
+        }}
+      >
         <div className="flex flex-col max-h-[85dvh]">
           <div className="shrink-0 flex justify-center pt-2 pb-1">
             <div className="h-1 w-10 rounded-full bg-gray-300" aria-hidden />
@@ -123,8 +130,6 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                onFocus={lockBodyScroll}
-                onBlur={unlockBodyScroll}
                 placeholder="e.g. Buy groceries"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required
@@ -218,6 +223,7 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
           </form>
         </div>
       </div>
+    </div>
   );
 
   if (typeof document === "undefined") return null;

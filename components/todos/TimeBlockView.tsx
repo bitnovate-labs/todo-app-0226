@@ -17,6 +17,7 @@ import {
   isValidTimeBlockColor,
 } from "@/lib/time-blocks";
 import { useTimeBlocks } from "@/hooks/useTimeBlocks";
+import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 const START_HOUR = 5;
 const END_HOUR = 22;
@@ -163,19 +164,18 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
   const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [datePickBlockId, setDatePickBlockId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const datePickRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (menuOpenId === null && datePickBlockId === null) return;
+    if (datePickBlockId === null) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null);
+      if (datePickRef.current && !datePickRef.current.contains(e.target as Node)) {
         setDatePickBlockId(null);
       }
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [menuOpenId, datePickBlockId]);
+  }, [datePickBlockId]);
 
   const dateDisplay = (() => {
     const [y, m, d] = date.split("-").map(Number);
@@ -200,11 +200,8 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
   };
 
   const today = todayKey();
-  const canGoNext = (() => {
-    const [y, m, d] = date.split("-").map(Number);
-    const next = new Date(y, m - 1, d + 1);
-    return dateKey(next) <= today;
-  })();
+  // Allow navigating to future dates (no cap) so users can create blocks for upcoming days.
+  const canGoNext = true;
 
   const segments = buildSegments(blocks);
 
@@ -374,14 +371,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                       {formatTimeLabel(block.end)}
                     </p>
                   </div>
-                  <div
-                    className="relative shrink-0"
-                    ref={
-                      menuOpenId === block.id || datePickBlockId === block.id
-                        ? menuRef
-                        : undefined
-                    }
-                  >
+                  <div className="relative shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -392,67 +382,13 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                       }}
                       className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-200/80 hover:text-gray-600 active:bg-gray-200"
                       aria-label="More actions"
-                      aria-expanded={menuOpenId === block.id}
-                      aria-haspopup="true"
+                      aria-haspopup="dialog"
                     >
                       <MoreVertical className="h-4 w-4" aria-hidden />
                     </button>
-                    {menuOpenId === block.id && (
-                      <div
-                        className="absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
-                        role="menu"
-                      >
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => openEdit(block)}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          <Pencil className="h-4 w-4 text-gray-400" />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpenId(null);
-                            copyBlockToDate(block, addDaysToDateKey(date, 1));
-                          }}
-                          disabled={addBlockPending}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          <Copy className="h-4 w-4 text-gray-400" />
-                          Copy to next day
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpenId(null);
-                            setDatePickBlockId(block.id);
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          Copy to date…
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpenId(null);
-                            removeBlock(block.id);
-                          }}
-                          disabled={deleteBlockPending}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
                     {datePickBlockId === block.id && (
                       <div
+                        ref={datePickRef}
                         className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
                         role="dialog"
                         aria-label="Select date"
@@ -511,6 +447,39 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
       >
         Add time block
       </button>
+
+      {menuOpenId && (() => {
+        const block = blocks.find((b) => b.id === menuOpenId);
+        if (!block) return null;
+        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
+        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+        return (
+          <TodoActionsModal open={true} onClose={() => setMenuOpenId(null)} title={block.label}>
+            <button type="button" className={act} onClick={() => { setMenuOpenId(null); openEdit(block); }}>
+              <Pencil className="h-4 w-4 text-gray-400 shrink-0" /> Edit
+            </button>
+            <button
+              type="button"
+              className={act}
+              onClick={() => { setMenuOpenId(null); copyBlockToDate(block, addDaysToDateKey(date, 1)); }}
+              disabled={addBlockPending}
+            >
+              <Copy className="h-4 w-4 text-gray-400 shrink-0" /> Copy to next day
+            </button>
+            <button type="button" className={act} onClick={() => { setMenuOpenId(null); setDatePickBlockId(block.id); }}>
+              <Calendar className="h-4 w-4 text-gray-400 shrink-0" /> Copy to date…
+            </button>
+            <button
+              type="button"
+              className={actDanger}
+              onClick={() => { setMenuOpenId(null); removeBlock(block.id); }}
+              disabled={deleteBlockPending}
+            >
+              <Trash2 className="h-4 w-4 shrink-0" /> Delete
+            </button>
+          </TodoActionsModal>
+        );
+      })()}
 
       {/* Sheet modal */}
       {addOpen && (

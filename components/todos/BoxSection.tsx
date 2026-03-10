@@ -12,21 +12,16 @@ import {
 import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import type { Todo } from "@/lib/todos";
 import { todayKey, dateKey } from "@/lib/todos";
-
-const MENU_ESTIMATED_HEIGHT = 120;
+import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type BoxRowProps = {
   todo: Todo;
-  menuRef: React.RefObject<HTMLDivElement | null> | undefined;
   scheduleRef: React.RefObject<HTMLDivElement | null> | undefined;
-  menuOpen: boolean;
-  menuOpenUp: boolean;
   scheduleOpen: boolean;
   schedulePickerOpen: boolean;
   onOpenMenu: () => void;
-  onCloseMenu: () => void;
-  onOpenSchedule: () => void;
   onCloseSchedule: () => void;
+  onOpenSchedule: () => void;
   onOpenDatePicker: () => void;
   onEdit: () => void;
   onScheduleToday: () => void;
@@ -42,16 +37,12 @@ endMonth.setDate(endMonth.getDate() + 365);
 
 function BoxRow({
   todo,
-  menuRef,
   scheduleRef,
-  menuOpen,
-  menuOpenUp,
   scheduleOpen,
   schedulePickerOpen,
   onOpenMenu,
-  onCloseMenu,
-  onOpenSchedule,
   onCloseSchedule,
+  onOpenSchedule,
   onOpenDatePicker,
   onEdit,
   onScheduleToday,
@@ -138,52 +129,20 @@ function BoxRow({
             </div>
           )}
         </div>
-        {/* ⋮ Menu button */}
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onOpenMenu();
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
-            aria-label="More actions"
-            aria-expanded={menuOpen}
-            aria-haspopup="true"
-          >
-            <MoreVertical className="h-5 w-5" aria-hidden />
-          </button>
-          {menuOpen && (
-            <div
-              className={`absolute right-0 z-10 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg ${menuOpenUp ? "bottom-full mb-1" : "top-full mt-1"}`}
-              role="menu"
-            >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  onCloseMenu();
-                  onEdit();
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-              >
-                <Pencil className="h-4 w-4 text-gray-400" />
-                Edit
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={onDelete}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenMenu();
+          }}
+          onClick={(e) => e.stopPropagation()}
+          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
+          aria-label="More actions"
+          aria-haspopup="dialog"
+        >
+          <MoreVertical className="h-5 w-5" aria-hidden />
+        </button>
       </div>
     </li>
   );
@@ -207,42 +166,24 @@ export function BoxSection({ userId }: BoxSectionProps) {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [menuOpenUp, setMenuOpenUp] = useState(false);
   const [scheduleOpenId, setScheduleOpenId] = useState<string | null>(null);
   const [schedulePickerOpen, setSchedulePickerOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const scheduleRef = useRef<HTMLDivElement>(null);
   const { lockBodyScroll, unlockBodyScroll } = useLockBodyScrollForKeyboard();
 
   const boxTodos = getBoxTodos();
 
   useEffect(() => {
-    if (menuOpenId === null && scheduleOpenId === null) return;
+    if (scheduleOpenId === null) return;
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      const inMenu = menuRef.current?.contains(target);
-      const inSchedule = scheduleRef.current?.contains(target);
-      if (!inMenu && !inSchedule) {
-        setMenuOpenId(null);
-        setScheduleOpenId(null);
-        setSchedulePickerOpen(false);
-      }
+      if (scheduleRef.current?.contains(target)) return;
+      setScheduleOpenId(null);
+      setSchedulePickerOpen(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [menuOpenId, scheduleOpenId]);
-
-  useEffect(() => {
-    if (menuOpenId === null) return;
-    const measure = () => {
-      if (!menuRef.current || typeof window === "undefined") return;
-      const rect = menuRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setMenuOpenUp(spaceBelow < MENU_ESTIMATED_HEIGHT);
-    };
-    const t = setTimeout(measure, 0);
-    return () => clearTimeout(t);
-  }, [menuOpenId]);
+  }, [scheduleOpenId]);
 
   const handleQuickAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,10 +259,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
             <BoxRow
               key={todo.id}
               todo={todo}
-              menuRef={menuOpenId === todo.id ? menuRef : undefined}
               scheduleRef={scheduleOpenId === todo.id ? scheduleRef : undefined}
-              menuOpen={menuOpenId === todo.id}
-              menuOpenUp={menuOpenUp}
               scheduleOpen={scheduleOpenId === todo.id}
               schedulePickerOpen={
                 scheduleOpenId === todo.id && schedulePickerOpen
@@ -329,7 +267,6 @@ export function BoxSection({ userId }: BoxSectionProps) {
               onOpenMenu={() =>
                 setMenuOpenId((id) => (id === todo.id ? null : todo.id))
               }
-              onCloseMenu={() => setMenuOpenId(null)}
               onOpenSchedule={() => {
                 setScheduleOpenId((id) => (id === todo.id ? null : todo.id));
                 setSchedulePickerOpen(false);
@@ -355,6 +292,41 @@ export function BoxSection({ userId }: BoxSectionProps) {
           ))
         )}
       </ul>
+
+      {menuOpenId && (() => {
+        const todo = boxTodos.find((t) => t.id === menuOpenId);
+        if (!todo) return null;
+        return (
+          <TodoActionsModal
+            open={true}
+            onClose={() => setMenuOpenId(null)}
+            title={todo.title}
+          >
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation"
+              onClick={() => {
+                setMenuOpenId(null);
+                openEdit(todo);
+              }}
+            >
+              <Pencil className="h-4 w-4 text-gray-400 shrink-0" />
+              Edit
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation"
+              onClick={() => {
+                setMenuOpenId(null);
+                deleteTodo(todo.id);
+              }}
+            >
+              <Trash2 className="h-4 w-4 shrink-0" />
+              Delete
+            </button>
+          </TodoActionsModal>
+        );
+      })()}
 
       {editingTodo && (
         <div

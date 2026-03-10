@@ -4,6 +4,7 @@ import { todayKey } from "@/lib/todos";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { InitialDataFetcher } from "@/components/layout/InitialDataFetcher";
+import { AppContentReadyNotifier } from "@/components/pwa/AppContentReadyNotifier";
 
 /**
  * Resolves auth (and optional initial data) inside Suspense so the root layout
@@ -26,6 +27,7 @@ export async function AuthBoundary({ children }: { children: React.ReactNode }) 
 
   return (
     <QueryProvider userId={null}>
+      <AppContentReadyNotifier />
       <main
         className={`flex min-h-0 flex-1 flex-col pt-0 safe-area-x pb-6`}
       >

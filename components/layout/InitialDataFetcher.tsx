@@ -11,6 +11,7 @@ import { TodosPrefetcher } from "@/components/providers/TodosPrefetcher";
 import { PostHogPageView } from "@/app/providers";
 import { AuthEventTracker } from "@/components/analytics/AuthEventTracker";
 import { IdentifyUser } from "@/components/analytics/IdentifyUser";
+import { AppContentReadyNotifier } from "@/components/pwa/AppContentReadyNotifier";
 import { getTodosForUser } from "@/app/actions/todos";
 import { getTimeBlocksForUser } from "@/app/actions/time-blocks";
 import type { User } from "@supabase/supabase-js";
@@ -42,6 +43,7 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
       userId={user.id}
     >
       <UserProvider user={{ id: user.id, email: user.email ?? undefined }}>
+      <AppContentReadyNotifier />
       <TodosPrefetcher userId={user.id} />
       <PostHogPageView />
       <AuthEventTracker />

@@ -6,7 +6,7 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
-import { PostHogProvider } from "./providers";
+import { PostHogProviderGate } from "./PostHogProviderGate";
 import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { APP_NAME } from "@/lib/constants";
 import { THEME } from "@/lib/theme";
@@ -137,7 +137,7 @@ export default function RootLayout({
           </span>
         </div>
         <SplashHideTrigger />
-        <PostHogProvider>
+        <PostHogProviderGate>
           <Script
             id="scroll-restoration"
             strategy="beforeInteractive"
@@ -163,7 +163,7 @@ export default function RootLayout({
           <ServiceWorkerRegister />
           <LockOrientation />
           <AnalyticsConsentGate />
-        </PostHogProvider>
+        </PostHogProviderGate>
       </body>
     </html>
   );

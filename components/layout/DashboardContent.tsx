@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -9,15 +10,40 @@ import {
 } from "@/components/layout/DashboardPathnameContext";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { TodayTodoList } from "@/components/todos/TodayTodoList";
-import { BoxSection } from "@/components/todos/BoxSection";
-import { useCalendarView } from "@/hooks/useCalendarView";
-import { WeekView } from "@/components/todos/WeekView";
-import { MonthView } from "@/components/todos/MonthView";
-import { HistoryView } from "@/components/todos/HistoryView";
 import { TimeBlockView } from "@/components/todos/TimeBlockView";
+import { useCalendarView } from "@/hooks/useCalendarView";
 import { todosQueryKey } from "@/lib/todos-query";
-import { timeBlocksQueryKey } from "@/lib/time-blocks-query";
+import {
+  timeBlocksQueryKey,
+  fetchTimeBlocks,
+} from "@/lib/time-blocks-query";
 import { todayKey } from "@/lib/todos";
+
+const dashboardViewLoading = (
+  <div className="flex min-h-[200px] items-center justify-center py-8">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" aria-hidden />
+  </div>
+);
+
+const BoxSection = dynamic(
+  () => import("@/components/todos/BoxSection").then((m) => ({ default: m.BoxSection })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
+
+const WeekView = dynamic(
+  () => import("@/components/todos/WeekView").then((m) => ({ default: m.WeekView })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
+
+const MonthView = dynamic(
+  () => import("@/components/todos/MonthView").then((m) => ({ default: m.MonthView })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
+
+const HistoryView = dynamic(
+  () => import("@/components/todos/HistoryView").then((m) => ({ default: m.HistoryView })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
 
 /**
  * Renders the main dashboard view based on current pathname (client state).
@@ -35,6 +61,19 @@ export function DashboardContent({ userId }: { userId: string }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Prefetch today's time blocks as soon as we have userId so the Time tab has data when user switches (no loading).
+  useEffect(() => {
+    if (!userId) return;
+    const today = todayKey();
+    const key = timeBlocksQueryKey(userId, today);
+    if (queryClient.getQueryData(key) == null) {
+      queryClient.prefetchQuery({
+        queryKey: key,
+        queryFn: () => fetchTimeBlocks(userId, today),
+      });
+    }
+  }, [userId, queryClient]);
 
   const handleRefresh = async () => {
     const todosKey = todosQueryKey(userId);

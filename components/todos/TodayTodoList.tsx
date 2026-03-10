@@ -42,20 +42,22 @@ import {
   addDaysToDateKey,
 } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
+import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type TodayTodoListProps = { userId: string | undefined | null };
 
 /** Priority todo styling (urgency: darker amber) */
 const PRIORITY_ROW_CLASS = "border-amber-400/90 bg-amber-100/80";
 
-const MENU_ESTIMATED_HEIGHT = 220;
+const actionButtonClass =
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
+const actionButtonDangerClass =
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
 
 function SortableTodoItem({
   todo,
-  menuRef,
-  menuOpen,
-  menuOpenUp,
   datePickOpen,
+  datePickRef,
   onToggle,
   onOpenMenu,
   onCloseMenu,
@@ -69,10 +71,8 @@ function SortableTodoItem({
   listFontSizeClass,
 }: {
   todo: Todo;
-  menuRef: React.RefObject<HTMLDivElement | null> | undefined;
-  menuOpen: boolean;
-  menuOpenUp: boolean;
   datePickOpen: boolean;
+  datePickRef?: React.RefObject<HTMLDivElement | null>;
   onToggle: (id: string) => void;
   onOpenMenu: () => void;
   onCloseMenu: () => void;
@@ -148,120 +148,22 @@ function SortableTodoItem({
           {todo.title}
         </span>
       </div>
-      <div className="relative shrink-0" ref={menuRef}>
+      <div className="relative shrink-0">
         <button
           type="button"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onOpenMenu();
-          }}
           onClick={(e) => {
             e.stopPropagation();
             onOpenMenu();
           }}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
           aria-label="More actions"
-          aria-expanded={menuOpen}
-          aria-haspopup="true"
+          aria-haspopup="dialog"
         >
           <MoreVertical className="h-5 w-5" aria-hidden />
         </button>
-        {menuOpen && (
-          <div
-            className={`absolute right-0 z-10 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg ${
-              menuOpenUp ? "bottom-full mb-1" : "top-full mt-1"
-            }`}
-            role="menu"
-          >
-            {todo.completed && (
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  onToggle(todo.id);
-                  onCloseMenu();
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-              >
-                <Undo2 className="h-4 w-4 text-gray-400" />
-                Mark incomplete
-              </button>
-            )}
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => onTogglePriority(todo.id, !todo.priority)}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-            >
-              {todo.priority ? (
-                <>
-                  <Check className="h-4 w-4 text-amber-700" />
-                  Not priority
-                </>
-              ) : (
-                <>
-                  <ArrowUp className="h-4 w-4 text-gray-400" />
-                  Priority
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onCloseMenu();
-                onEdit();
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <Pencil className="h-4 w-4 text-gray-400" />
-              Edit
-            </button>
-            {!todo.completed && (
-              <>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={onMovePrev}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  <ChevronLeft className="h-4 w-4 text-gray-400" />
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={onMoveNext}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
-                  Next
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={onOpenDatePick}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  Date…
-                </button>
-              </>
-            )}
-            <button
-              type="button"
-              role="menuitem"
-              onClick={onDelete}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </button>
-          </div>
-        )}
         {datePickOpen && (
           <div
+            ref={datePickRef}
             className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             role="dialog"
             aria-label="Select date"
@@ -298,9 +200,8 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [menuOpenUp, setMenuOpenUp] = useState(false);
   const [datePickTodoId, setDatePickTodoId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const datePickRef = useRef<HTMLDivElement>(null);
   const today = todayKey();
   const dayTodos = getByDate(today)
     .slice()
@@ -335,28 +236,15 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   );
 
   useEffect(() => {
-    if (menuOpenId === null && datePickTodoId === null) return;
+    if (datePickTodoId === null) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null);
+      if (datePickRef.current && !datePickRef.current.contains(e.target as Node)) {
         setDatePickTodoId(null);
       }
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [menuOpenId, datePickTodoId]);
-
-  useEffect(() => {
-    if (menuOpenId === null) return;
-    const measure = () => {
-      if (!menuRef.current || typeof window === "undefined") return;
-      const rect = menuRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setMenuOpenUp(spaceBelow < MENU_ESTIMATED_HEIGHT);
-    };
-    const t = setTimeout(measure, 0);
-    return () => clearTimeout(t);
-  }, [menuOpenId]);
+  }, [datePickTodoId]);
 
   const openEdit = (todo: Todo) => {
     setMenuOpenId(null);
@@ -441,10 +329,8 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                 <SortableTodoItem
                   key={todo.id}
                   todo={todo}
-                  menuRef={menuOpenId === todo.id || datePickTodoId === todo.id ? menuRef : undefined}
-                  menuOpen={menuOpenId === todo.id}
-                  menuOpenUp={menuOpenUp}
                   datePickOpen={datePickTodoId === todo.id}
+                  datePickRef={datePickTodoId === todo.id ? datePickRef : undefined}
                   onToggle={toggleTodo}
                   onOpenMenu={() =>
                     setMenuOpenId((id) => (id === todo.id ? null : todo.id))
@@ -487,6 +373,112 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
           </DndContext>
         )}
       </ul>
+
+      {/* Actions modal */}
+      {(() => {
+        const todo = menuOpenId ? dayTodos.find((t) => t.id === menuOpenId) : null;
+        if (!todo) return null;
+        return (
+          <TodoActionsModal
+            open={true}
+            onClose={() => setMenuOpenId(null)}
+            title={todo.title}
+          >
+            {todo.completed && (
+              <button
+                type="button"
+                className={actionButtonClass}
+                onClick={() => {
+                  toggleTodo(todo.id);
+                  setMenuOpenId(null);
+                }}
+              >
+                <Undo2 className="h-4 w-4 text-gray-400 shrink-0" />
+                Mark incomplete
+              </button>
+            )}
+            <button
+              type="button"
+              className={actionButtonClass}
+              onClick={() => {
+                updateTodoPriority(todo.id, !todo.priority);
+                setMenuOpenId(null);
+              }}
+            >
+              {todo.priority ? (
+                <>
+                  <Check className="h-4 w-4 text-amber-700 shrink-0" />
+                  Not priority
+                </>
+              ) : (
+                <>
+                  <ArrowUp className="h-4 w-4 text-gray-400 shrink-0" />
+                  Priority
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              className={actionButtonClass}
+              onClick={() => {
+                setMenuOpenId(null);
+                openEdit(todo);
+              }}
+            >
+              <Pencil className="h-4 w-4 text-gray-400 shrink-0" />
+              Edit
+            </button>
+            {!todo.completed && (
+              <>
+                <button
+                  type="button"
+                  className={actionButtonClass}
+                  onClick={() => {
+                    setMenuOpenId(null);
+                    if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, -1));
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className={actionButtonClass}
+                  onClick={() => {
+                    setMenuOpenId(null);
+                    if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, 1));
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
+                  Next
+                </button>
+                <button
+                  type="button"
+                  className={actionButtonClass}
+                  onClick={() => {
+                    setMenuOpenId(null);
+                    setDatePickTodoId(todo.id);
+                  }}
+                >
+                  <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+                  Date…
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              className={actionButtonDangerClass}
+              onClick={() => {
+                setMenuOpenId(null);
+                deleteTodo(todo.id);
+              }}
+            >
+              <Trash2 className="h-4 w-4 shrink-0" />
+              Delete
+            </button>
+          </TodoActionsModal>
+        );
+      })()}
 
       {/* Edit todo sheet */}
       {editingTodo && (

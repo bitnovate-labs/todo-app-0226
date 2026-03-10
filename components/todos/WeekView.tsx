@@ -18,6 +18,7 @@ import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 import { useWeekViewLayout } from "@/hooks/useWeekViewLayout";
 import { weekDatesForWeekWithOffset, todayKey, addDaysToDateKey, formatWeekRangeLabel } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
+import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type WeekViewProps = { userId: string | undefined | null };
 
@@ -44,19 +45,18 @@ export function WeekView({ userId }: WeekViewProps) {
   const [editTitle, setEditTitle] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [datePickTodoId, setDatePickTodoId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const datePickRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (menuOpenId === null && datePickTodoId === null) return;
+    if (datePickTodoId === null) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null);
+      if (datePickRef.current && !datePickRef.current.contains(e.target as Node)) {
         setDatePickTodoId(null);
       }
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [menuOpenId, datePickTodoId]);
+  }, [datePickTodoId]);
 
   // Scroll to top on mount and when switching layout so sticky header and days are visible
   useEffect(() => {
@@ -200,14 +200,7 @@ export function WeekView({ userId }: WeekViewProps) {
                       {todo.title}
                     </span>
                   </div>
-                  <div
-                    className="relative shrink-0"
-                    ref={
-                      menuOpenId === todo.id || datePickTodoId === todo.id
-                        ? menuRef
-                        : undefined
-                    }
-                  >
+                  <div className="relative shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -218,131 +211,13 @@ export function WeekView({ userId }: WeekViewProps) {
                       }}
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
                       aria-label="More actions"
-                      aria-expanded={menuOpenId === todo.id}
-                      aria-haspopup="true"
+                      aria-haspopup="dialog"
                     >
                       <MoreVertical className="h-5 w-5" aria-hidden />
                     </button>
-                    {menuOpenId === todo.id && (
-                      <div
-                        className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
-                        role="menu"
-                      >
-                        {todo.completed && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            onClick={() => {
-                              setMenuOpenId(null);
-                              toggleTodo(todo.id);
-                            }}
-                            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            <Undo2 className="h-4 w-4 text-gray-400" />
-                            Mark incomplete
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpenId(null);
-                            updateTodoPriority(todo.id, !todo.priority);
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          {todo.priority ? (
-                            <>
-                              <Check className="h-4 w-4 text-amber-700" />
-                              Not priority
-                            </>
-                          ) : (
-                            <>
-                              <ArrowUp className="h-4 w-4 text-gray-400" />
-                              Priority
-                            </>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => openEdit(todo)}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          <Pencil className="h-4 w-4 text-gray-400" />
-                          Edit
-                        </button>
-                        {!todo.completed &&
-                          todo.date != null &&
-                          (() => {
-                            const dayIndex = days.findIndex(
-                              (d) => d.dateKey === todo.date,
-                            );
-                            const prevDate =
-                              dayIndex > 0
-                                ? days[dayIndex - 1].dateKey
-                                : addDaysToDateKey(todo.date, -1);
-                            const nextDate =
-                              dayIndex >= 0 && dayIndex < 6
-                                ? days[dayIndex + 1].dateKey
-                                : addDaysToDateKey(todo.date, 1);
-                            return (
-                              <>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    setMenuOpenId(null);
-                                    updateTodoDate(todo.id, prevDate);
-                                  }}
-                                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <ChevronLeft className="h-4 w-4 text-gray-400" />
-                                  Previous
-                                </button>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    setMenuOpenId(null);
-                                    updateTodoDate(todo.id, nextDate);
-                                  }}
-                                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <ChevronRight className="h-4 w-4 text-gray-400" />
-                                  Next
-                                </button>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    setMenuOpenId(null);
-                                    setDatePickTodoId(todo.id);
-                                  }}
-                                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <Calendar className="h-4 w-4 text-gray-400" />
-                                  Date…
-                                </button>
-                              </>
-                            );
-                          })()}
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpenId(null);
-                            deleteTodo(todo.id);
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
                     {datePickTodoId === todo.id && (
                       <div
+                        ref={datePickRef}
                         className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
                         role="dialog"
                         aria-label="Select date"
@@ -422,6 +297,49 @@ export function WeekView({ userId }: WeekViewProps) {
           <div className="flex items-start gap-4 mt-4">{dayBlocks}</div>
         </div>
       )}
+
+      {menuOpenId && (() => {
+        const todo = todos.find((t) => t.id === menuOpenId);
+        if (!todo) return null;
+        const dayIndex = todo.date != null ? days.findIndex((d) => d.dateKey === todo.date) : -1;
+        const prevDate = dayIndex > 0 ? days[dayIndex - 1].dateKey : todo.date ? addDaysToDateKey(todo.date, -1) : null;
+        const nextDate = dayIndex >= 0 && dayIndex < 6 ? days[dayIndex + 1].dateKey : todo.date ? addDaysToDateKey(todo.date, 1) : null;
+        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
+        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+        return (
+          <TodoActionsModal open={true} onClose={() => setMenuOpenId(null)} title={todo.title}>
+            {todo.completed && (
+              <button type="button" className={act} onClick={() => { toggleTodo(todo.id); setMenuOpenId(null); }}>
+                <Undo2 className="h-4 w-4 text-gray-400 shrink-0" /> Mark incomplete
+              </button>
+            )}
+            <button type="button" className={act} onClick={() => { updateTodoPriority(todo.id, !todo.priority); setMenuOpenId(null); }}>
+              {todo.priority ? <><Check className="h-4 w-4 text-amber-700 shrink-0" /> Not priority</> : <><ArrowUp className="h-4 w-4 text-gray-400 shrink-0" /> Priority</>}
+            </button>
+            <button type="button" className={act} onClick={() => { setMenuOpenId(null); openEdit(todo); }}>
+              <Pencil className="h-4 w-4 text-gray-400 shrink-0" /> Edit
+            </button>
+            {!todo.completed && todo.date != null && prevDate != null && (
+              <button type="button" className={act} onClick={() => { setMenuOpenId(null); updateTodoDate(todo.id, prevDate); }}>
+                <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" /> Previous
+              </button>
+            )}
+            {!todo.completed && todo.date != null && nextDate != null && (
+              <button type="button" className={act} onClick={() => { setMenuOpenId(null); updateTodoDate(todo.id, nextDate); }}>
+                <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" /> Next
+              </button>
+            )}
+            {!todo.completed && (
+              <button type="button" className={act} onClick={() => { setMenuOpenId(null); setDatePickTodoId(todo.id); }}>
+                <Calendar className="h-4 w-4 text-gray-400 shrink-0" /> Date…
+              </button>
+            )}
+            <button type="button" className={actDanger} onClick={() => { setMenuOpenId(null); deleteTodo(todo.id); }}>
+              <Trash2 className="h-4 w-4 shrink-0" /> Delete
+            </button>
+          </TodoActionsModal>
+        );
+      })()}
 
       {editingTodo && (
         <div
