@@ -61,6 +61,9 @@ export async function InitialDataFetcher({ user, today, children }: Props) {
           <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
             <MainContent userId={user.id}>{children}</MainContent>
           </div>
+          <footer className="shrink-0 px-4 py-4 text-center text-xs text-gray-500">
+            Copyright 2026. Built by The Timinator
+          </footer>
         </main>
         <BottomNavShell>
           <Suspense fallback={null}>

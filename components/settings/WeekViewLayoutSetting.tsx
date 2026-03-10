@@ -6,7 +6,7 @@ export function WeekViewLayoutSetting() {
   const [layout, setLayout, mounted] = useWeekViewLayout();
 
   return (
-    <div className="border-t border-gray-200 pt-6 text-left">
+    <div>
       <p className="mb-3 text-sm font-medium text-gray-700">Week view layout</p>
       {!mounted ? (
         <div className="space-y-2">
@@ -14,8 +14,8 @@ export function WeekViewLayoutSetting() {
           <div className="h-[52px] animate-pulse rounded-xl bg-gray-100" />
         </div>
       ) : (
-        <div className="space-y-2">
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <div className="overflow-hidden rounded-xl border border-gray-200">
+          <label className="flex cursor-pointer items-center gap-3 border-b border-gray-100 px-3 py-3 last:border-0 hover:bg-gray-50/80">
             <input
               type="radio"
               name="week-view-layout"
@@ -25,7 +25,7 @@ export function WeekViewLayoutSetting() {
             />
             <span className="text-gray-900">Vertical — scroll down through days</span>
           </label>
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+          <label className="flex cursor-pointer items-center gap-3 px-3 py-3 hover:bg-gray-50/80">
             <input
               type="radio"
               name="week-view-layout"

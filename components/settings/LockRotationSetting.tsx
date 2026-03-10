@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Smartphone } from 'lucide-react';
 import type { OrientationAPI } from '@/lib/orientation';
+import { SettingsSection } from './SettingsSection';
 
 export function LockRotationSetting() {
   const [status, setStatus] = useState<'idle' | 'locking' | 'ok' | 'unsupported' | 'error'>('idle');
@@ -42,16 +44,15 @@ export function LockRotationSetting() {
   if (!isStandalone) return null;
 
   return (
-    <div className="border-t border-gray-200 pt-6 text-left">
-      <p className="mb-3 text-sm font-medium text-gray-700">Screen rotation</p>
-      <p className="mb-3 text-xs text-gray-500">
-        On Android, tap below to lock rotation (fullscreen may be used). On iOS, rotation cannot be locked; rotate back to portrait when the message appears.
+    <SettingsSection title="Device" icon={<Smartphone className="h-3.5 w-3.5" />}>
+      <p className="mb-3 text-sm text-gray-600">
+        On Android, tap below to lock rotation (fullscreen may be used). On iOS, rotation cannot be locked.
       </p>
       <button
         type="button"
         onClick={handleLockRotation}
         disabled={status === 'locking'}
-        className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-gray-900 transition hover:bg-gray-50 disabled:opacity-70"
+        className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-left text-sm font-medium text-gray-900 transition hover:bg-gray-100 disabled:opacity-70"
       >
         {status === 'idle' && 'Lock to portrait'}
         {status === 'locking' && 'Locking…'}
@@ -59,6 +60,6 @@ export function LockRotationSetting() {
         {status === 'unsupported' && 'Not supported on this device'}
         {status === 'error' && 'Could not lock (try again)'}
       </button>
-    </div>
+    </SettingsSection>
   );
 }
