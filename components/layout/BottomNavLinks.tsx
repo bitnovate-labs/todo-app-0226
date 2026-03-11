@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Home, Package, Calendar, Clock, LayoutGrid, Plus } from "lucide-react";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 import { useAddDrawer } from "@/components/layout/AddDrawerContext";
-import { AddTodoDrawer } from "@/components/todos/AddTodoDrawer";
+import { AddTodoModal } from "@/components/todos/AddTodoModal";
 
 const navItemClass =
   "flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors min-w-0 flex-1 ";
@@ -97,17 +97,19 @@ export function BottomNavLinks({ userId }: { userId: string }) {
         <span>Time</span>
       </NavTab>
     </div>
-    {/* FAB: opens add-todo drawer */}
-    <button
-      type="button"
-      onClick={() => addDrawer?.openDrawer()}
-      className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)] right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      aria-label="Add todo"
-    >
-      <Plus className="h-7 w-7 shrink-0" strokeWidth={2.5} aria-hidden />
-    </button>
+    {/* FAB: opens add-todo modal; on desktop constrained to app max-width */}
+    <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)] right-6 z-50 md:left-1/2 md:right-auto md:w-full md:max-w-[430px] md:-translate-x-1/2 md:px-6 md:flex md:justify-end">
+      <button
+        type="button"
+        onClick={() => addDrawer?.openDrawer()}
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        aria-label="Add todo"
+      >
+        <Plus className="h-7 w-7 shrink-0" strokeWidth={2.5} aria-hidden />
+      </button>
+    </div>
     {addDrawer && (
-      <AddTodoDrawer
+      <AddTodoModal
         open={addDrawer.open}
         onClose={addDrawer.closeDrawer}
         userId={userId}

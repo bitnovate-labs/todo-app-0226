@@ -160,16 +160,16 @@ export function WeekView({ userId }: WeekViewProps) {
             dayTodos.map((todo) => (
                 <li
                   key={todo.id}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 transition-shadow ${
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 shadow-md transition-shadow ${
                     todo.completed
-                      ? "border border-green-400/70 bg-green-50/70"
+                      ? "bg-green-50/70"
                       : todo.priority
-                        ? "border border-amber-400/90 bg-amber-100/80 ring-1 ring-amber-400/50"
+                        ? "bg-amber-100/80"
                         : isToday
-                          ? "border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-300"
+                          ? "bg-white"
                           : isPast
-                            ? "border border-gray-200 bg-gray-100/80 ring-1 ring-gray-300"
-                            : "border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-300"
+                            ? "bg-gray-100/80"
+                            : "bg-white"
                   }`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-2">

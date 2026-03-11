@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/components/layout/UserContext";
 
 /**
- * Redirect to dashboard and open the add-todo drawer.
+ * Redirect to dashboard and open the add-todo modal.
  * Keeps the app snappy: no separate page, drawer opens via FAB or ?add=1.
  */
 export default function NewTodoPage() {

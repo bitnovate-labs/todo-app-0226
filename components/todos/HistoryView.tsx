@@ -133,10 +133,10 @@ function TodoHistoryItem({
   const isIncomplete = !todo.completed;
   return (
     <li
-      className={`flex items-center gap-3 rounded-lg border py-2.5 pl-3 pr-2 ${
+      className={`flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 shadow-md ${
         isIncomplete
-          ? "cursor-pointer border-blue-200 bg-blue-50/80 hover:bg-blue-100/80"
-          : "cursor-pointer border-green-400 bg-green-50/80 hover:bg-green-100/80"
+          ? "cursor-pointer bg-blue-50/80 hover:bg-blue-100/80"
+          : "cursor-pointer bg-green-50/80 hover:bg-green-100/80"
       }`}
       onClick={() =>
         isIncomplete ? onReAdd(todo) : onUndoComplete(todo.id)

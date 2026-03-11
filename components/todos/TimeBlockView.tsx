@@ -41,42 +41,42 @@ const BLOCK_COLOR_MAP: Record<
   { card: string; bar: string; label: string; time: string; swatch: string }
 > = {
   blue: {
-    card: "border-blue-200/80 bg-blue-50/70",
+    card: "bg-blue-50/70",
     bar: "bg-blue-500/80",
     label: "text-blue-900",
     time: "text-blue-600/90",
     swatch: "bg-blue-500",
   },
   emerald: {
-    card: "border-emerald-200/80 bg-emerald-50/70",
+    card: "bg-emerald-50/70",
     bar: "bg-emerald-500/80",
     label: "text-emerald-900",
     time: "text-emerald-600/90",
     swatch: "bg-emerald-500",
   },
   amber: {
-    card: "border-amber-200/80 bg-amber-50/70",
+    card: "bg-amber-50/70",
     bar: "bg-amber-500/80",
     label: "text-amber-900",
     time: "text-amber-600/90",
     swatch: "bg-amber-500",
   },
   violet: {
-    card: "border-violet-200/80 bg-violet-50/70",
+    card: "bg-violet-50/70",
     bar: "bg-violet-500/80",
     label: "text-violet-900",
     time: "text-violet-600/90",
     swatch: "bg-violet-500",
   },
   rose: {
-    card: "border-rose-200/80 bg-rose-50/70",
+    card: "bg-rose-50/70",
     bar: "bg-rose-500/80",
     label: "text-rose-900",
     time: "text-rose-600/90",
     swatch: "bg-rose-500",
   },
   slate: {
-    card: "border-slate-200/80 bg-slate-100/70",
+    card: "bg-slate-100/70",
     bar: "bg-slate-500/80",
     label: "text-slate-900",
     time: "text-slate-600/90",
@@ -354,7 +354,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
               return (
                 <div
                   key={block.id}
-                  className={`group flex items-center gap-3 rounded-2xl border py-3 pl-4 pr-3 shadow-sm transition-shadow hover:shadow ${colors.card}`}
+                  className={`group flex items-center gap-3 rounded-2xl py-3 pl-4 pr-3 shadow-md transition-shadow hover:shadow-lg ${colors.card}`}
                 >
                   <div
                     className={`h-full min-h-[40px] w-1 shrink-0 self-stretch rounded-full ${colors.bar}`}

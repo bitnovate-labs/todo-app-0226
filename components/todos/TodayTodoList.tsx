@@ -47,7 +47,7 @@ import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 type TodayTodoListProps = { userId: string | undefined | null };
 
 /** Priority todo styling (urgency: darker amber) */
-const PRIORITY_ROW_CLASS = "border-amber-400/90 bg-amber-100/80";
+const PRIORITY_ROW_CLASS = "bg-amber-100/80";
 
 const actionButtonClass =
   "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
@@ -100,13 +100,13 @@ function SortableTodoItem({
   };
 
   const rowClass = [
-    "flex items-center gap-1.5 rounded-xl border py-2.5 pl-2 pr-1.5 shadow-sm",
-    isDragging && "z-50 opacity-90 shadow-md",
+    "flex items-center gap-1.5 rounded-xl py-2.5 pl-2 pr-1.5 shadow-md",
+    isDragging && "z-50 opacity-90 shadow-lg",
     todo.completed
-      ? "border-green-400 bg-green-50/80"
+      ? "bg-green-50/80"
       : todo.priority
         ? PRIORITY_ROW_CLASS
-        : "border-gray-200 bg-white",
+        : "bg-white",
   ]
     .filter(Boolean)
     .join(" ");
@@ -270,7 +270,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   );
 
   const stickyHeader = (
-    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-white pb-1 -mt-8 pt-6">
+    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-gray-100 pb-1 -mt-8 pt-6">
       <h1 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
         Today
       </h1>

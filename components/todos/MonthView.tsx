@@ -85,10 +85,12 @@ export function MonthView({ userId }: MonthViewProps) {
     " " +
     selectedDateObj.toLocaleDateString(undefined, { month: "long" });
 
+  // Only allow adding new todos for today or future; don't pass past dates to the add modal
+  const canAddForSelectedDate = selectedDateKey >= today;
   useEffect(() => {
-    addDrawer?.setDefaultDateForAdd(selectedDateKey);
+    addDrawer?.setDefaultDateForAdd(canAddForSelectedDate ? selectedDateKey : null);
     return () => addDrawer?.setDefaultDateForAdd(null);
-  }, [selectedDateKey, addDrawer]);
+  }, [selectedDateKey, canAddForSelectedDate, addDrawer]);
 
   useEffect(() => {
     if (datePickTodoId === null) return;
@@ -399,12 +401,12 @@ function MonthTodoRow({
 }) {
   return (
     <li
-      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 shadow-sm ${
+      className={`flex items-center gap-1.5 rounded-xl px-3 py-2 shadow-md ${
         todo.completed
-          ? "border-green-400/70 bg-green-50/70"
+          ? "bg-green-50/70"
           : todo.priority
-            ? "border-amber-400/90 bg-amber-100/80"
-            : "border-gray-200 bg-white"
+            ? "bg-amber-100/80"
+            : "bg-white"
       }`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">

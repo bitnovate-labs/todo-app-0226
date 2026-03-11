@@ -100,7 +100,9 @@ export function DashboardContent({ userId }: { userId: string }) {
     ) : pathname === "/timeblock" ? (
       <TimeBlockView userId={userId} />
     ) : (
-      <TodayTodoList userId={userId} />
+      <div className="min-h-full bg-gray-100 -mx-4 -my-6 px-4 py-6">
+        <TodayTodoList userId={userId} />
+      </div>
     );
 
   if (!mounted) return content;

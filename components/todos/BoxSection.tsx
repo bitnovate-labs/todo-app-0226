@@ -51,7 +51,7 @@ function BoxRow({
   listFontSizeClass,
 }: BoxRowProps) {
   return (
-    <li className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white py-2 pl-4 pr-1 shadow-sm">
+    <li className="flex items-center gap-1 rounded-xl bg-white py-2 pl-4 pr-1 shadow-md">
       <span className={`min-w-0 flex-1 ${listFontSizeClass} text-gray-900`}>
         {todo.title}
       </span>

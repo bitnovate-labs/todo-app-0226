@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
-import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import { todayKey, dateKey, dayNameFromDate, formatDateDDMMMFromDate } from "@/lib/todos";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 
@@ -14,7 +13,7 @@ today.setHours(0, 0, 0, 0);
 const endMonth = new Date(today);
 endMonth.setDate(endMonth.getDate() + 365);
 
-type AddTodoDrawerProps = {
+type AddTodoModalProps = {
   open: boolean;
   onClose: () => void;
   userId: string;
@@ -23,15 +22,16 @@ type AddTodoDrawerProps = {
   defaultDate: string | null;
 };
 
-export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddTodoDrawerProps) {
+export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTodoModalProps) {
   const { addTodo } = useTodos(userId);
   const pathnameCtx = useDashboardPathname();
-  const { lockBodyScroll, unlockBodyScroll } = useLockBodyScrollForKeyboard();
   const [title, setTitle] = useState("");
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const datePickerRef = useRef<HTMLDivElement>(null);
 
   const selectedDateObj = selectedDate
     ? (() => {
@@ -60,7 +60,6 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
   };
 
   const handleClose = () => {
-    unlockBodyScroll();
     setTitle("");
     setUseToday(true);
     setSelectedDate(todayKey());
@@ -68,74 +67,78 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
     onClose();
   };
 
-  const [mounted, setMounted] = useState(false);
+  // Keep input visible when keyboard opens: scroll it into view inside the modal
   useEffect(() => {
-    if (open) {
-      setMounted(false);
-      const id = requestAnimationFrame(() => {
-        setMounted(true);
-        // Lock body as soon as drawer opens so the panel stays above the keyboard
-        // when the user focuses the input (first open and every open).
-        lockBodyScroll();
+    if (!open) return;
+    const input = inputRef.current;
+    if (!input) return;
+    const onFocus = () => {
+      requestAnimationFrame(() => {
+        input.scrollIntoView({ block: "nearest", behavior: "smooth" });
       });
-      return () => cancelAnimationFrame(id);
-    }
-    setMounted(false);
-    unlockBodyScroll();
-  }, [open, unlockBodyScroll, lockBodyScroll]);
+    };
+    input.addEventListener("focus", onFocus);
+    return () => input.removeEventListener("focus", onFocus);
+  }, [open]);
+
+  // When date picker opens, shift view so the calendar is shown in full height
+  useEffect(() => {
+    if (!open || !datePickerOpen) return;
+    const el = datePickerRef.current;
+    if (!el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [open, datePickerOpen]);
 
   if (!open) return null;
 
   const overlay = (
     <div
-      className={`fixed inset-0 bg-black/70 transition-opacity duration-300 ease-out ${mounted ? "opacity-100" : "opacity-0"}`}
-      style={{ zIndex: 9998 }}
+      className="fixed inset-0 z-[9998] bg-black/60"
       aria-hidden
       onClick={handleClose}
     />
   );
 
-  const panel = (
+  const dialog = (
     <div
-      className="fixed inset-x-0 bottom-0 z-[9999] md:left-1/2 md:right-auto md:max-w-[430px] md:-translate-x-1/2"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="add-todo-drawer-title"
+      aria-labelledby="add-todo-modal-title"
     >
       <div
-        className="w-full max-h-[85dvh] rounded-t-2xl bg-white shadow-xl transition-transform duration-300 ease-out safe-area-b"
-        style={{
-          transform: mounted ? "translateY(0)" : "translateY(100%)",
-        }}
+        className="w-full max-w-[430px] max-h-[90dvh] flex flex-col rounded-2xl bg-white shadow-xl safe-area-b"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col max-h-[85dvh]">
-          <div className="shrink-0 flex justify-center pt-2 pb-1">
-            <div className="h-1 w-10 rounded-full bg-gray-300" aria-hidden />
+        <div className="shrink-0 px-4 pt-4 pb-2">
+          <h2 id="add-todo-modal-title" className="text-lg font-semibold text-gray-900">
+            New todo
+          </h2>
+        </div>
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6"
+        >
+          <div>
+            <label htmlFor="modal-title" className="mb-1 block text-sm font-medium text-gray-700">
+              What to do?
+            </label>
+            <input
+              ref={inputRef}
+              id="modal-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Buy groceries"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+              autoComplete="off"
+            />
           </div>
-          <div className="shrink-0 px-4 pb-2">
-            <h2 id="add-todo-drawer-title" className="text-lg font-semibold text-gray-900">
-              New todo
-            </h2>
-          </div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6"
-          >
-            <div>
-              <label htmlFor="drawer-title" className="mb-1 block text-sm font-medium text-gray-700">
-                What to do?
-              </label>
-              <input
-                id="drawer-title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Buy groceries"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
-              />
-            </div>
-            {!defaultDate && (
+          {!defaultDate && (
             <div>
               <span className="mb-2 block text-sm font-medium text-gray-700">
                 When?
@@ -144,7 +147,7 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
                   <input
                     type="radio"
-                    name="drawer-when"
+                    name="modal-when"
                     checked={useToday}
                     onChange={() => {
                       setUseToday(true);
@@ -157,7 +160,7 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
                   <input
                     type="radio"
-                    name="drawer-when"
+                    name="modal-when"
                     checked={!useToday}
                     onChange={() => {
                       setUseToday(false);
@@ -182,7 +185,10 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                       <span className="text-blue-700">{datePickerOpen ? "Close" : "Change"}</span>
                     </button>
                     {datePickerOpen && (
-                      <div className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-3 [&_.rdp-root]:mx-0">
+                      <div
+                        ref={datePickerRef}
+                        className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-3 [&_.rdp-root]:mx-0"
+                      >
                         <DayPicker
                           mode="single"
                           weekStartsOn={0}
@@ -203,25 +209,24 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
                 )}
               </div>
             </div>
-            )}
-            <div className="mt-auto flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting || !title.trim()}
-                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {submitting ? "Adding…" : "Add todo"}
-              </button>
-            </div>
-          </form>
-        </div>
+          )}
+          <div className="mt-auto flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting || !title.trim()}
+              className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {submitting ? "Adding…" : "Add todo"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -230,7 +235,7 @@ export function AddTodoDrawer({ open, onClose, userId, next, defaultDate }: AddT
   return createPortal(
     <>
       {overlay}
-      {panel}
+      {dialog}
     </>,
     document.body
   );
