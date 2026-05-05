@@ -1,11 +1,18 @@
 'use client';
 
 import { signOut } from '@/app/actions/auth';
+import { useUser } from '@/components/layout/UserContext';
 import { ANALYTICS_EVENTS } from '@/lib/analytics/events';
+import { clearPersistedReactQueryCache } from '@/lib/query-persistence';
 import { trackEvent, resetAnalyticsIdentity } from '@/lib/analytics/track';
 
 export function SignOutForm() {
+  const user = useUser();
+
   const handleSubmit = () => {
+    if (user?.id) {
+      clearPersistedReactQueryCache(user.id);
+    }
     trackEvent({ name: ANALYTICS_EVENTS.USER_SIGNED_OUT });
     resetAnalyticsIdentity();
     // Form action (signOut) will then run and redirect

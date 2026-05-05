@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getUserOrNull } from "@/lib/auth";
-import { todayKey } from "@/lib/todos";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { InitialDataFetcher } from "@/components/layout/InitialDataFetcher";
@@ -13,12 +12,11 @@ import { AppContentReadyNotifier } from "@/components/pwa/AppContentReadyNotifie
  */
 export async function AuthBoundary({ children }: { children: React.ReactNode }) {
   const user = await getUserOrNull();
-  const today = todayKey();
 
   if (user) {
     return (
       <Suspense fallback={<ShellFallback />}>
-        <InitialDataFetcher user={user} today={today}>
+        <InitialDataFetcher user={user}>
           {children}
         </InitialDataFetcher>
       </Suspense>

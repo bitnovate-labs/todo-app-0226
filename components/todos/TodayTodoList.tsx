@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -195,8 +195,12 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
     reorderTodos,
     todos,
     loading,
-    mounted,
   } = useTodos(userId);
+
+  const todayDateLabel = useMemo(() => {
+    const [y, m, d] = todayKey().split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }, []);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -275,33 +279,23 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
         Today
       </h1>
       <p className="mb-2 text-sm text-gray-500">
-        {mounted ? (
-          <>
-            {dayNameFromDate(new Date())}, {formatDateDDMMMFromDate(new Date())}
-          </>
-        ) : (
-          "—"
-        )}
+        {dayNameFromDate(todayDateLabel)}, {formatDateDDMMMFromDate(todayDateLabel)}
       </p>
     </div>
   );
-
-  // Always show placeholder until client mount so server and client first paint match
-  // (server may have prefetched todos and render date/list; client has mounted=false first).
-  if (!mounted) {
-    return (
-      <div className="min-w-0 animate-page-load">
-        {stickyHeader}
-        <div className="py-8 text-center text-gray-500">Loading…</div>
-      </div>
-    );
-  }
 
   if (loading && todos.length === 0) {
     return (
       <div className="min-w-0 animate-page-load">
         {stickyHeader}
-        <div className="py-8 text-center text-gray-500">Loading…</div>
+        <ul className="mt-2 space-y-3" aria-busy="true" aria-label="Loading todos">
+          {[1, 2, 3, 4].map((i) => (
+            <li
+              key={i}
+              className="h-[52px] rounded-xl bg-gray-200/70 animate-pulse shadow-md"
+            />
+          ))}
+        </ul>
       </div>
     );
   }

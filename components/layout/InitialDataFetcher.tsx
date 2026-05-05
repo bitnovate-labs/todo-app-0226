@@ -13,36 +13,21 @@ import { PostHogPageView } from "@/app/providers";
 import { AuthEventTracker } from "@/components/analytics/AuthEventTracker";
 import { IdentifyUser } from "@/components/analytics/IdentifyUser";
 import { AppContentReadyNotifier } from "@/components/pwa/AppContentReadyNotifier";
-import { getTodosForUser } from "@/app/actions/todos";
-import { getTimeBlocksForUser } from "@/app/actions/time-blocks";
 import type { User } from "@supabase/supabase-js";
 
 type Props = {
   user: User;
-  today: string;
   children: React.ReactNode;
 };
 
 /**
- * Fetches initial todos and time blocks in parallel (using cached user, no duplicate auth),
- * then renders the dashboard with QueryProvider. Used inside Suspense so the shell can
- * stream first and this streams in when data is ready.
+ * Renders the logged-in shell immediately. Todos and time blocks load on the client
+ * (React Query + TodosPrefetcher) so the PWA does not wait for server DB round-trips
+ * before showing the UI.
  */
-export async function InitialDataFetcher({ user, today, children }: Props) {
-  const [todosResult, timeBlocksResult] = await Promise.all([
-    getTodosForUser(user.id),
-    getTimeBlocksForUser(user.id, today),
-  ]);
-  const initialTodos = todosResult?.data ?? [];
-  const initialTimeBlocks = timeBlocksResult?.data ?? [];
-
+export function InitialDataFetcher({ user, children }: Props) {
   return (
-    <QueryProvider
-      initialTodos={initialTodos}
-      initialTimeBlocks={initialTimeBlocks}
-      initialTimeBlocksDate={today}
-      userId={user.id}
-    >
+    <QueryProvider userId={user.id}>
       <UserProvider user={{ id: user.id, email: user.email ?? undefined }}>
       <AppContentReadyNotifier />
       <TodosPrefetcher userId={user.id} />

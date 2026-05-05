@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-const SPLASH_MIN_MS = 400;
+/** Short enough to feel responsive after shell mounts; long enough to avoid a bare flash */
+const SPLASH_MIN_MS = 280;
 const SPLASH_MAX_MS = 2000;
 const FADE_OUT_MS = 250;
 const CONTENT_READY_DELAY_MS = 80;
