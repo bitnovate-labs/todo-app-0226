@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -65,6 +65,14 @@ export function MonthView({ userId }: MonthViewProps) {
 
   const grid = getMonthCalendarGrid(viewMonth, weekStartsOn);
   const weekdays = weekStartsOn === "monday" ? WEEKDAY_MONDAY_FIRST : WEEKDAY_SHORT;
+
+  const dateKeysWithTodos = useMemo(() => {
+    const s = new Set<string>();
+    for (const t of todos) {
+      if (t.date) s.add(t.date);
+    }
+    return s;
+  }, [todos]);
 
   const selectedTodos = getByDate(selectedDateKey)
     .slice()
@@ -183,21 +191,31 @@ export function MonthView({ userId }: MonthViewProps) {
           {grid.map((cell) => {
             const isToday = cell.dateKey === today;
             const isSelected = cell.dateKey === selectedDateKey;
+            const hasTodos = dateKeysWithTodos.has(cell.dateKey);
+
+            let cellClass =
+              "flex min-h-[44px] min-w-0 items-center justify-center rounded-lg text-sm transition-colors touch-manipulation active:scale-[0.97] ";
+            if (!cell.isCurrentMonth) {
+              cellClass += hasTodos ? "bg-blue-50/40 text-gray-400 " : "text-gray-300 ";
+            } else if (isSelected) {
+              cellClass += "bg-primary text-white font-semibold ";
+            } else if (isToday) {
+              cellClass += `border-2 border-primary font-semibold ${
+                hasTodos ? "border-primary bg-blue-50 text-primary " : "text-primary "
+              }`;
+            } else if (hasTodos) {
+              cellClass += "bg-blue-50 text-gray-900 hover:bg-blue-100/90 ";
+            } else {
+              cellClass += "text-gray-700 hover:bg-gray-100 ";
+            }
+
             return (
               <button
                 key={cell.dateKey}
                 type="button"
                 onClick={() => setSelectedDateKey(cell.dateKey)}
-                className={`flex min-h-[44px] min-w-0 items-center justify-center rounded-lg text-sm transition-colors touch-manipulation active:scale-[0.97] ${
-                  !cell.isCurrentMonth
-                    ? "text-gray-300"
-                    : isSelected
-                      ? "bg-primary text-white font-semibold"
-                      : isToday
-                        ? "border-2 border-primary text-primary font-semibold"
-                        : "text-gray-700 hover:bg-gray-100"
-                }`}
-                aria-label={`${cell.dayNum}${isSelected ? " selected" : ""}`}
+                className={cellClass}
+                aria-label={`${cell.dayNum}${hasTodos ? ", has tasks" : ""}${isSelected ? ", selected" : ""}`}
                 aria-pressed={isSelected}
               >
                 {cell.dayNum}
