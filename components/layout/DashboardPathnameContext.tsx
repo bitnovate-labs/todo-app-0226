@@ -10,7 +10,7 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 
-const DASHBOARD_PATHS = ["/", "/box", "/week", "/history", "/timeblock", "/habits"] as const;
+const DASHBOARD_PATHS = ["/", "/box", "/week", "/timeblock", "/habits"] as const;
 export type DashboardPath = (typeof DASHBOARD_PATHS)[number];
 
 export function isDashboardPath(path: string): path is DashboardPath {

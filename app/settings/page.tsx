@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Calendar,
   Type,
-  Smartphone,
   MessageCircle,
   LogOut,
   Mail,

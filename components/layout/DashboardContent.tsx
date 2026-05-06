@@ -41,14 +41,9 @@ const MonthView = dynamic(
   { ssr: false, loading: () => dashboardViewLoading }
 );
 
-const HistoryView = dynamic(
-  () => import("@/components/todos/HistoryView").then((m) => ({ default: m.HistoryView })),
-  { ssr: false, loading: () => dashboardViewLoading }
-);
-
 /**
  * Renders the main dashboard view based on current pathname (client state).
- * No server round-trip when switching between Home / Week / History.
+ * No server round-trip when switching between dashboard tabs.
  * Pull-to-refresh on all dashboard tabs to refresh todos and time blocks.
  * Wrapper is client-only to avoid SSR/hydration mismatch with the inner view's root DOM.
  */
@@ -96,8 +91,6 @@ export function DashboardContent({ userId }: { userId: string }) {
       <div className="min-w-0 animate-page-load pt-2 pb-8">
         <BoxSection userId={userId} />
       </div>
-    ) : pathname === "/history" ? (
-      <HistoryView userId={userId} />
     ) : pathname === "/timeblock" ? (
       <TimeBlockView userId={userId} />
     ) : pathname === "/habits" ? (
@@ -115,7 +108,7 @@ export function DashboardContent({ userId }: { userId: string }) {
 }
 
 /**
- * For dashboard paths (/, /week, /history) renders DashboardContent (instant tab switch).
+ * For dashboard paths (e.g. /, /week, /timeblock) renders DashboardContent (instant tab switch).
  * For other paths (e.g. /settings, /todo/new) renders the actual page (children).
  * Uses context pathname so client-only tab switches show the right view immediately.
  */

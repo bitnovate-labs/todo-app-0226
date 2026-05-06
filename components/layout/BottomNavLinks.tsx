@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Home, Package, Calendar, Clock, LayoutGrid, Flame, Plus } from "lucide-react";
+import { Home, Package, Calendar, LayoutGrid, Flame, Plus } from "lucide-react";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 import { useAddDrawer } from "@/components/layout/AddDrawerContext";
 import { AddHabitModal } from "@/components/habits/AddHabitModal";
@@ -36,7 +36,7 @@ function NavTab({
 }
 
 /**
- * Dashboard tabs (/, /week, /history) use client-only navigation (pushState)
+ * Dashboard tabs (/, /week, /box, /timeblock, /habits) use client-only navigation (pushState)
  * so switching is instant. Add and Settings use real Link for full navigation.
  */
 export function BottomNavLinks({ userId }: { userId: string }) {
@@ -83,13 +83,6 @@ export function BottomNavLinks({ userId }: { userId: string }) {
       >
         <Calendar className="h-6 w-6 shrink-0" aria-hidden />
         <span>Calendar</span>
-      </NavTab>
-      <NavTab
-        active={pathname === "/history"}
-        onClick={() => handleDashboardTab("/history")}
-      >
-        <Clock className="h-6 w-6 shrink-0" aria-hidden />
-        <span>History</span>
       </NavTab>
       <NavTab
         active={pathname === "/timeblock"}

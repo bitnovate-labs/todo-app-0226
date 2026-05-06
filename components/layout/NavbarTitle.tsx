@@ -9,7 +9,6 @@ const pathTitles: Record<string, string> = {
   '/box': 'Box',
   '/week': 'Week',
   '/todo/new': 'New todo',
-  '/history': 'History',
   '/timeblock': 'Time block',
   '/habits': 'Habit Tracker',
   '/settings': 'Settings',

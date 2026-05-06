@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import { getUserOrNull } from "@/lib/auth";
 import { NavbarTitle } from "./NavbarTitle";
+import { NavbarActions } from "./NavbarActions";
 
 export async function Navbar() {
   const user = await getUserOrNull();
@@ -24,7 +25,7 @@ export async function Navbar() {
             <div className="flex min-w-0 justify-center">
               <NavbarTitle />
             </div>
-            <div />
+            <NavbarActions />
           </nav>
         ) : (
           <nav className="grid min-h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 py-3">
