@@ -4,6 +4,8 @@ export type Habit = {
   id: string;
   title: string;
   createdAt: number;
+  /** List order (0-based), persisted like todos. */
+  position: number;
   completedDates: string[];
   /** Consecutive days with a check-in ending today (also stored on `habits.current_streak`). */
   currentStreak: number;

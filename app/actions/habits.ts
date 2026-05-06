@@ -14,6 +14,7 @@ type HabitRow = {
   profile_id: string;
   title: string;
   created_at: string;
+  position: number;
   current_streak: number;
   longest_streak: number;
 };
@@ -33,6 +34,7 @@ function buildHabit(row: HabitRow, dates: string[]): Habit {
     id: row.id,
     title: row.title,
     createdAt: new Date(row.created_at).getTime(),
+    position: row.position ?? 0,
     completedDates,
     currentStreak,
     longestStreak,
@@ -81,8 +83,9 @@ export async function getHabitsForUser(userId: string): Promise<GetHabitsResult>
 
   const { data: habitsData, error: habitsError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, current_streak, longest_streak')
+    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
     .eq('profile_id', userId)
+    .order('position', { ascending: true })
     .order('created_at', { ascending: true });
 
   if (habitsError) return { error: habitsError.message, data: [] };
@@ -127,10 +130,19 @@ export async function addHabitAction(title: string): Promise<AddHabitResult> {
   const trimmed = title.trim();
   if (!trimmed) return { error: 'Title required' };
 
+  const { data: maxRow } = await supabase
+    .from('habits')
+    .select('position')
+    .eq('profile_id', user.id)
+    .order('position', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextPosition = ((maxRow as { position?: number } | null)?.position ?? -1) + 1;
+
   const { data, error } = await supabase
     .from('habits')
-    .insert({ profile_id: user.id, title: trimmed })
-    .select('id, profile_id, title, created_at, current_streak, longest_streak')
+    .insert({ profile_id: user.id, title: trimmed, position: nextPosition })
+    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
     .single();
 
   if (error) return { error: error.message };
@@ -175,7 +187,7 @@ export async function updateHabitTitleAction(
 
   const { data: habitData, error: habitError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, current_streak, longest_streak')
+    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
     .eq('id', habitId)
     .eq('profile_id', user.id)
     .single();
@@ -193,6 +205,32 @@ export async function updateHabitTitleAction(
   const habit = buildHabit(row, dates);
   await persistHabitStreaks(supabase, user.id, [row], [habit]);
   return { data: habit };
+}
+
+export type ReorderHabitsResult = { error?: string };
+
+/**
+ * Reorder habits. habitIds must be the full ordered list for the user.
+ * Sets position to 0, 1, 2, … for each id.
+ */
+export async function reorderHabitsAction(habitIds: string[]): Promise<ReorderHabitsResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: authError?.message ?? 'Not authenticated' };
+  }
+  for (let i = 0; i < habitIds.length; i += 1) {
+    const { error } = await supabase
+      .from('habits')
+      .update({ position: i })
+      .eq('id', habitIds[i])
+      .eq('profile_id', user.id);
+    if (error) return { error: error.message };
+  }
+  return {};
 }
 
 export type ToggleHabitTodayResult = { data?: Habit; error?: string };
@@ -232,7 +270,7 @@ export async function toggleHabitTodayAction(habitId: string): Promise<ToggleHab
 
   const { data: habitData, error: habitError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, current_streak, longest_streak')
+    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
     .eq('id', habitId)
     .eq('profile_id', user.id)
     .single();

@@ -1,11 +1,29 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   Check,
   ChevronLeft,
   ChevronRight,
   Flame,
+  GripVertical,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -34,6 +52,110 @@ const HABIT_CARD_FRAME =
   "rounded-[1.25rem] border px-4 py-4 shadow-[0_2px_24px_rgba(15,15,20,0.055)] backdrop-blur-md sm:px-5 sm:py-5";
 
 const RIPPLE_CELL_EMPTY = "bg-white/55";
+
+/** Cast for React 19 JSX compatibility with @dnd-kit return type */
+const SortableList = SortableContext as unknown as React.JSX.ElementType;
+
+function SortableHabitRow({
+  habit,
+  completed,
+  streak,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  habit: Habit;
+  completed: boolean;
+  streak: number;
+  onToggle: (id: string) => void;
+  onEdit: (h: Habit) => void;
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: habit.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const rowClass = [
+    "flex items-center gap-3 rounded-xl px-3 py-3 shadow-md",
+    isDragging && "z-50 opacity-90 shadow-lg",
+    completed ? "bg-emerald-50" : "bg-white",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <li ref={setNodeRef} style={style} className={rowClass}>
+      <button
+        type="button"
+        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-5 w-5" aria-hidden />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onToggle(habit.id)}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+          completed
+            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+        }`}
+        aria-label={
+          completed
+            ? "Mark habit incomplete for today"
+            : "Mark habit complete for today"
+        }
+      >
+        <Check className="h-5 w-5" />
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={`truncate text-[15px] font-medium ${completed ? "text-emerald-900" : "text-gray-900"}`}
+        >
+          {habit.title}
+        </p>
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+          <Flame
+            className={`h-3.5 w-3.5 ${streak > 0 ? "text-orange-500" : "text-gray-400"}`}
+          />
+          {streak} day streak
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onEdit(habit)}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+        aria-label="Edit habit"
+      >
+        <Pencil className="h-4 w-4" />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDelete(habit.id)}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500"
+        aria-label="Delete habit"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </li>
+  );
+}
 
 type HabitGridAccent = {
   cardClass: string;
@@ -187,9 +309,38 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
     deleteHabit,
     toggleToday,
     updateHabitTitle,
+    reorderHabits,
     isCompletedToday,
     updateTitlePending,
   } = useHabits(userId);
+
+  const sortedHabits = useMemo(
+    () =>
+      [...habits].sort(
+        (a, b) => (a.position - b.position) || (a.createdAt - b.createdAt)
+      ),
+    [habits]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const ids = sortedHabits.map((h) => h.id);
+      const oldIndex = ids.indexOf(active.id as string);
+      const newIndex = ids.indexOf(over.id as string);
+      if (oldIndex === -1 || newIndex === -1) return;
+      reorderHabits(arrayMove(ids, oldIndex, newIndex));
+    },
+    [sortedHabits, reorderHabits]
+  );
 
   const openEdit = useCallback((habit: Habit) => {
     setEditingHabit(habit);
@@ -213,9 +364,9 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
   );
 
   const stats = useMemo(() => {
-    const doneToday = habits.filter((h) => isCompletedToday(h)).length;
-    return { doneToday, total: habits.length };
-  }, [habits, isCompletedToday]);
+    const doneToday = sortedHabits.filter((h) => isCompletedToday(h)).length;
+    return { doneToday, total: sortedHabits.length };
+  }, [sortedHabits, isCompletedToday]);
 
   if (loading) {
     return (
@@ -263,72 +414,34 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
           </div>
 
           <ul className="space-y-3 pb-6">
-            {habits.length === 0 ? (
+            {sortedHabits.length === 0 ? (
               <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 py-8 text-center text-sm text-gray-500">
                 No habits yet. Tap the + button to add one.
               </li>
             ) : (
-              habits.map((habit) => {
-                const completed = isCompletedToday(habit);
-                const streak = habit.currentStreak;
-                return (
-                  <li
-                    key={habit.id}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-3 shadow-md ${
-                      completed ? "bg-emerald-50" : "bg-white"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleToday(habit.id)}
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
-                        completed
-                          ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
-                      aria-label={
-                        completed
-                          ? "Mark habit incomplete for today"
-                          : "Mark habit complete for today"
-                      }
-                    >
-                      <Check className="h-5 w-5" />
-                    </button>
-
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className={`truncate text-[15px] font-medium ${completed ? "text-emerald-900" : "text-gray-900"}`}
-                      >
-                        {habit.title}
-                      </p>
-                      <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                        <Flame
-                          className={`h-3.5 w-3.5 ${streak > 0 ? "text-orange-500" : "text-gray-400"}`}
-                        />
-                        {streak} day streak
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => openEdit(habit)}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-                      aria-label="Edit habit"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => deleteHabit(habit.id)}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500"
-                      aria-label="Delete habit"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </li>
-                );
-              })
+              <DndContext
+                id="habits-daily-dnd"
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableList
+                  items={sortedHabits.map((h) => h.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {sortedHabits.map((habit) => (
+                    <SortableHabitRow
+                      key={habit.id}
+                      habit={habit}
+                      completed={isCompletedToday(habit)}
+                      streak={habit.currentStreak}
+                      onToggle={toggleToday}
+                      onEdit={openEdit}
+                      onDelete={deleteHabit}
+                    />
+                  ))}
+                </SortableList>
+              </DndContext>
             )}
           </ul>
         </>
@@ -363,13 +476,13 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          {habits.length === 0 ? (
+          {sortedHabits.length === 0 ? (
             <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 py-8 text-center text-sm text-gray-500">
               Add habits on the Daily tab to see a calendar for each one.
             </p>
           ) : (
             <ul className="space-y-2">
-              {habits.map((habit, index) => {
+              {sortedHabits.map((habit, index) => {
                 const accent =
                   HABIT_GRID_ACCENTS[index % HABIT_GRID_ACCENTS.length];
                 return (

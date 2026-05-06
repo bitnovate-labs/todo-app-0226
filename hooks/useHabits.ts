@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addHabitAction,
   deleteHabitAction,
+  reorderHabitsAction,
   toggleHabitTodayAction,
   updateHabitTitleAction,
 } from "@/app/actions/habits";
@@ -74,6 +75,30 @@ export function useHabits(userId: string | undefined | null) {
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const reorderHabitsMutation = useMutation({
+    mutationFn: (habitIds: string[]) => reorderHabitsAction(habitIds),
+    onMutate: async (habitIds) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Habit[]>(queryKey);
+      queryClient.setQueryData<Habit[]>(queryKey, (old) => {
+        if (!old) return old;
+        const updated = old.map((h) => {
+          const idx = habitIds.indexOf(h.id);
+          if (idx === -1) return h;
+          return { ...h, position: idx };
+        });
+        return updated.sort(
+          (a, b) => (a.position - b.position) || (a.createdAt - b.createdAt)
+        );
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev != null) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const addHabit = useCallback(
     async (title: string) => {
       const result = await addMutation.mutateAsync(title.trim());
@@ -105,6 +130,11 @@ export function useHabits(userId: string | undefined | null) {
     [updateTitleMutation]
   );
 
+  const reorderHabits = useCallback(
+    (habitIds: string[]) => reorderHabitsMutation.mutate(habitIds),
+    [reorderHabitsMutation]
+  );
+
   const isCompletedToday = useCallback(
     (habit: Habit) => habit.completedDates.includes(todayKey()),
     []
@@ -118,6 +148,7 @@ export function useHabits(userId: string | undefined | null) {
     deleteHabit,
     toggleToday,
     updateHabitTitle,
+    reorderHabits,
     isCompletedToday,
     addPending: addMutation.isPending,
     deletePending: deleteMutation.isPending,
