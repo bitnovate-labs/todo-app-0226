@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { Home, Package, Calendar, Clock, LayoutGrid, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Home, Package, Calendar, Clock, LayoutGrid, Flame, Plus } from "lucide-react";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 import { useAddDrawer } from "@/components/layout/AddDrawerContext";
+import { AddHabitModal } from "@/components/habits/AddHabitModal";
 import { AddTodoModal } from "@/components/todos/AddTodoModal";
 
 const navItemClass =
@@ -42,6 +43,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
   const pathnameCtx = useDashboardPathname();
   const pathname = pathnameCtx?.pathname ?? "/";
   const addDrawer = useAddDrawer();
+  const [addHabitOpen, setAddHabitOpen] = useState(false);
 
   const handleDashboardTab = (path: string) => {
     if (pathname === path) return;
@@ -49,13 +51,13 @@ export function BottomNavLinks({ userId }: { userId: string }) {
   };
 
   useEffect(() => {
-    if (typeof window === "undefined" || !addDrawer) return;
+    if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("add") === "1") {
-      addDrawer.openDrawer();
-      const path = pathnameCtx?.pathname ?? window.location.pathname;
-      window.history.replaceState(null, "", path);
-    }
+    if (params.get("add") !== "1") return;
+    const path = pathnameCtx?.pathname ?? window.location.pathname;
+    if (path === "/habits") setAddHabitOpen(true);
+    else addDrawer?.openDrawer();
+    window.history.replaceState(null, "", path);
   }, [addDrawer, pathnameCtx?.pathname]);
 
   return (
@@ -96,18 +98,33 @@ export function BottomNavLinks({ userId }: { userId: string }) {
         <LayoutGrid className="h-6 w-6 shrink-0" aria-hidden />
         <span>Time</span>
       </NavTab>
+      <NavTab
+        active={pathname === "/habits"}
+        onClick={() => handleDashboardTab("/habits")}
+      >
+        <Flame className="h-6 w-6 shrink-0" aria-hidden />
+        <span>Habits</span>
+      </NavTab>
     </div>
-    {/* FAB: opens add-todo modal; on desktop constrained to app max-width */}
+    {/* FAB: add habit on /habits, else add todo; desktop aligned to app max-width */}
     <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px)+0.5rem)] right-6 z-50 md:left-1/2 md:right-auto md:w-full md:max-w-[430px] md:-translate-x-1/2 md:px-6 md:flex md:justify-end">
       <button
         type="button"
-        onClick={() => addDrawer?.openDrawer()}
+        onClick={() => {
+          if (pathname === "/habits") setAddHabitOpen(true);
+          else addDrawer?.openDrawer();
+        }}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        aria-label="Add todo"
+        aria-label={pathname === "/habits" ? "Add habit" : "Add todo"}
       >
         <Plus className="h-7 w-7 shrink-0" strokeWidth={2.5} aria-hidden />
       </button>
     </div>
+    <AddHabitModal
+      open={addHabitOpen}
+      onClose={() => setAddHabitOpen(false)}
+      userId={userId}
+    />
     {addDrawer && (
       <AddTodoModal
         open={addDrawer.open}

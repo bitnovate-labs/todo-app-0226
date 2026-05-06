@@ -5,6 +5,7 @@ import {
   TIME_BLOCKS_QUERY_KEY,
   QUERY_GC_TIME_MS,
 } from "@/lib/query-client";
+import { HABITS_QUERY_KEY } from "@/lib/habits-query";
 
 /** Bump if persisted cache shape changes (invalidates old localStorage blobs). */
 const STORAGE_VERSION = "v1";
@@ -31,7 +32,11 @@ export function buildPersistOptions(userId: string) {
     dehydrateOptions: {
       shouldDehydrateQuery: (query: Query) => {
         const root = query.queryKey[0];
-        return root === TODOS_QUERY_KEY[0] || root === TIME_BLOCKS_QUERY_KEY[0];
+        return (
+          root === TODOS_QUERY_KEY[0] ||
+          root === TIME_BLOCKS_QUERY_KEY[0] ||
+          root === HABITS_QUERY_KEY[0]
+        );
       },
     },
   };

@@ -11,6 +11,7 @@ const pathTitles: Record<string, string> = {
   '/todo/new': 'New todo',
   '/history': 'History',
   '/timeblock': 'Time block',
+  '/habits': 'Habit Tracker',
   '/settings': 'Settings',
   '/sign-in': 'Sign in',
   '/sign-up': 'Sign up',

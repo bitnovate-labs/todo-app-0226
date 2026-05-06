@@ -11,6 +11,7 @@ import {
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { TodayTodoList } from "@/components/todos/TodayTodoList";
 import { TimeBlockView } from "@/components/todos/TimeBlockView";
+import { HabitTrackerView } from "@/components/habits/HabitTrackerView";
 import { useCalendarView } from "@/hooks/useCalendarView";
 import { todosQueryKey } from "@/lib/todos-query";
 import {
@@ -99,6 +100,8 @@ export function DashboardContent({ userId }: { userId: string }) {
       <HistoryView userId={userId} />
     ) : pathname === "/timeblock" ? (
       <TimeBlockView userId={userId} />
+    ) : pathname === "/habits" ? (
+      <HabitTrackerView userId={userId} />
     ) : (
       <div className="min-h-full bg-gray-100 -mx-4 -my-6 px-4 py-6">
         <TodayTodoList userId={userId} />

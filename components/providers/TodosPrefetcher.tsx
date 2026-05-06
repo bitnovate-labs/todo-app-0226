@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { todosQueryKey } from "@/lib/todos-query";
+import { habitsQueryKey, fetchHabits } from "@/lib/habits-query";
 import {
   timeBlocksQueryKey,
   fetchTimeBlocks,
@@ -20,7 +21,14 @@ export function TodosPrefetcher({ userId }: { userId: string | null }) {
 
   useEffect(() => {
     if (!userId) return;
+    const habitsKey = habitsQueryKey(userId);
     const timeBlocksKey = timeBlocksQueryKey(userId, todayKey());
+    if (queryClient.getQueryData(habitsKey) == null) {
+      queryClient.prefetchQuery({
+        queryKey: habitsKey,
+        queryFn: fetchHabits,
+      });
+    }
     if (queryClient.getQueryData(timeBlocksKey) == null) {
       queryClient.prefetchQuery({
         queryKey: timeBlocksKey,
@@ -42,8 +50,10 @@ export function TodosPrefetcher({ userId }: { userId: string | null }) {
       if (document.visibilityState === "visible" && wasHidden) {
         wasHidden = false;
         const todosKey = todosQueryKey(userId);
+        const habitsKey = habitsQueryKey(userId);
         const timeBlocksKey = timeBlocksQueryKey(userId, todayKey());
         queryClient.invalidateQueries({ queryKey: todosKey });
+        queryClient.invalidateQueries({ queryKey: habitsKey });
         queryClient.invalidateQueries({ queryKey: timeBlocksKey });
       }
     };
