@@ -10,6 +10,11 @@ import {
   updateHabitTitleAction,
 } from "@/app/actions/habits";
 import type { Habit } from "@/lib/habits";
+import {
+  currentHabitStreak,
+  longestHabitStreak,
+  sortHabitDatesAsc,
+} from "@/lib/habits";
 import { todayKey } from "@/lib/todos";
 import { habitsQueryKey, fetchHabits } from "@/lib/habits-query";
 
@@ -29,13 +34,42 @@ export function useHabits(userId: string | undefined | null) {
 
   const addMutation = useMutation({
     mutationFn: (title: string) => addHabitAction(title),
-    onSuccess: (result) => {
-      if (!result.data) return;
-      queryClient.setQueryData<Habit[]>(queryKey, (prev) =>
-        prev ? [...prev, result.data!] : [result.data!]
+    onMutate: async (title) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Habit[]>(queryKey);
+      const trimmed = title.trim();
+      if (!trimmed) return { prev };
+
+      const optimisticId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+      const maxPos = prev?.length ? Math.max(...prev.map((h) => h.position)) : -1;
+      const optimistic: Habit = {
+        id: optimisticId,
+        title: trimmed,
+        createdAt: Date.now(),
+        position: maxPos + 1,
+        completedDates: [],
+        currentStreak: 0,
+        longestStreak: 0,
+      };
+      queryClient.setQueryData<Habit[]>(queryKey, (old) =>
+        old ? [...old, optimistic] : [optimistic]
       );
+      return { prev, optimisticId };
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onError: (_err, _title, ctx) => {
+      if (ctx?.prev !== undefined) queryClient.setQueryData(queryKey, ctx.prev);
+    },
+    onSuccess: (result, _title, ctx) => {
+      if (!result.data) return;
+      const optimisticId = ctx?.optimisticId;
+      queryClient.setQueryData<Habit[]>(queryKey, (old) => {
+        if (!old) return [result.data!];
+        if (optimisticId) {
+          return old.map((h) => (h.id === optimisticId ? result.data! : h));
+        }
+        return [...old, result.data!];
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -54,13 +88,35 @@ export function useHabits(userId: string | undefined | null) {
 
   const toggleMutation = useMutation({
     mutationFn: (id: string) => toggleHabitTodayAction(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<Habit[]>(queryKey);
+      const day = todayKey();
+      queryClient.setQueryData<Habit[]>(queryKey, (old) => {
+        if (!old) return old;
+        return old.map((h) => {
+          if (h.id !== id) return h;
+          const had = h.completedDates.includes(day);
+          const completedDates = sortHabitDatesAsc(
+            had ? h.completedDates.filter((d) => d !== day) : [...h.completedDates, day]
+          );
+          const currentStreak = currentHabitStreak({ completedDates });
+          const computedLong = longestHabitStreak(completedDates);
+          const longestStreak = Math.max(computedLong, h.longestStreak);
+          return { ...h, completedDates, currentStreak, longestStreak };
+        });
+      });
+      return { prev };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev !== undefined) queryClient.setQueryData(queryKey, ctx.prev);
+    },
     onSuccess: (result) => {
       if (!result.data) return;
       queryClient.setQueryData<Habit[]>(queryKey, (old) =>
         old ? old.map((h) => (h.id === result.data!.id ? result.data! : h)) : [result.data!]
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
   const updateTitleMutation = useMutation({
@@ -72,7 +128,6 @@ export function useHabits(userId: string | undefined | null) {
         old ? old.map((h) => (h.id === result.data!.id ? result.data! : h)) : [result.data!]
       );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
   const reorderHabitsMutation = useMutation({
