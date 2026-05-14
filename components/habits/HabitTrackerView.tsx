@@ -60,6 +60,7 @@ function SortableHabitRow({
   habit,
   completed,
   streak,
+  toggleBusy,
   onToggle,
   onEdit,
   onDelete,
@@ -67,6 +68,7 @@ function SortableHabitRow({
   habit: Habit;
   completed: boolean;
   streak: number;
+  toggleBusy: boolean;
   onToggle: (id: string) => void;
   onEdit: (h: Habit) => void;
   onDelete: (id: string) => void;
@@ -107,8 +109,10 @@ function SortableHabitRow({
 
       <button
         type="button"
+        disabled={toggleBusy}
+        aria-busy={toggleBusy}
         onClick={() => onToggle(habit.id)}
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors active:scale-95 disabled:pointer-events-none disabled:opacity-60 ${
           completed
             ? "bg-emerald-500 text-white hover:bg-emerald-600"
             : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -311,6 +315,7 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
     updateHabitTitle,
     reorderHabits,
     isCompletedToday,
+    isTogglePending,
     updateTitlePending,
   } = useHabits(userId);
 
@@ -435,6 +440,7 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                       habit={habit}
                       completed={isCompletedToday(habit)}
                       streak={habit.currentStreak}
+                      toggleBusy={isTogglePending(habit.id)}
                       onToggle={toggleToday}
                       onEdit={openEdit}
                       onDelete={deleteHabit}

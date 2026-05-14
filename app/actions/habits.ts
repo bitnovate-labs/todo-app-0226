@@ -9,6 +9,11 @@ import {
   sortHabitDatesAsc,
 } from '@/lib/habits';
 
+/** YYYY-MM-DD from the client for calendar-day habits (must match user-local `todayKey()`). */
+function isClientDateKey(s: string | undefined): s is string {
+  return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+}
+
 type HabitRow = {
   id: string;
   profile_id: string;
@@ -24,9 +29,10 @@ type CheckinRow = {
   date: string;
 };
 
-function buildHabit(row: HabitRow, dates: string[]): Habit {
+function buildHabit(row: HabitRow, dates: string[], streakAsOfDate?: string): Habit {
   const completedDates = sortHabitDatesAsc(dates);
-  const currentStreak = currentHabitStreak({ completedDates });
+  const streakAnchor = isClientDateKey(streakAsOfDate) ? streakAsOfDate : todayKey();
+  const currentStreak = currentHabitStreak({ completedDates }, streakAnchor);
   const computedLong = longestHabitStreak(completedDates);
   const storedLong = row.longest_streak ?? 0;
   const longestStreak = Math.max(computedLong, storedLong);
@@ -41,14 +47,18 @@ function buildHabit(row: HabitRow, dates: string[]): Habit {
   };
 }
 
-function mapRowsToHabits(habitRows: HabitRow[], checkins: CheckinRow[]): Habit[] {
+function mapRowsToHabits(
+  habitRows: HabitRow[],
+  checkins: CheckinRow[],
+  streakAsOfDate?: string
+): Habit[] {
   const byHabit = new Map<string, string[]>();
   for (const c of checkins) {
     const list = byHabit.get(c.habit_id) ?? [];
     list.push(c.date);
     byHabit.set(c.habit_id, list);
   }
-  return habitRows.map((row) => buildHabit(row, byHabit.get(row.id) ?? []));
+  return habitRows.map((row) => buildHabit(row, byHabit.get(row.id) ?? [], streakAsOfDate));
 }
 
 async function persistHabitStreaks(
@@ -78,7 +88,11 @@ async function persistHabitStreaks(
 
 export type GetHabitsResult = { data?: Habit[]; error?: string };
 
-export async function getHabitsForUser(userId: string): Promise<GetHabitsResult> {
+export async function getHabitsForUser(
+  userId: string,
+  /** Client local calendar date (YYYY-MM-DD) for streak "today"; avoids server TZ drift. */
+  clientCalendarDate?: string
+): Promise<GetHabitsResult> {
   const supabase = await createClient();
 
   const { data: habitsData, error: habitsError } = await supabase
@@ -102,19 +116,20 @@ export async function getHabitsForUser(userId: string): Promise<GetHabitsResult>
 
   if (checkinsError) return { error: checkinsError.message, data: [] };
 
-  const mapped = mapRowsToHabits(habits, (checkinsData ?? []) as CheckinRow[]);
+  const streakAsOf = isClientDateKey(clientCalendarDate) ? clientCalendarDate : undefined;
+  const mapped = mapRowsToHabits(habits, (checkinsData ?? []) as CheckinRow[], streakAsOf);
   await persistHabitStreaks(supabase, userId, habits, mapped);
   return { data: mapped };
 }
 
-export async function getHabitsAction(): Promise<GetHabitsResult> {
+export async function getHabitsAction(clientCalendarDate?: string): Promise<GetHabitsResult> {
   const supabase = await createClient();
   const {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) return { data: [], error: authError?.message ?? 'Not authenticated' };
-  return getHabitsForUser(user.id);
+  return getHabitsForUser(user.id, clientCalendarDate);
 }
 
 export type AddHabitResult = { data?: Habit; error?: string };
@@ -235,7 +250,11 @@ export async function reorderHabitsAction(habitIds: string[]): Promise<ReorderHa
 
 export type ToggleHabitTodayResult = { data?: Habit; error?: string };
 
-export async function toggleHabitTodayAction(habitId: string): Promise<ToggleHabitTodayResult> {
+export async function toggleHabitTodayAction(
+  habitId: string,
+  /** Must be the caller's local calendar day (same as UI `todayKey()`). */
+  clientDate: string
+): Promise<ToggleHabitTodayResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -243,7 +262,7 @@ export async function toggleHabitTodayAction(habitId: string): Promise<ToggleHab
   } = await supabase.auth.getUser();
   if (authError || !user) return { error: authError?.message ?? 'Not authenticated' };
 
-  const date = todayKey();
+  const date = isClientDateKey(clientDate) ? clientDate : todayKey();
 
   const { data: existing, error: existingError } = await supabase
     .from('habit_checkins')
@@ -265,7 +284,12 @@ export async function toggleHabitTodayAction(habitId: string): Promise<ToggleHab
     const { error: insError } = await supabase
       .from('habit_checkins')
       .insert({ habit_id: habitId, profile_id: user.id, date });
-    if (insError) return { error: insError.message };
+    if (insError) {
+      const msg = insError.message ?? '';
+      const dup =
+        insError.code === '23505' || msg.includes('duplicate') || msg.includes('unique');
+      if (!dup) return { error: insError.message };
+    }
   }
 
   const { data: habitData, error: habitError } = await supabase
@@ -285,7 +309,7 @@ export async function toggleHabitTodayAction(habitId: string): Promise<ToggleHab
 
   const row = habitData as HabitRow;
   const dates = ((checkinsData ?? []) as CheckinRow[]).map((c) => c.date);
-  const habit = buildHabit(row, dates);
+  const habit = buildHabit(row, dates, date);
   await persistHabitStreaks(supabase, user.id, [row], [habit]);
   return { data: habit };
 }

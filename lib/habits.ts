@@ -21,9 +21,13 @@ export function isHabitCompletedOn(habit: Habit, date: string): boolean {
   return habit.completedDates.includes(date);
 }
 
-export function currentHabitStreak(habit: Pick<Habit, "completedDates">): number {
+export function currentHabitStreak(
+  habit: Pick<Habit, "completedDates">,
+  /** Calendar day to treat as "today" for streak (use client local date when computing on the server). */
+  asOfDateKey: string = todayKey()
+): number {
   let streak = 0;
-  let day = todayKey();
+  let day = asOfDateKey;
   while (habit.completedDates.includes(day)) {
     streak += 1;
     day = addDaysToDateKey(day, -1);

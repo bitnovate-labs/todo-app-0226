@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addHabitAction,
@@ -21,6 +21,8 @@ import { habitsQueryKey, fetchHabits } from "@/lib/habits-query";
 export function useHabits(userId: string | undefined | null) {
   const queryClient = useQueryClient();
   const queryKey = habitsQueryKey(userId);
+  const togglingRef = useRef(new Set<string>());
+  const [togglePendingIds, setTogglePendingIds] = useState(() => new Set<string>());
 
   const {
     data: habits = [],
@@ -87,20 +89,23 @@ export function useHabits(userId: string | undefined | null) {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: (id: string) => toggleHabitTodayAction(id),
-    onMutate: async (id) => {
+    mutationFn: async ({ id, dateKey }: { id: string; dateKey: string }) => {
+      const result = await toggleHabitTodayAction(id, dateKey);
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
+    onMutate: async ({ id, dateKey }) => {
       await queryClient.cancelQueries({ queryKey });
       const prev = queryClient.getQueryData<Habit[]>(queryKey);
-      const day = todayKey();
       queryClient.setQueryData<Habit[]>(queryKey, (old) => {
         if (!old) return old;
         return old.map((h) => {
           if (h.id !== id) return h;
-          const had = h.completedDates.includes(day);
+          const had = h.completedDates.includes(dateKey);
           const completedDates = sortHabitDatesAsc(
-            had ? h.completedDates.filter((d) => d !== day) : [...h.completedDates, day]
+            had ? h.completedDates.filter((d) => d !== dateKey) : [...h.completedDates, dateKey]
           );
-          const currentStreak = currentHabitStreak({ completedDates });
+          const currentStreak = currentHabitStreak({ completedDates }, dateKey);
           const computedLong = longestHabitStreak(completedDates);
           const longestStreak = Math.max(computedLong, h.longestStreak);
           return { ...h, completedDates, currentStreak, longestStreak };
@@ -108,7 +113,7 @@ export function useHabits(userId: string | undefined | null) {
       });
       return { prev };
     },
-    onError: (_err, _id, ctx) => {
+    onError: (_err, _vars, ctx) => {
       if (ctx?.prev !== undefined) queryClient.setQueryData(queryKey, ctx.prev);
     },
     onSuccess: (result) => {
@@ -170,11 +175,31 @@ export function useHabits(userId: string | undefined | null) {
   );
 
   const toggleToday = useCallback(
-    async (id: string) => {
-      const result = await toggleMutation.mutateAsync(id);
-      if (result.error) throw new Error(result.error);
+    (id: string) => {
+      if (togglingRef.current.has(id)) return;
+      const dateKey = todayKey();
+      togglingRef.current.add(id);
+      setTogglePendingIds((prev) => new Set(prev).add(id));
+      toggleMutation.mutate(
+        { id, dateKey },
+        {
+          onSettled: () => {
+            togglingRef.current.delete(id);
+            setTogglePendingIds((prev) => {
+              const next = new Set(prev);
+              next.delete(id);
+              return next;
+            });
+          },
+        }
+      );
     },
     [toggleMutation]
+  );
+
+  const isTogglePending = useCallback(
+    (id: string) => togglePendingIds.has(id),
+    [togglePendingIds]
   );
 
   const updateHabitTitle = useCallback(
@@ -207,7 +232,8 @@ export function useHabits(userId: string | undefined | null) {
     isCompletedToday,
     addPending: addMutation.isPending,
     deletePending: deleteMutation.isPending,
-    togglePending: toggleMutation.isPending,
+    togglePending: togglePendingIds.size > 0,
+    isTogglePending,
     updateTitlePending: updateTitleMutation.isPending,
   };
 }

@@ -1,11 +1,14 @@
 import { requireUser } from "@/lib/auth";
-import { HabitTrackerView } from "@/components/habits/HabitTrackerView";
 
 export const metadata = {
   title: "Habit Tracker",
 };
 
+/**
+ * Route exists so /habits is a valid URL; `MainContent` renders `HabitTrackerView` when
+ * the dashboard pathname is /habits (same pattern as /box, /week, etc.).
+ */
 export default async function HabitsPage() {
-  const user = await requireUser();
-  return <HabitTrackerView userId={user.id} />;
+  await requireUser();
+  return null;
 }
