@@ -26,7 +26,7 @@ export function FeedbackDrawer() {
       <button
         type="button"
         onClick={open}
-        className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-sm font-medium text-fg transition hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-canvas"
       >
         Give feedback
       </button>
@@ -34,7 +34,7 @@ export function FeedbackDrawer() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 transition-opacity"
+          className="fixed inset-0 z-50 bg-overlay transition-opacity"
           aria-hidden
           onClick={close}
         />
@@ -42,7 +42,7 @@ export function FeedbackDrawer() {
 
       {/* Drawer panel (slide from right) */}
       <div
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[430px] flex-col bg-white shadow-xl transition-transform duration-300 ease-out"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[430px] flex-col border-l border-border bg-surface text-fg shadow-popover transition-transform duration-300 ease-out"
         style={{
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
           visibility: isOpen ? "visible" : "hidden",
@@ -52,17 +52,17 @@ export function FeedbackDrawer() {
         aria-modal="true"
         aria-labelledby="feedback-drawer-title"
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3 safe-area-t">
+        <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3 safe-area-t">
           <h2
             id="feedback-drawer-title"
-            className="text-lg font-semibold text-gray-900 mt-4"
+            className="mt-4 text-lg font-semibold text-fg"
           >
             Feedback
           </h2>
           <button
             type="button"
             onClick={close}
-            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
+            className="mt-4 rounded-md p-1.5 text-fg-muted hover:bg-muted hover:text-fg focus:outline-none focus:ring-2 focus:ring-primary-focus"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -70,7 +70,7 @@ export function FeedbackDrawer() {
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-          <p className="mb-4 text-sm text-gray-600">
+          <p className="mb-4 text-sm text-fg-muted">
             Help us improve by sharing your experience (~30 seconds).
           </p>
           <FeedbackForm onSubmitted={handleSubmitted} />

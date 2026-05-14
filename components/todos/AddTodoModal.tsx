@@ -96,7 +96,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
 
   const overlay = (
     <div
-      className="fixed inset-0 z-[9998] bg-black/60"
+      className="fixed inset-0 z-[9998] bg-overlay"
       aria-hidden
       onClick={handleClose}
     />
@@ -110,11 +110,11 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
       aria-labelledby="add-todo-modal-title"
     >
       <div
-        className="w-full max-w-[430px] max-h-[90dvh] flex flex-col rounded-2xl bg-white shadow-xl safe-area-b"
+        className="safe-area-b flex max-h-[90dvh] w-full max-w-[430px] flex-col rounded-2xl border border-border bg-surface text-fg shadow-popover"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="shrink-0 px-4 pt-4 pb-2">
-          <h2 id="add-todo-modal-title" className="text-lg font-semibold text-gray-900">
+        <div className="shrink-0 px-4 pb-2 pt-4">
+          <h2 id="add-todo-modal-title" className="text-lg font-semibold text-fg">
             New todo
           </h2>
         </div>
@@ -123,7 +123,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
           className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6"
         >
           <div>
-            <label htmlFor="modal-title" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="modal-title" className="mb-1 block text-sm font-medium text-fg-muted">
               What to do?
             </label>
             <input
@@ -133,18 +133,18 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Buy groceries"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
               required
               autoComplete="off"
             />
           </div>
           {!defaultDate && (
             <div>
-              <span className="mb-2 block text-sm font-medium text-gray-700">
+              <span className="mb-2 block text-sm font-medium text-fg-muted">
                 When?
               </span>
               <div className="space-y-2">
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-muted px-4 py-3 has-[input:checked]:border-primary/40 has-[input:checked]:bg-accent-soft">
                   <input
                     type="radio"
                     name="modal-when"
@@ -153,11 +153,11 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
                       setUseToday(true);
                       setDatePickerOpen(false);
                     }}
-                    className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 border-border text-primary focus:ring-primary-focus"
                   />
-                  <span className="text-gray-900">Today</span>
+                  <span className="text-fg">Today</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-muted px-4 py-3 has-[input:checked]:border-primary/40 has-[input:checked]:bg-accent-soft">
                   <input
                     type="radio"
                     name="modal-when"
@@ -166,28 +166,28 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
                       setUseToday(false);
                       setDatePickerOpen(true);
                     }}
-                    className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 border-border text-primary focus:ring-primary-focus"
                   />
-                  <span className="text-gray-900">Select a date</span>
+                  <span className="text-fg">Select a date</span>
                 </label>
                 {!useToday && (
                   <div className="space-y-2">
                     <button
                       type="button"
                       onClick={() => setDatePickerOpen((v) => !v)}
-                      className="flex w-full items-center justify-between rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3 text-left text-sm hover:bg-blue-100/80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex w-full items-center justify-between rounded-xl border border-primary/35 bg-accent-soft px-4 py-3 text-left text-sm text-fg hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
                       aria-expanded={datePickerOpen}
                     >
                       <span>
                         {dayNameFromDate(selectedDateObj ?? today)},{" "}
                         {formatDateDDMMMFromDate(selectedDateObj ?? today)}
                       </span>
-                      <span className="text-blue-700">{datePickerOpen ? "Close" : "Change"}</span>
+                      <span className="font-medium text-primary">{datePickerOpen ? "Close" : "Change"}</span>
                     </button>
                     {datePickerOpen && (
                       <div
                         ref={datePickerRef}
-                        className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-3 [&_.rdp-root]:mx-0"
+                        className="create-todo-calendar min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-border bg-elevated p-3 text-fg [&_.rdp-root]:mx-0"
                       >
                         <DayPicker
                           mode="single"
@@ -214,14 +214,14 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !title.trim()}
-              className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50"
             >
               {submitting ? "Adding…" : "Add todo"}
             </button>

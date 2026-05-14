@@ -49,9 +49,9 @@ function ScaleRow({
   const options = Array.from({ length: max - min + 1 }, (_, i) => min + i);
   return (
     <div className="mb-5">
-      <p className="mb-2 text-sm font-medium text-gray-700">{label}</p>
+      <p className="mb-2 text-sm font-medium text-fg">{label}</p>
       {leftLabel != null && rightLabel != null && (
-        <p className="mb-2 flex justify-between text-xs text-gray-500">
+        <p className="mb-2 flex justify-between text-xs text-fg-muted">
           <span>{leftLabel}</span>
           <span>{rightLabel}</span>
         </p>
@@ -60,7 +60,7 @@ function ScaleRow({
         {options.map((n) => (
           <label
             key={n}
-            className="flex flex-1 cursor-pointer select-none flex-col items-center rounded-md border py-2 transition-colors has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 hover:border-gray-400"
+            className="flex flex-1 cursor-pointer select-none flex-col items-center rounded-md border border-border py-2 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent-soft has-[:checked]:text-primary hover:border-border-strong"
           >
             <input
               type="radio"
@@ -80,12 +80,12 @@ function ScaleRow({
 function CategoryRow({ value }: { value: string | null }) {
   return (
     <div className="mb-5">
-      <p className="mb-2 text-sm font-medium text-gray-700">What best describes this feedback?</p>
+      <p className="mb-2 text-sm font-medium text-fg">What best describes this feedback?</p>
       <div className="grid grid-cols-2 gap-2">
         {FEEDBACK_CATEGORIES.map((cat) => (
           <label
             key={cat}
-            className="cursor-pointer select-none rounded-md border py-2 text-center text-sm transition-colors has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 hover:border-gray-400"
+            className="cursor-pointer select-none rounded-md border border-border py-2 text-center text-sm transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent-soft has-[:checked]:text-primary hover:border-border-strong"
           >
             <input
               type="radio"
@@ -119,7 +119,7 @@ export function FeedbackForm({ onSubmitted }: FeedbackFormProps) {
 
   if (state?.submitted) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center text-sm text-green-800">
+      <div className="rounded-lg border border-success/40 bg-success-muted p-4 text-center text-sm text-success">
         Thanks for your feedback. It helps us improve the app.
       </div>
     );
@@ -166,27 +166,27 @@ export function FeedbackForm({ onSubmitted }: FeedbackFormProps) {
         leftLabel="Poor value"
         rightLabel="Great value"
       />
-      <p className="-mt-3 mb-4 text-xs text-gray-500">Optional — skip if not applicable.</p>
+      <p className="-mt-3 mb-4 text-xs text-fg-muted">Optional — skip if not applicable.</p>
       <CategoryRow value={null} />
 
       <div className="mb-5">
-        <p className="mb-2 text-sm font-medium text-gray-700">
-          Anything else? <span className="font-normal text-gray-500">(optional)</span>
+        <p className="mb-2 text-sm font-medium text-fg">
+          Anything else? <span className="font-normal text-fg-muted">(optional)</span>
         </p>
         <textarea
           name="message"
           rows={3}
           maxLength={2000}
           placeholder="Short comment..."
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-md border border-border bg-canvas px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary-focus"
         />
       </div>
 
       <div className="mb-5">
-        <p className="mb-2 text-sm font-medium text-gray-700">
-          Attach screenshots <span className="font-normal text-gray-500">(optional)</span>
+        <p className="mb-2 text-sm font-medium text-fg">
+          Attach screenshots <span className="font-normal text-fg-muted">(optional)</span>
         </p>
-        <p className="mb-2 text-xs text-gray-500">
+        <p className="mb-2 text-xs text-fg-muted">
           Each image must be JPEG, PNG, GIF or WebP and under 5MB. Max 3 images.
         </p>
         <input
@@ -194,12 +194,12 @@ export function FeedbackForm({ onSubmitted }: FeedbackFormProps) {
           name="images"
           accept="image/jpeg,image/png,image/gif,image/webp"
           multiple
-          className="w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+          className="w-full text-sm text-fg-muted file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary hover:file:bg-surface"
         />
       </div>
 
       {state?.error && (
-        <p className="mb-3 text-sm text-red-600" role="alert">
+        <p className="mb-3 text-sm text-danger" role="alert">
           {state.error}
         </p>
       )}
@@ -207,7 +207,7 @@ export function FeedbackForm({ onSubmitted }: FeedbackFormProps) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-canvas disabled:opacity-50"
       >
         {isPending ? 'Sending…' : 'Submit feedback'}
       </button>

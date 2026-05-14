@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
@@ -9,12 +10,21 @@ import { PreventSwipeBack } from "@/components/ui/PreventSwipeBack";
 import { PostHogProviderGate } from "./PostHogProviderGate";
 import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { APP_NAME } from "@/lib/constants";
-import { THEME } from "@/lib/theme";
+import { THEME_COLOR_LIGHT } from "@/lib/theme";
+import { THEME_STORAGE_KEY } from "@/lib/theme-preference";
 import { ShellFallback } from "@/components/layout/ShellFallback";
 import { AuthBoundary } from "@/components/layout/AuthBoundary";
 import { SplashHideTrigger } from "@/components/pwa/SplashScreen";
 import { LockOrientation } from "@/components/pwa/LockOrientation";
 import { OrientationGate } from "@/components/pwa/OrientationGate";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeColorMeta } from "@/components/theme/ThemeColorMeta";
+
+const appSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-app",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
@@ -33,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: THEME.primary,
+  themeColor: THEME_COLOR_LIGHT,
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
@@ -47,15 +57,32 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const themeInitScript = `
+(function(){
+  var KEY='${THEME_STORAGE_KEY}';
+  try {
+    var stored=localStorage.getItem(KEY);
+    var dark=false;
+    if(stored==='dark')dark=true;
+    else if(stored==='light')dark=false;
+    else dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if(dark)document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }catch(e){}
+})();
+`.trim();
+
   return (
-    <html lang="en" style={{ backgroundColor: '#f9fafb' }}>
-      <body className="min-h-dynamic-screen bg-gray-50 text-gray-900 antialiased">
+    <html
+      lang="en"
+      className={appSans.variable}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dynamic-screen bg-canvas font-sans text-fg antialiased">
         <Script
-          id="critical-bg"
+          id="theme-init"
           strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: "document.documentElement.style.backgroundColor='#f9fafb';",
-          }}
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <Script
           id="chunk-load-error-handler"
@@ -68,7 +95,7 @@ export default function RootLayout({
     return /ChunkLoadError|Loading chunk \\d+ failed|Loading CSS chunk \\d+ failed/i.test(msg);
   }
   function showRetryUI() {
-    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem;text-align:center;font-family:system-ui,sans-serif;background:#f9fafb;">' +
+    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem;text-align:center;font-family:system-ui,sans-serif;background:#f2f3f5;">' +
       '<p style="margin:0 0 1rem;font-size:1.125rem;color:#111827;">Something went wrong loading the app.</p>' +
       '<button type="button" onclick="sessionStorage.removeItem(\'chunkLoadRetry\');location.reload();" style="padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;color:#fff;background:#2563eb;border:none;border-radius:0.375rem;cursor:pointer;">Retry</button>' +
       '</div>';
@@ -108,22 +135,7 @@ export default function RootLayout({
           }}
         />
         {/* Launch splash: visible on first paint, hidden by SplashHideTrigger after mount */}
-        <div
-          id="app-splash"
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-            background: '#f9fafb',
-            padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
-          }}
-        >
+        <div id="app-splash" aria-hidden="true">
           <img
             src="/icon-192.png"
             alt=""
@@ -132,12 +144,12 @@ export default function RootLayout({
             style={{ width: 96, height: 96, borderRadius: '22%' }}
             fetchPriority="high"
           />
-          <span style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>
-            {APP_NAME}
-          </span>
+          <span className="app-splash-title">{APP_NAME}</span>
         </div>
         <SplashHideTrigger />
-        <PostHogProviderGate>
+        <ThemeProvider>
+          <ThemeColorMeta />
+          <PostHogProviderGate>
           <Script
             id="scroll-restoration"
             strategy="beforeInteractive"
@@ -153,7 +165,10 @@ export default function RootLayout({
           <ScrollToTop />
           <PreventSwipeBack />
           <OrientationGate>
-            <div id="app-container" className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-white shadow-lg">
+            <div
+              id="app-container"
+              className="mx-auto flex min-h-dynamic-screen max-w-[430px] flex-col bg-surface shadow-shell"
+            >
               <Suspense fallback={<ShellFallback />}>
                 <AuthBoundary>{children}</AuthBoundary>
               </Suspense>
@@ -164,6 +179,7 @@ export default function RootLayout({
           <LockOrientation />
           <AnalyticsConsentGate />
         </PostHogProviderGate>
+        </ThemeProvider>
       </body>
     </html>
   );

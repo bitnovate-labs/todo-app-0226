@@ -24,17 +24,17 @@ export function ConsentBanner({ onDismiss }: Props) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-gray-200 bg-white p-4 shadow-lg safe-area-b md:left-1/2 md:max-w-[430px] md:-translate-x-1/2"
+      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-surface p-4 shadow-popover safe-area-b md:left-1/2 md:max-w-[430px] md:-translate-x-1/2"
       role="dialog"
       aria-labelledby="consent-title"
       aria-describedby="consent-desc"
     >
-      <p id="consent-title" className="text-sm font-medium text-gray-900">
+      <p id="consent-title" className="text-sm font-medium text-fg">
         Help us improve
       </p>
-      <p id="consent-desc" className="mt-1 text-xs text-gray-600">
+      <p id="consent-desc" className="mt-1 text-xs text-fg-muted">
         We use anonymous analytics (PostHog) to understand how the app is used and fix issues. No ads or selling data.{' '}
-        <a href="/privacy" className="text-blue-600 underline">
+        <a href="/privacy" className="text-primary underline hover:text-primary-hover">
           Privacy
         </a>
       </p>
@@ -42,14 +42,14 @@ export function ConsentBanner({ onDismiss }: Props) {
         <button
           type="button"
           onClick={handleAccept}
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-canvas"
         >
           Accept
         </button>
         <button
           type="button"
           onClick={handleDecline}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md border border-border bg-muted px-3 py-2 text-sm font-medium text-fg hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-canvas"
         >
           Decline
         </button>

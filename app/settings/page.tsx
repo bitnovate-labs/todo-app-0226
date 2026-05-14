@@ -16,6 +16,7 @@ import { WeekStartSetting } from "@/components/settings/WeekStartSetting";
 import { WeekViewLayoutSetting } from "@/components/settings/WeekViewLayoutSetting";
 import { CalendarViewSetting } from "@/components/settings/CalendarViewSetting";
 import { ListFontSizeSetting } from "@/components/settings/ListFontSizeSetting";
+import { DarkModeSetting } from "@/components/settings/DarkModeSetting";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { useUser } from "@/components/layout/UserContext";
 
@@ -32,7 +33,7 @@ export default function SettingsPage() {
   if (user === null) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="h-6 w-24 animate-pulse rounded-lg bg-gray-200" />
+        <div className="h-6 w-24 animate-pulse rounded-lg bg-muted" />
       </div>
     );
   }
@@ -42,8 +43,8 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <SettingsSection title="Account" icon={<Mail className="h-3.5 w-3.5" />}>
           <div>
-            <p className="text-xs font-medium text-gray-500">Email</p>
-            <p className="mt-0.5 break-all text-sm font-medium text-gray-900">
+            <p className="text-xs font-medium text-fg-muted">Email</p>
+            <p className="mt-0.5 break-all text-sm font-medium text-fg">
               {user.email ?? ""}
             </p>
           </div>
@@ -58,7 +59,10 @@ export default function SettingsPage() {
         </SettingsSection>
 
         <SettingsSection title="Appearance" icon={<Type className="h-3.5 w-3.5" />}>
-          <ListFontSizeSetting />
+          <div className="space-y-6">
+            <DarkModeSetting />
+            <ListFontSizeSetting />
+          </div>
         </SettingsSection>
 
         <LockRotationSetting />
@@ -67,7 +71,7 @@ export default function SettingsPage() {
           title="Feedback"
           icon={<MessageCircle className="h-3.5 w-3.5" />}
         >
-          <p className="mb-3 text-sm text-gray-600">
+          <p className="mb-3 text-sm text-fg-muted">
             Help us improve by sharing your experience.
           </p>
           <FeedbackDrawer />

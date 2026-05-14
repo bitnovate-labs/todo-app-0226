@@ -102,7 +102,7 @@ export function WeekView({ userId }: WeekViewProps) {
 
   if (loading && todos.length === 0) {
     return (
-      <div className="animate-page-load py-8 text-center text-gray-500">
+      <div className="animate-page-load py-8 text-center text-fg-muted">
         Loading…
       </div>
     );
@@ -126,10 +126,10 @@ export function WeekView({ userId }: WeekViewProps) {
         ref={isToday ? todayRef : undefined}
         className={`min-h-0 shrink-0 rounded-2xl p-4 ${
           isToday
-            ? "border border-gray-200 bg-primary/10 shadow-md"
+            ? "border border-border bg-accent-soft shadow-card"
             : isPast
-              ? "border border-gray-200 bg-gray-50/70 shadow-none"
-              : "border border-gray-300 bg-white/80 shadow-sm"
+              ? "border border-border bg-muted/70 shadow-none"
+              : "border border-border bg-surface shadow-card"
         } ${
           layout === "horizontal"
             ? "min-w-[370px] w-[340px] snap-start"
@@ -138,7 +138,7 @@ export function WeekView({ userId }: WeekViewProps) {
       >
         <h2
           className={`mb-4 text-base font-bold tracking-tight ${
-            isToday ? "text-primary" : isPast ? "text-gray-400" : "text-gray-700"
+            isToday ? "text-accent" : isPast ? "text-fg-subtle" : "text-fg-muted"
           }`}
         >
           {isToday ? "Today" : `${dayName} · ${label}`}
@@ -148,10 +148,10 @@ export function WeekView({ userId }: WeekViewProps) {
             <li
               className={`rounded-xl border border-dashed py-4 text-center text-sm ${
                 isToday
-                  ? "border-primary/40 bg-primary/5 text-gray-600"
+                  ? "border-primary/40 bg-primary/10 text-fg-muted"
                   : isPast
-                    ? "border-gray-200 bg-gray-100/60 text-gray-400"
-                    : "border-gray-200 bg-gray-50/80 text-gray-500"
+                    ? "border-border bg-muted/50 text-fg-subtle"
+                    : "border-border bg-muted/60 text-fg-muted"
               }`}
             >
               No todos
@@ -160,16 +160,16 @@ export function WeekView({ userId }: WeekViewProps) {
             dayTodos.map((todo) => (
                 <li
                   key={todo.id}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 shadow-md transition-shadow ${
+                  className={`flex items-center gap-1.5 rounded-xl border border-border-subtle px-3 py-2.5 shadow-card transition-shadow ${
                     todo.completed
-                      ? "bg-green-50/70"
+                      ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
                       : todo.priority
-                        ? "bg-amber-100/80"
+                        ? "bg-row-priority border-amber-200/50 dark:border-amber-500/20"
                         : isToday
-                          ? "bg-white"
+                          ? "bg-row-default"
                           : isPast
-                            ? "bg-gray-100/80"
-                            : "bg-white"
+                            ? "bg-muted/50"
+                            : "bg-row-default"
                   }`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -179,22 +179,22 @@ export function WeekView({ userId }: WeekViewProps) {
                         e.stopPropagation();
                         toggleTodo(todo.id);
                       }}
-                      className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 touch-manipulation"
+                      className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0 touch-manipulation"
                       aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
                     >
                       {todo.completed ? (
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-row-done-icon text-white">
                           <Check className="h-4 w-4" strokeWidth={2.5} />
                         </span>
                       ) : (
-                        <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
+                        <span className="h-5 w-5 rounded-full border-2 border-border-strong" />
                       )}
                     </button>
                     <span
                       className={`min-w-0 flex-1 break-words font-medium leading-snug ${listFontSizeClass} ${
                         todo.completed
-                          ? "text-green-700 line-through opacity-90"
-                          : "text-gray-900"
+                          ? "text-row-done-text line-through opacity-90"
+                          : "text-fg"
                       }`}
                     >
                       {todo.title}
@@ -209,7 +209,7 @@ export function WeekView({ userId }: WeekViewProps) {
                           id === todo.id ? null : todo.id,
                         );
                       }}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted"
                       aria-label="More actions"
                       aria-haspopup="dialog"
                     >
@@ -218,7 +218,7 @@ export function WeekView({ userId }: WeekViewProps) {
                     {datePickTodoId === todo.id && (
                       <div
                         ref={datePickRef}
-                        className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+                        className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-border bg-elevated p-2 shadow-popover"
                         role="dialog"
                         aria-label="Select date"
                       >
@@ -232,7 +232,7 @@ export function WeekView({ userId }: WeekViewProps) {
                               setDatePickTodoId(null);
                             }
                           }}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-200"
+                          className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary-focus/30"
                           autoFocus
                         />
                       </div>
@@ -249,12 +249,12 @@ export function WeekView({ userId }: WeekViewProps) {
   const isCurrentWeek = weekOffset === 0;
 
   return (
-    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "" : "-mx-4 -my-6 min-h-screen bg-gray-100 px-4 py-6"}`}>
-      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-white" : "bg-gray-100"}`}>
+    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "" : "-mx-4 -my-6 min-h-screen bg-canvas px-4 py-6"}`}>
+      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-surface" : "bg-canvas"}`}>
         <div className="flex flex-nowrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center justify-start gap-2 text-left">
-              <h1 className={`text-lg font-semibold tracking-tight ${weekOffset === 0 ? "text-primary" : "text-gray-900"}`}>
+              <h1 className={`text-lg font-semibold tracking-tight ${weekOffset === 0 ? "text-accent" : "text-fg"}`}>
                 {weekOffset === 0 ? "This week" : formatWeekRangeLabel(weekStartsOn, weekOffset)}
               </h1>
             </div>
@@ -262,7 +262,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o - 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-border bg-muted text-fg-muted hover:bg-surface hover:text-fg" : "border border-border bg-surface text-fg-muted shadow-card hover:bg-muted hover:border-border-strong"}`}
                 aria-label="Previous week"
               >
                 <span className="inline-flex items-center gap-1.5">
@@ -273,7 +273,7 @@ export function WeekView({ userId }: WeekViewProps) {
               <button
                 type="button"
                 onClick={() => setWeekOffset((o) => o + 1)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-gray-200 bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 hover:text-gray-900" : "border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-400"}`}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${isCurrentWeek ? "border border-border bg-muted text-fg-muted hover:bg-surface hover:text-fg" : "border border-border bg-surface text-fg-muted shadow-card hover:bg-muted hover:border-border-strong"}`}
                 aria-label="Next week"
               >
                 <span className="inline-flex items-center gap-1.5">
@@ -304,34 +304,34 @@ export function WeekView({ userId }: WeekViewProps) {
         const dayIndex = todo.date != null ? days.findIndex((d) => d.dateKey === todo.date) : -1;
         const prevDate = dayIndex > 0 ? days[dayIndex - 1].dateKey : todo.date ? addDaysToDateKey(todo.date, -1) : null;
         const nextDate = dayIndex >= 0 && dayIndex < 6 ? days[dayIndex + 1].dateKey : todo.date ? addDaysToDateKey(todo.date, 1) : null;
-        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
-        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation";
+        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-danger-muted dark:hover:bg-danger-muted/20 min-h-[44px] touch-manipulation";
         return (
           <TodoActionsModal open={true} onClose={() => setMenuOpenId(null)} title={todo.title}>
             {todo.completed && (
               <button type="button" className={act} onClick={() => { toggleTodo(todo.id); setMenuOpenId(null); }}>
-                <Undo2 className="h-4 w-4 text-gray-400 shrink-0" /> Mark incomplete
+                <Undo2 className="h-4 w-4 text-fg-subtle shrink-0" /> Mark incomplete
               </button>
             )}
             <button type="button" className={act} onClick={() => { updateTodoPriority(todo.id, !todo.priority); setMenuOpenId(null); }}>
-              {todo.priority ? <><Check className="h-4 w-4 text-amber-700 shrink-0" /> Not priority</> : <><ArrowUp className="h-4 w-4 text-gray-400 shrink-0" /> Priority</>}
+              {todo.priority ? <><Check className="h-4 w-4 text-amber-700 shrink-0" /> Not priority</> : <><ArrowUp className="h-4 w-4 text-fg-subtle shrink-0" /> Priority</>}
             </button>
             <button type="button" className={act} onClick={() => { setMenuOpenId(null); openEdit(todo); }}>
-              <Pencil className="h-4 w-4 text-gray-400 shrink-0" /> Edit
+              <Pencil className="h-4 w-4 text-fg-subtle shrink-0" /> Edit
             </button>
             {!todo.completed && todo.date != null && prevDate != null && (
               <button type="button" className={act} onClick={() => { setMenuOpenId(null); updateTodoDate(todo.id, prevDate); }}>
-                <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" /> Previous
+                <ChevronLeft className="h-4 w-4 text-fg-subtle shrink-0" /> Previous
               </button>
             )}
             {!todo.completed && todo.date != null && nextDate != null && (
               <button type="button" className={act} onClick={() => { setMenuOpenId(null); updateTodoDate(todo.id, nextDate); }}>
-                <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" /> Next
+                <ChevronRight className="h-4 w-4 text-fg-subtle shrink-0" /> Next
               </button>
             )}
             {!todo.completed && (
               <button type="button" className={act} onClick={() => { setMenuOpenId(null); setDatePickTodoId(todo.id); }}>
-                <Calendar className="h-4 w-4 text-gray-400 shrink-0" /> Date…
+                <Calendar className="h-4 w-4 text-fg-subtle shrink-0" /> Date…
               </button>
             )}
             <button type="button" className={actDanger} onClick={() => { setMenuOpenId(null); deleteTodo(todo.id); }}>
@@ -343,19 +343,19 @@ export function WeekView({ userId }: WeekViewProps) {
 
       {editingTodo && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-todo-title-week"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
               <h2
                 id="edit-todo-title-week"
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-fg"
               >
                 Edit todo
               </h2>
@@ -374,7 +374,7 @@ export function WeekView({ userId }: WeekViewProps) {
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Todo title"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   autoFocus
                 />
               </div>
@@ -382,13 +382,13 @@ export function WeekView({ userId }: WeekViewProps) {
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
                 >
                   Save
                 </button>

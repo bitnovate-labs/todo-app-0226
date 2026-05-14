@@ -45,14 +45,14 @@ export function LockRotationSetting() {
 
   return (
     <SettingsSection title="Device" icon={<Smartphone className="h-3.5 w-3.5" />}>
-      <p className="mb-3 text-sm text-gray-600">
+      <p className="mb-3 text-sm text-fg-muted">
         On Android, tap below to lock rotation (fullscreen may be used). On iOS, rotation cannot be locked.
       </p>
       <button
         type="button"
         onClick={handleLockRotation}
         disabled={status === 'locking'}
-        className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-left text-sm font-medium text-gray-900 transition hover:bg-gray-100 disabled:opacity-70"
+        className="w-full rounded-xl border border-border bg-muted px-3 py-3 text-left text-sm font-medium text-fg transition hover:bg-surface disabled:opacity-70"
       >
         {status === 'idle' && 'Lock to portrait'}
         {status === 'locking' && 'Locking…'}

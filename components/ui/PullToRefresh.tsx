@@ -118,7 +118,7 @@ export function PullToRefresh({ children, onRefresh, disabled }: Props) {
           )}
         </div>
       </div>
-      <div className="min-h-0 flex-1">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }

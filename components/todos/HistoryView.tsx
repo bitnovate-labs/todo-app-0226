@@ -40,43 +40,45 @@ function ReAddModal({ todo, onClose, onReAdd }: ReAddModalProps) {
     return dateKey(d);
   })();
 
+  const radioClass = "h-4 w-4 border-border text-primary focus:ring-primary-focus";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 px-5 sm:px-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4 px-5 sm:px-6">
       <div
-        className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-xl"
+        className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-gray-200 p-4">
-          <h3 className="text-lg font-semibold text-gray-900">Re-add todo</h3>
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+        <div className="border-b border-border p-4">
+          <h3 className="text-lg font-semibold text-fg">Re-add todo</h3>
+          <p className="mt-1 line-clamp-2 text-sm text-fg-muted">
             {todo.title}
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div>
-            <span className="mb-2 block text-sm font-medium text-gray-700">
+            <span className="mb-2 block text-sm font-medium text-fg-muted">
               Schedule for
             </span>
             <div className="space-y-2">
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-muted px-4 py-3 hover:bg-surface">
                 <input
                   type="radio"
                   name="readd-when"
                   checked={useToday}
                   onChange={() => setUseToday(true)}
-                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className={radioClass}
                 />
-                <span className="text-gray-900">Today</span>
+                <span className="text-fg">Today</span>
               </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-muted px-4 py-3 hover:bg-surface">
                 <input
                   type="radio"
                   name="readd-when"
                   checked={!useToday}
                   onChange={() => setUseToday(false)}
-                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className={radioClass}
                 />
-                <span className="text-gray-900">Select a date</span>
+                <span className="text-fg">Select a date</span>
               </label>
               {!useToday && (
                 <div className="pl-7">
@@ -86,7 +88,7 @@ function ReAddModal({ todo, onClose, onReAdd }: ReAddModalProps) {
                     min={todayStr}
                     max={maxDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-border bg-canvas px-3 py-2 text-fg focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary-focus"
                   />
                 </div>
               )}
@@ -96,13 +98,13 @@ function ReAddModal({ todo, onClose, onReAdd }: ReAddModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-gray-300 py-3 font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-1 rounded-xl border border-border py-3 font-medium text-fg-muted transition hover:bg-muted hover:text-fg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
+              className="flex-1 rounded-xl bg-primary py-3 font-medium text-white transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-surface"
             >
               Re-add
             </button>
@@ -133,10 +135,10 @@ function TodoHistoryItem({
   const isIncomplete = !todo.completed;
   return (
     <li
-      className={`flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 shadow-md ${
+      className={`flex cursor-pointer items-center gap-3 rounded-lg border py-2.5 pl-3 pr-2 shadow-card ${
         isIncomplete
-          ? "cursor-pointer bg-blue-50/80 hover:bg-blue-100/80"
-          : "cursor-pointer bg-green-50/80 hover:bg-green-100/80"
+          ? "border-border bg-accent-soft hover:bg-muted"
+          : "border-emerald-200/40 bg-row-done hover:opacity-90 dark:border-emerald-500/25"
       }`}
       onClick={() =>
         isIncomplete ? onReAdd(todo) : onUndoComplete(todo.id)
@@ -145,15 +147,15 @@ function TodoHistoryItem({
     >
       <span
         className={`min-w-0 flex-1 ${listFontSizeClass} ${
-          todo.completed ? "text-green-700 line-through" : "text-gray-900"
+          todo.completed ? "text-row-done-text line-through opacity-90" : "text-fg"
         }`}
       >
         {todo.title}
       </span>
       {isIncomplete ? (
-        <span className="shrink-0 text-xs text-blue-600">Tap to re-add</span>
+        <span className="shrink-0 text-xs text-primary">Tap to re-add</span>
       ) : (
-        <span className="shrink-0 text-xs text-green-600">Tap to undo</span>
+        <span className="shrink-0 text-xs text-row-done-text">Tap to undo</span>
       )}
     </li>
   );
@@ -253,7 +255,7 @@ export function HistoryView({ userId }: HistoryViewProps) {
 
   if (loading && todos.length === 0) {
     return (
-      <div className="animate-page-load py-8 text-center text-gray-500">
+      <div className="animate-page-load py-8 text-center text-fg-muted">
         Loading…
       </div>
     );
@@ -261,15 +263,17 @@ export function HistoryView({ userId }: HistoryViewProps) {
 
   return (
     <div className="min-w-0 animate-page-load">
-      <h1 className="mb-4 text-xl font-semibold tracking-tight text-gray-900">History</h1>
+      <h1 className="mb-4 text-xl font-semibold tracking-tight text-fg">History</h1>
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-2 rounded-xl bg-gray-100 p-1">
+      <div className="mb-4 flex gap-2 rounded-xl bg-muted p-1">
         <button
           type="button"
           onClick={() => setTab("week")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${
-            tab === "week" ? "bg-white text-gray-900 shadow" : "text-gray-600"
+          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+            tab === "week"
+              ? "bg-surface text-fg shadow-card"
+              : "text-fg-muted hover:text-fg"
           }`}
         >
           Week
@@ -277,8 +281,10 @@ export function HistoryView({ userId }: HistoryViewProps) {
         <button
           type="button"
           onClick={() => setTab("month")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${
-            tab === "month" ? "bg-white text-gray-900 shadow" : "text-gray-600"
+          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+            tab === "month"
+              ? "bg-surface text-fg shadow-card"
+              : "text-fg-muted hover:text-fg"
           }`}
         >
           Month
@@ -288,12 +294,12 @@ export function HistoryView({ userId }: HistoryViewProps) {
       {tab === "week" && (
         <div className="space-y-6">
           <section>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">
               Incomplete this week
             </h2>
             <ul className="space-y-3">
               {weekIncomplete.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
+                <li className="rounded-lg border border-dashed border-border py-4 text-center text-sm text-fg-subtle">
                   No incomplete todos this week
                 </li>
               ) : (
@@ -310,12 +316,12 @@ export function HistoryView({ userId }: HistoryViewProps) {
             </ul>
           </section>
           <section>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">
               Completed this week
             </h2>
             <ul className="space-y-3">
               {weekCompleted.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
+                <li className="rounded-lg border border-dashed border-border py-4 text-center text-sm text-fg-subtle">
                   No completed todos this week
                 </li>
               ) : (
@@ -336,35 +342,35 @@ export function HistoryView({ userId }: HistoryViewProps) {
 
       {tab === "month" && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-2">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/60 px-4 py-2">
             <button
               type="button"
               onClick={goPrevMonth}
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-200"
+              className="rounded-lg p-2 text-fg-muted transition hover:bg-surface hover:text-fg"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-fg">
               {monthLabel(monthCursor)}
             </span>
             <button
               type="button"
               onClick={goNextMonth}
               disabled={!canGoNextMonth}
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-200 disabled:opacity-40 disabled:pointer-events-none"
+              className="rounded-lg p-2 text-fg-muted transition hover:bg-surface hover:text-fg disabled:pointer-events-none disabled:opacity-40"
               aria-label="Next month"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
           <section>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">
               Incomplete in {monthLabel(monthCursor)}
             </h2>
             <ul className="space-y-3">
               {monthIncomplete.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
+                <li className="rounded-lg border border-dashed border-border py-4 text-center text-sm text-fg-subtle">
                   No incomplete todos this month
                 </li>
               ) : (
@@ -381,12 +387,12 @@ export function HistoryView({ userId }: HistoryViewProps) {
             </ul>
           </section>
           <section>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">
               Completed in {monthLabel(monthCursor)}
             </h2>
             <ul className="space-y-3">
               {monthCompleted.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-gray-200 py-4 text-center text-sm text-gray-400">
+                <li className="rounded-lg border border-dashed border-border py-4 text-center text-sm text-fg-subtle">
                   No completed todos this month
                 </li>
               ) : (

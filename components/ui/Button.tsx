@@ -8,7 +8,7 @@ const variantClasses: Record<Variant, string> = {
   primary:
     "bg-primary text-white hover:bg-primary-hover focus:ring-primary-focus border-transparent",
   secondary:
-    "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-400 border-gray-300",
+    "bg-muted text-fg hover:bg-surface focus:ring-primary-focus border-border dark:hover:bg-elevated",
   danger:
     "bg-danger text-white hover:bg-red-700 focus:ring-red-500 border-transparent",
   warning:
@@ -37,7 +37,7 @@ export function Button({
   ...rest
 }: Props) {
   const base =
-    "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] touch-manipulation border py-3 px-4";
+    "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-canvas min-h-[44px] touch-manipulation border py-3 px-4";
   const combined = [
     base,
     variantClasses[variant],

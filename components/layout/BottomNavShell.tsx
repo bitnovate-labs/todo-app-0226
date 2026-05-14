@@ -17,7 +17,9 @@ export function BottomNavShell({ children }: { children: React.ReactNode }) {
 
   const shell = (
     <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center bottom-nav-fixed">
-      <div className="w-full max-w-[430px] bg-white">{children}</div>
+      <div className="w-full max-w-[430px] bg-surface backdrop-blur-md backdrop-saturate-150">
+        {children}
+      </div>
     </div>
   );
 

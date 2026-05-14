@@ -16,7 +16,7 @@ export function NavbarActions() {
       {showHistory ? (
         <Link
           href="/history"
-          className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+          className="rounded-full p-2 text-fg-muted transition-colors hover:bg-muted hover:text-fg"
           aria-label="History"
         >
           <History className="h-6 w-6" aria-hidden />

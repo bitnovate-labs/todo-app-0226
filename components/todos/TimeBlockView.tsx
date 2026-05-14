@@ -312,10 +312,10 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
     <div className="min-w-0 animate-page-load">
       {/* Header: minimal */}
       <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight text-gray-900">
+        <h1 className="text-xl font-semibold tracking-tight text-fg">
           Time Block
         </h1>
-        <p className="mt-0.5 text-sm text-gray-500">Block your day</p>
+        <p className="mt-0.5 text-sm text-fg-muted">Block your day</p>
       </div>
 
       {/* Date: compact pill */}
@@ -323,19 +323,19 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
         <button
           type="button"
           onClick={goPrevDay}
-          className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200"
+          className="rounded-full p-2 text-fg-subtle transition-colors hover:bg-muted hover:text-fg active:bg-muted"
           aria-label="Previous day"
         >
           <ChevronLeft className="h-5 w-5" strokeWidth={2} />
         </button>
-        <span className="min-w-[140px] text-center text-sm font-medium text-gray-700">
+        <span className="min-w-[140px] text-center text-sm font-medium text-fg">
           {dateDisplay}
         </span>
         <button
           type="button"
           onClick={goNextDay}
           disabled={!canGoNext}
-          className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200 disabled:opacity-30 disabled:pointer-events-none"
+          className="rounded-full p-2 text-fg-subtle transition-colors hover:bg-muted hover:text-fg active:bg-muted disabled:opacity-30 disabled:pointer-events-none"
           aria-label="Next day"
         >
           <ChevronRight className="h-5 w-5" strokeWidth={2} />
@@ -344,7 +344,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
 
       {/* Timeline segments */}
       {loading && blocks.length === 0 ? (
-        <div className="py-8 text-center text-sm text-gray-500">Loading…</div>
+        <div className="py-8 text-center text-sm text-fg-muted">Loading…</div>
       ) : (
         <div className="space-y-2">
           {segments.map((seg, segIdx) => {
@@ -380,7 +380,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                           id === block.id ? null : block.id,
                         );
                       }}
-                      className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-200/80 hover:text-gray-600 active:bg-gray-200"
+                      className="rounded-full p-2 text-fg-subtle transition-colors hover:bg-black/10 hover:text-fg dark:hover:bg-white/10"
                       aria-label="More actions"
                       aria-haspopup="dialog"
                     >
@@ -389,7 +389,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                     {datePickBlockId === block.id && (
                       <div
                         ref={datePickRef}
-                        className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+                        className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-border bg-elevated p-2 shadow-popover"
                         role="dialog"
                         aria-label="Select date"
                       >
@@ -406,7 +406,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                               copyBlockToDate(block, next);
                             }
                           }}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-200"
+                          className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary-focus/30"
                           autoFocus
                         />
                       </div>
@@ -420,12 +420,14 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                 key={`empty-${seg.start}-${seg.end}`}
                 type="button"
                 onClick={() => openAddAt(seg.start, seg.end)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-3 pl-4 pr-4 text-left transition-colors hover:border-gray-300 hover:bg-gray-100/80 active:bg-gray-100"
+                className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-muted/40 py-3 pl-4 pr-4 text-left transition-colors hover:border-border-strong hover:bg-muted active:bg-elevated"
               >
-                <span className="text-xs font-medium uppercase tracking-wider text-gray-400">
+                <span className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
                   {formatTimeLabel(seg.start)} – {formatTimeLabel(seg.end)}
                 </span>
-                <span className="text-sm text-gray-500">+ Add block</span>
+                <span className="text-sm font-medium text-primary">
+                  + Add block
+                </span>
               </button>
             );
           })}
@@ -443,7 +445,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
           setNewColor("blue");
           setAddOpen(true);
         }}
-        className="mt-6 w-full rounded-2xl bg-gray-900 py-3.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 active:bg-gray-700"
+        className="mt-6 w-full rounded-2xl bg-primary py-3.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover active:bg-primary-hover"
       >
         Add time block
       </button>
@@ -451,12 +453,12 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
       {menuOpenId && (() => {
         const block = blocks.find((b) => b.id === menuOpenId);
         if (!block) return null;
-        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
-        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+        const act = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation";
+        const actDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-danger-muted dark:hover:bg-danger-muted/20 min-h-[44px] touch-manipulation";
         return (
           <TodoActionsModal open={true} onClose={() => setMenuOpenId(null)} title={block.label}>
             <button type="button" className={act} onClick={() => { setMenuOpenId(null); openEdit(block); }}>
-              <Pencil className="h-4 w-4 text-gray-400 shrink-0" /> Edit
+              <Pencil className="h-4 w-4 text-fg-subtle shrink-0" /> Edit
             </button>
             <button
               type="button"
@@ -464,10 +466,10 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
               onClick={() => { setMenuOpenId(null); copyBlockToDate(block, addDaysToDateKey(date, 1)); }}
               disabled={addBlockPending}
             >
-              <Copy className="h-4 w-4 text-gray-400 shrink-0" /> Copy to next day
+              <Copy className="h-4 w-4 text-fg-subtle shrink-0" /> Copy to next day
             </button>
             <button type="button" className={act} onClick={() => { setMenuOpenId(null); setDatePickBlockId(block.id); }}>
-              <Calendar className="h-4 w-4 text-gray-400 shrink-0" /> Copy to date…
+              <Calendar className="h-4 w-4 text-fg-subtle shrink-0" /> Copy to date…
             </button>
             <button
               type="button"
@@ -484,19 +486,19 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
       {/* Sheet modal */}
       {addOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="add-block-title"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
               <h2
                 id="add-block-title"
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-fg"
               >
                 {editingBlock ? "Edit block" : "New block"}
               </h2>
@@ -515,11 +517,11 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="What are you doing?"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle transition-colors focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                 />
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-fg-muted">
                   Color
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -533,7 +535,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                         onClick={() => setNewColor(key)}
                         className={`h-9 w-9 rounded-full ${swatch} transition-transform active:scale-95 ${
                           selected
-                            ? "ring-2 ring-offset-2 ring-gray-400"
+                            ? "ring-2 ring-primary ring-offset-2 ring-offset-surface"
                             : "hover:opacity-90"
                         }`}
                         title={key}
@@ -548,7 +550,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                 <div>
                   <label
                     htmlFor="block-start"
-                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-fg-muted"
                   >
                     Start
                   </label>
@@ -556,7 +558,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                     id="block-start"
                     value={newStart}
                     onChange={(e) => setNewStart(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2.5 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   >
                     {SLOTS.map((s) => (
                       <option key={s} value={s}>
@@ -568,7 +570,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                 <div>
                   <label
                     htmlFor="block-end"
-                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-500"
+                    className="mb-1 block text-xs font-medium uppercase tracking-wider text-fg-muted"
                   >
                     End
                   </label>
@@ -576,7 +578,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                     id="block-end"
                     value={newEnd}
                     onChange={(e) => setNewEnd(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2.5 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full rounded-xl border border-border bg-muted px-3 py-2.5 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   >
                     {SLOTS.filter((s) => s > newStart).map((s) => (
                       <option key={s} value={s}>
@@ -595,7 +597,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                 <button
                   type="button"
                   onClick={closeSheet}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
@@ -604,7 +606,7 @@ export function TimeBlockView({ userId }: TimeBlockViewProps) {
                   disabled={
                     newStart >= newEnd || addBlockPending || updateBlockPending
                   }
-                  className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-40"
                 >
                   {addBlockPending || updateBlockPending
                     ? editingBlock

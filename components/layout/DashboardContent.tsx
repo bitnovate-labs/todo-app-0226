@@ -22,7 +22,7 @@ import { todayKey } from "@/lib/todos";
 
 const dashboardViewLoading = (
   <div className="flex min-h-[200px] items-center justify-center py-8">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" aria-hidden />
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" aria-hidden />
   </div>
 );
 
@@ -96,7 +96,7 @@ export function DashboardContent({ userId }: { userId: string }) {
     ) : pathname === "/habits" ? (
       <HabitTrackerView userId={userId} />
     ) : (
-      <div className="min-h-full bg-gray-100 -mx-4 -my-6 px-4 py-6">
+      <div className="flex min-h-0 flex-1 flex-col bg-canvas -mx-4 -my-6 px-4 py-6">
         <TodayTodoList userId={userId} />
       </div>
     );

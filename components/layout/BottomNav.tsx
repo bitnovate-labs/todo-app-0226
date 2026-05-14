@@ -7,7 +7,7 @@ export async function BottomNav() {
 
   return (
     <nav
-      className="mx-auto max-w-[430px] border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      className="mx-auto max-w-[430px] border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] backdrop-blur-md backdrop-saturate-150"
       role="navigation"
       aria-label="Main"
     >

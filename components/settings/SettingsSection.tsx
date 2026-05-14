@@ -8,9 +8,9 @@ type SettingsSectionProps = {
 
 export function SettingsSection({ title, icon, children }: SettingsSectionProps) {
   return (
-    <section className="rounded-2xl border border-gray-200/80 bg-white shadow-md">
-      <div className="border-b border-gray-100 px-3 py-3">
-        <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+    <section className="rounded-2xl border border-border bg-surface shadow-card">
+      <div className="border-b border-border-subtle px-3 py-3">
+        <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-fg-muted">
           {icon}
           {title}
         </h2>

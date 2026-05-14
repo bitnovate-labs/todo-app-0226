@@ -4,16 +4,66 @@
 
 :root {
   --foreground: #111827;
-  --background: #f9fafb;
+  --background: #f2f3f5;
   /* Mobile PWA: max content width (e.g. iPhone 14 Pro Max) */
   --app-max-width: 430px;
   --header-height: 3.5rem;
   --bottom-nav-height: 4rem;
+
+  --color-canvas: #f2f3f5;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-muted: #eef0f3;
+  --color-border: #e2e5ea;
+  --color-border-strong: #d1d5db;
+  --color-border-subtle: #eceef2;
+  --color-fg: #111827;
+  --color-fg-muted: #6b7280;
+  --color-fg-subtle: #9ca3af;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-soft: #eff6ff;
+  --color-row-default: #ffffff;
+  --color-row-priority: #fff7ed;
+  --color-row-done: #ecfdf5;
+  --color-row-done-text: #047857;
+  --color-row-done-icon: #16a34a;
+  --color-overlay: rgba(15, 23, 42, 0.35);
+  --shadow-shell: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 16px 48px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.06);
+  --shadow-popover: 0 8px 28px rgba(15, 23, 42, 0.1);
+}
+
+.dark {
+  --foreground: #f4f4f5;
+  --background: #0c0c0f;
+  --color-canvas: #0c0c0f;
+  --color-surface: #16161a;
+  --color-elevated: #1c1c22;
+  --color-muted: #222228;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-fg: #f4f4f5;
+  --color-fg-muted: #a1a1aa;
+  --color-fg-subtle: #71717a;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #93c5fd;
+  --color-accent-soft: rgba(37, 99, 235, 0.18);
+  --color-row-default: #1c1c22;
+  --color-row-priority: rgba(251, 191, 36, 0.12);
+  --color-row-done: rgba(16, 185, 129, 0.12);
+  --color-row-done-text: #6ee7b7;
+  --color-row-done-icon: #34d399;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --shadow-shell: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04), 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-popover: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 html {
   /* Match body so viewport is never black before CSS paints (fixes PWA startup flash) */
-  background: var(--background);
+  background: var(--color-canvas);
   /* Prevent automatic scroll restoration on mobile browsers */
   scroll-behavior: auto;
   margin: 0;
@@ -27,8 +77,8 @@ html {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--color-fg);
+  background: var(--color-canvas);
   /* Prevent overscroll on mobile */
   overscroll-behavior: none;
   /* Disable pinch-zoom and restrict touch to vertical pan only (reduces accidental swipe-back) */
@@ -108,10 +158,36 @@ nav[class*="fixed"][role="navigation"] {
 }
 
 /* Splash screen: fade out before removal */
+#app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--color-canvas);
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+#app-splash .app-splash-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
 #app-splash.splash-fade-out {
   opacity: 0;
   transition: opacity 0.25s ease-out;
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-load {
+    animation: none !important;
+  }
 }
 
 /* Ease-in animation for loading states when switching pages (fade only, no slide) */
@@ -154,4 +230,12 @@ input[type="date"]::-webkit-date-and-time-value {
     --rdp-day_button-width: 36px;
     --rdp-day_button-height: 36px;
   }
+}
+
+/* react-day-picker inside modals: match app dark theme */
+.dark .create-todo-calendar .rdp-root {
+  color: var(--color-fg);
+  --rdp-accent-color: var(--color-accent);
+  --rdp-accent-background-color: var(--color-accent-soft);
+  --rdp-outside-opacity: 0.45;
 }

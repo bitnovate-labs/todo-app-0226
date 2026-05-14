@@ -22,7 +22,7 @@ export function SignOutForm() {
     <form action={signOut} onSubmit={handleSubmit}>
       <button
         type="submit"
-        className="w-full rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        className="w-full rounded-xl border border-danger-border bg-danger-muted px-4 py-3 text-sm font-medium text-danger transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-canvas"
       >
         Sign out
       </button>

@@ -31,7 +31,7 @@ export function NavbarTitle() {
       : pathTitles[pathname] ?? 'App';
 
   return (
-    <span className="shrink-0 font-semibold text-gray-900" aria-hidden>
+    <span className="shrink-0 font-semibold tracking-tight text-fg" aria-hidden>
       {title}
     </span>
   );

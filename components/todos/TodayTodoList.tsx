@@ -46,13 +46,13 @@ import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type TodayTodoListProps = { userId: string | undefined | null };
 
-/** Priority todo styling (urgency: darker amber) */
-const PRIORITY_ROW_CLASS = "bg-amber-100/80";
+/** Priority todo styling */
+const PRIORITY_ROW_CLASS = "bg-row-priority";
 
 const actionButtonClass =
-  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation";
 const actionButtonDangerClass =
-  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-danger-muted dark:hover:bg-danger-muted/30 min-h-[44px] touch-manipulation";
 
 function SortableTodoItem({
   todo,
@@ -100,13 +100,13 @@ function SortableTodoItem({
   };
 
   const rowClass = [
-    "flex items-center gap-1.5 rounded-xl py-2.5 pl-2 pr-1.5 shadow-md",
-    isDragging && "z-50 opacity-90 shadow-lg",
+    "flex items-center gap-1.5 rounded-xl border border-border-subtle py-2.5 pl-2 pr-1.5 shadow-card",
+    isDragging && "z-50 opacity-95 shadow-popover ring-2 ring-primary/20",
     todo.completed
-      ? "bg-green-50/80"
+      ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
       : todo.priority
-        ? PRIORITY_ROW_CLASS
-        : "bg-white",
+        ? `${PRIORITY_ROW_CLASS} border-amber-200/50 dark:border-amber-500/20`
+        : "bg-row-default",
   ]
     .filter(Boolean)
     .join(" ");
@@ -115,7 +115,7 @@ function SortableTodoItem({
     <li ref={setNodeRef} style={style} className={rowClass}>
       <button
         type="button"
-        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-fg-subtle hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0"
         aria-label="Drag to reorder"
         {...attributes}
         {...listeners}
@@ -129,20 +129,20 @@ function SortableTodoItem({
             e.stopPropagation();
             onToggle(todo.id);
           }}
-          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 touch-manipulation"
+          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0 touch-manipulation"
           aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
         >
           {todo.completed ? (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-row-done-icon text-white">
               <Check className="h-4 w-4" strokeWidth={2.5} />
             </span>
           ) : (
-            <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
+            <span className="h-5 w-5 rounded-full border-2 border-border-strong" />
           )}
         </button>
         <span
           className={`min-w-0 flex-1 break-words leading-snug ${listFontSizeClass} ${
-            todo.completed ? "text-green-700 line-through" : "text-gray-900"
+            todo.completed ? "text-row-done-text line-through" : "text-fg"
           }`}
         >
           {todo.title}
@@ -155,7 +155,7 @@ function SortableTodoItem({
             e.stopPropagation();
             onOpenMenu();
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted touch-manipulation"
           aria-label="More actions"
           aria-haspopup="dialog"
         >
@@ -164,7 +164,7 @@ function SortableTodoItem({
         {datePickOpen && (
           <div
             ref={datePickRef}
-            className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-border bg-elevated p-2 shadow-popover"
             role="dialog"
             aria-label="Select date"
           >
@@ -172,7 +172,7 @@ function SortableTodoItem({
               type="date"
               value={todo.date ?? ""}
               onChange={(e) => onDateChange(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-200"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary-focus/30"
               autoFocus
             />
           </div>
@@ -274,11 +274,11 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   );
 
   const stickyHeader = (
-    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-gray-100 pb-1 -mt-8 pt-6">
-      <h1 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-canvas pb-1 -mt-8 pt-6 backdrop-blur-md backdrop-saturate-150">
+      <h1 className="mb-1 text-xl font-semibold tracking-tight text-fg">
         Today
       </h1>
-      <p className="mb-2 text-sm text-gray-500">
+      <p className="mb-2 text-sm text-fg-muted">
         {dayNameFromDate(todayDateLabel)}, {formatDateDDMMMFromDate(todayDateLabel)}
       </p>
     </div>
@@ -292,7 +292,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
           {[1, 2, 3, 4].map((i) => (
             <li
               key={i}
-              className="h-[52px] rounded-xl bg-gray-200/70 animate-pulse shadow-md"
+              className="h-[52px] rounded-xl border border-border-subtle bg-muted animate-pulse shadow-card"
             />
           ))}
         </ul>
@@ -305,7 +305,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
       {stickyHeader}
       <ul className="mt-2 space-y-3">
         {dayTodos.length === 0 ? (
-          <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-8 text-center text-gray-500">
+          <li className="rounded-xl border border-dashed border-border bg-muted/60 py-8 text-center text-fg-muted">
             No todos for today. Tap + to add one.
           </li>
         ) : (
@@ -387,7 +387,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                   setMenuOpenId(null);
                 }}
               >
-                <Undo2 className="h-4 w-4 text-gray-400 shrink-0" />
+                <Undo2 className="h-4 w-4 text-fg-subtle shrink-0" />
                 Mark incomplete
               </button>
             )}
@@ -406,7 +406,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                 </>
               ) : (
                 <>
-                  <ArrowUp className="h-4 w-4 text-gray-400 shrink-0" />
+                  <ArrowUp className="h-4 w-4 text-fg-subtle shrink-0" />
                   Priority
                 </>
               )}
@@ -419,7 +419,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                 openEdit(todo);
               }}
             >
-              <Pencil className="h-4 w-4 text-gray-400 shrink-0" />
+              <Pencil className="h-4 w-4 text-fg-subtle shrink-0" />
               Edit
             </button>
             {!todo.completed && (
@@ -432,7 +432,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                     if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, -1));
                   }}
                 >
-                  <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
+                  <ChevronLeft className="h-4 w-4 text-fg-subtle shrink-0" />
                   Previous
                 </button>
                 <button
@@ -443,7 +443,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                     if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, 1));
                   }}
                 >
-                  <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
+                  <ChevronRight className="h-4 w-4 text-fg-subtle shrink-0" />
                   Next
                 </button>
                 <button
@@ -454,7 +454,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                     setDatePickTodoId(todo.id);
                   }}
                 >
-                  <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+                  <Calendar className="h-4 w-4 text-fg-subtle shrink-0" />
                   Date…
                 </button>
               </>
@@ -477,19 +477,19 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
       {/* Edit todo sheet */}
       {editingTodo && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-todo-title"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
               <h2
                 id="edit-todo-title"
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-fg"
               >
                 Edit todo
               </h2>
@@ -508,7 +508,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Todo title"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   autoFocus
                 />
               </div>
@@ -516,13 +516,13 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  className="flex-1 rounded-xl bg-fg py-3 text-sm font-medium text-surface transition-colors hover:opacity-90"
                 >
                   Save
                 </button>

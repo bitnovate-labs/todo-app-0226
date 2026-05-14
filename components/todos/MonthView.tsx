@@ -29,8 +29,10 @@ import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAY_MONDAY_FIRST = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const actionBtn = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation";
-const actionBtnDanger = "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation";
+const actionBtn =
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation";
+const actionBtnDanger =
+  "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-danger-muted dark:hover:bg-danger-muted/20 min-h-[44px] touch-manipulation";
 
 type MonthViewProps = { userId: string | undefined | null };
 
@@ -148,7 +150,7 @@ export function MonthView({ userId }: MonthViewProps) {
 
   if (loading && todos.length === 0) {
     return (
-      <div className="min-w-0 animate-page-load py-8 text-center text-gray-500">
+      <div className="min-w-0 animate-page-load py-8 text-center text-fg-muted">
         Loading…
       </div>
     );
@@ -157,30 +159,33 @@ export function MonthView({ userId }: MonthViewProps) {
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col animate-page-load">
       {/* Top half: calendar (fixed height, 44px+ touch targets) */}
-      <div className="flex shrink-0 flex-col border-b border-gray-100 bg-white pb-2 pt-2" style={{ height: "max(48dvh, 320px)" }}>
-        <div className="mb-1 flex items-center justify-center gap-0.5 rounded-lg border border-gray-200 bg-gray-100/80 p-0.5">
+      <div
+        className="flex shrink-0 flex-col border-b border-border bg-surface pb-2 pt-2"
+        style={{ height: "max(48dvh, 320px)" }}
+      >
+        <div className="mb-1 flex items-center justify-center gap-0.5 rounded-lg border border-border bg-muted p-0.5">
           <button
             type="button"
             onClick={goPrevMonth}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-gray-600 hover:bg-gray-200/80 hover:text-gray-900 touch-manipulation"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-fg-muted hover:bg-surface hover:text-fg touch-manipulation"
             aria-label="Previous month"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <span className="min-w-[7rem] px-2 py-1.5 text-center text-sm font-semibold text-gray-900">
+          <span className="min-w-[7rem] px-2 py-1.5 text-center text-sm font-semibold text-fg">
             {monthLabel(viewMonth)}
           </span>
           <button
             type="button"
             onClick={goNextMonth}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-gray-600 hover:bg-gray-200/80 hover:text-gray-900 touch-manipulation"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-fg-muted hover:bg-surface hover:text-fg touch-manipulation"
             aria-label="Next month"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-px text-center text-[10px] font-medium text-gray-500">
+        <div className="grid grid-cols-7 gap-px text-center text-[10px] font-medium text-fg-muted">
           {weekdays.map((wd) => (
             <div key={wd} className="truncate py-0.5">{wd}</div>
           ))}
@@ -196,17 +201,22 @@ export function MonthView({ userId }: MonthViewProps) {
             let cellClass =
               "flex min-h-[44px] min-w-0 items-center justify-center rounded-lg text-sm transition-colors touch-manipulation active:scale-[0.97] ";
             if (!cell.isCurrentMonth) {
-              cellClass += hasTodos ? "bg-blue-50/40 text-gray-400 " : "text-gray-300 ";
+              cellClass += hasTodos
+                ? "bg-primary/15 text-fg-subtle dark:bg-primary/20 "
+                : "text-fg-subtle ";
             } else if (isSelected) {
               cellClass += "bg-primary text-white font-semibold ";
             } else if (isToday) {
               cellClass += `border-2 border-primary font-semibold ${
-                hasTodos ? "border-primary bg-blue-50 text-primary " : "text-primary "
+                hasTodos
+                  ? "border-primary bg-accent-soft text-accent "
+                  : "text-accent "
               }`;
             } else if (hasTodos) {
-              cellClass += "bg-blue-50 text-gray-900 hover:bg-blue-100/90 ";
+              cellClass +=
+                "bg-accent-soft text-fg hover:bg-muted dark:hover:bg-elevated ";
             } else {
-              cellClass += "text-gray-700 hover:bg-gray-100 ";
+              cellClass += "text-fg-muted hover:bg-muted ";
             }
 
             return (
@@ -227,14 +237,14 @@ export function MonthView({ userId }: MonthViewProps) {
 
       {/* Bottom half: selected day label + task list (scrolls independently) */}
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="shrink-0 border-b border-gray-100 px-0 py-2">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
+        <div className="shrink-0 border-b border-border px-0 py-2">
+          <h2 className="text-base font-semibold tracking-tight text-fg">
             {selectedLabel}
           </h2>
         </div>
         <ul className="space-y-2 pb-4 pt-1">
           {selectedTodos.length === 0 ? (
-            <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-6 text-center text-sm text-gray-500">
+            <li className="rounded-xl border border-dashed border-border bg-muted/60 py-6 text-center text-sm text-fg-muted">
               No tasks for this day. Tap + to add one.
             </li>
           ) : (
@@ -295,25 +305,25 @@ export function MonthView({ userId }: MonthViewProps) {
           <TodoActionsModal open={true} onClose={() => setMenuOpenId(null)} title={todo.title}>
             {todo.completed && (
               <button type="button" className={actionBtn} onClick={() => { toggleTodo(todo.id); setMenuOpenId(null); }}>
-                <Undo2 className="h-4 w-4 text-gray-400 shrink-0" /> Mark incomplete
+                <Undo2 className="h-4 w-4 text-fg-subtle shrink-0" /> Mark incomplete
               </button>
             )}
             <button type="button" className={actionBtn} onClick={() => { updateTodoPriority(todo.id, !todo.priority); setMenuOpenId(null); }}>
-              {todo.priority ? <><Check className="h-4 w-4 text-amber-700 shrink-0" /> Not priority</> : <><ArrowUp className="h-4 w-4 text-gray-400 shrink-0" /> Priority</>}
+              {todo.priority ? <><Check className="h-4 w-4 text-amber-700 shrink-0" /> Not priority</> : <><ArrowUp className="h-4 w-4 text-fg-subtle shrink-0" /> Priority</>}
             </button>
             <button type="button" className={actionBtn} onClick={() => { setMenuOpenId(null); openEdit(todo); }}>
-              <Pencil className="h-4 w-4 text-gray-400 shrink-0" /> Edit
+              <Pencil className="h-4 w-4 text-fg-subtle shrink-0" /> Edit
             </button>
             {!todo.completed && (
               <>
                 <button type="button" className={actionBtn} onClick={() => { setMenuOpenId(null); if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, -1)); }}>
-                  <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" /> Previous
+                  <ChevronLeft className="h-4 w-4 text-fg-subtle shrink-0" /> Previous
                 </button>
                 <button type="button" className={actionBtn} onClick={() => { setMenuOpenId(null); if (todo.date) updateTodoDate(todo.id, addDaysToDateKey(todo.date, 1)); }}>
-                  <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" /> Next
+                  <ChevronRight className="h-4 w-4 text-fg-subtle shrink-0" /> Next
                 </button>
                 <button type="button" className={actionBtn} onClick={() => { setMenuOpenId(null); setDatePickTodoId(todo.id); }}>
-                  <Calendar className="h-4 w-4 text-gray-400 shrink-0" /> Date…
+                  <Calendar className="h-4 w-4 text-fg-subtle shrink-0" /> Date…
                 </button>
               </>
             )}
@@ -326,17 +336,17 @@ export function MonthView({ userId }: MonthViewProps) {
 
       {editingTodo && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-todo-title-month"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
-              <h2 id="edit-todo-title-month" className="text-lg font-semibold text-gray-900">
+              <h2 id="edit-todo-title-month" className="text-lg font-semibold text-fg">
                 Edit todo
               </h2>
             </div>
@@ -351,7 +361,7 @@ export function MonthView({ userId }: MonthViewProps) {
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Todo title"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   autoFocus
                 />
               </div>
@@ -359,13 +369,13 @@ export function MonthView({ userId }: MonthViewProps) {
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
                 >
                   Save
                 </button>
@@ -419,12 +429,12 @@ function MonthTodoRow({
 }) {
   return (
     <li
-      className={`flex items-center gap-1.5 rounded-xl px-3 py-2 shadow-md ${
+      className={`flex items-center gap-1.5 rounded-xl border border-border-subtle px-3 py-2 shadow-card ${
         todo.completed
-          ? "bg-green-50/70"
+          ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
           : todo.priority
-            ? "bg-amber-100/80"
-            : "bg-white"
+            ? "bg-row-priority border-amber-200/50 dark:border-amber-500/20"
+            : "bg-row-default"
       }`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -434,20 +444,20 @@ function MonthTodoRow({
             e.stopPropagation();
             todo.completed ? onMarkIncomplete() : onToggle();
           }}
-          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 touch-manipulation"
+          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0 touch-manipulation"
           aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
         >
           {todo.completed ? (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-row-done-icon text-white">
               <Check className="h-4 w-4" strokeWidth={2.5} />
             </span>
           ) : (
-            <span className="h-5 w-5 rounded-full border-2 border-gray-300" />
+            <span className="h-5 w-5 rounded-full border-2 border-border-strong" />
           )}
         </button>
         <span
           className={`min-w-0 flex-1 break-words font-medium leading-snug ${listFontSizeClass} ${
-            todo.completed ? "text-green-700 line-through opacity-90" : "text-gray-900"
+            todo.completed ? "text-row-done-text line-through opacity-90" : "text-fg"
           }`}
         >
           {todo.title}
@@ -457,7 +467,7 @@ function MonthTodoRow({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onOpenMenu(); }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-fg-subtle hover:bg-muted hover:text-fg-muted touch-manipulation"
           aria-label="More actions"
           aria-haspopup="dialog"
         >
@@ -466,7 +476,7 @@ function MonthTodoRow({
         {datePickOpen && (
           <div
             ref={datePickRef}
-            className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            className="absolute right-0 top-full z-10 mt-1 rounded-xl border border-border bg-elevated p-2 shadow-popover"
             role="dialog"
             aria-label="Select date"
           >
@@ -474,7 +484,7 @@ function MonthTodoRow({
               type="date"
               value={todo.date ?? ""}
               onChange={(e) => onDateChange(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gray-200"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary-focus/30"
               autoFocus
             />
           </div>

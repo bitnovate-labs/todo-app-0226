@@ -38,17 +38,17 @@ export function TodoActionsModal({ open, onClose, children, title }: Props) {
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/30"
+        className="absolute inset-0 bg-overlay"
         onClick={onClose}
       />
       <div
         ref={cardRef}
-        className="relative w-full max-w-[280px] rounded-2xl border border-gray-200 bg-white py-1 shadow-xl"
+        className="relative w-full max-w-[280px] rounded-2xl border border-border bg-surface py-1 shadow-popover"
         onClick={(e) => e.stopPropagation()}
       >
         {title ? (
-          <div className="border-b border-gray-100 px-4 py-2">
-            <p className="text-sm font-medium text-gray-700 truncate" title={title}>
+          <div className="border-b border-border-subtle px-4 py-2">
+            <p className="text-sm font-medium text-fg truncate" title={title}>
               {title}
             </p>
           </div>

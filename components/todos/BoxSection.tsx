@@ -51,8 +51,8 @@ function BoxRow({
   listFontSizeClass,
 }: BoxRowProps) {
   return (
-    <li className="flex items-center gap-1 rounded-xl bg-white py-2 pl-4 pr-1 shadow-md">
-      <span className={`min-w-0 flex-1 ${listFontSizeClass} text-gray-900`}>
+    <li className="flex items-center gap-1 rounded-xl border border-border-subtle bg-row-default py-2 pl-4 pr-1 shadow-card">
+      <span className={`min-w-0 flex-1 ${listFontSizeClass} text-fg`}>
         {todo.title}
       </span>
       <div className="relative shrink-0 flex items-center">
@@ -67,7 +67,7 @@ function BoxRow({
               else onOpenSchedule();
             }}
             onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center text-blue-600 touch-manipulation"
+            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center text-primary touch-manipulation"
             aria-label="Schedule"
             aria-expanded={scheduleOpen}
             aria-haspopup="true"
@@ -76,7 +76,7 @@ function BoxRow({
           </button>
           {scheduleOpen && (
             <div
-              className={`absolute right-0 top-full z-20 mt-1 rounded-xl border border-gray-200 bg-white py-1 shadow-lg ${schedulePickerOpen ? "min-w-[280px] p-2" : "min-w-[200px]"}`}
+              className={`absolute right-0 top-full z-20 mt-1 rounded-xl border border-border bg-elevated py-1 shadow-popover ${schedulePickerOpen ? "min-w-[280px] p-2" : "min-w-[200px]"}`}
               role="dialog"
               aria-label="When?"
             >
@@ -84,7 +84,7 @@ function BoxRow({
                 <>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-fg hover:bg-muted"
                     onClick={() => {
                       onScheduleToday();
                       onCloseSchedule();
@@ -94,7 +94,7 @@ function BoxRow({
                   </button>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-fg hover:bg-muted"
                     onPointerDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -137,7 +137,7 @@ function BoxRow({
             onOpenMenu();
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 touch-manipulation"
+          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted touch-manipulation"
           aria-label="More actions"
           aria-haspopup="dialog"
         >
@@ -220,11 +220,11 @@ export function BoxSection({ userId }: BoxSectionProps) {
 
   return (
     <section className="pt-2">
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-white pb-2 pt-4">
-        <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-gray-900">
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-surface pb-2 pt-4 backdrop-blur-md backdrop-saturate-150">
+        <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-fg">
           Box
         </h2>
-        <p className="mb-3 text-sm text-gray-500">
+        <p className="mb-3 text-sm text-fg-muted">
           Jot it down. Add a date when you’re ready.
         </p>
         <form onSubmit={handleQuickAdd} className="flex gap-2">
@@ -236,13 +236,13 @@ export function BoxSection({ userId }: BoxSectionProps) {
             onBlur={unlockBodyScroll}
             placeholder="Quick add…"
             disabled={!mounted}
-            className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-2.5 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="min-w-0 flex-1 rounded-xl border border-border bg-muted px-4 py-2.5 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
             aria-label="Add to Box"
           />
           <button
             type="submit"
             disabled={!quickAdd.trim() || adding || !mounted}
-            className="shrink-0 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
+            className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
           >
             {adding ? "…" : "Add"}
           </button>
@@ -250,7 +250,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
       </div>
       <ul className="mt-2 space-y-3">
         {boxTodos.length === 0 ? (
-          <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-6 text-center text-sm text-gray-500">
+          <li className="rounded-xl border border-dashed border-border bg-muted/60 py-6 text-center text-sm text-fg-muted">
             Nothing in Box yet. Type above to capture tasks and schedule them
             later.
           </li>
@@ -304,18 +304,18 @@ export function BoxSection({ userId }: BoxSectionProps) {
           >
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 min-h-[44px] touch-manipulation"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation"
               onClick={() => {
                 setMenuOpenId(null);
                 openEdit(todo);
               }}
             >
-              <Pencil className="h-4 w-4 text-gray-400 shrink-0" />
+              <Pencil className="h-4 w-4 text-fg-subtle shrink-0" />
               Edit
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 min-h-[44px] touch-manipulation"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-danger-muted dark:hover:bg-danger-muted/20 min-h-[44px] touch-manipulation"
               onClick={() => {
                 setMenuOpenId(null);
                 deleteTodo(todo.id);
@@ -330,19 +330,19 @@ export function BoxSection({ userId }: BoxSectionProps) {
 
       {editingTodo && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-box-todo-title"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
               <h2
                 id="edit-box-todo-title"
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-fg"
               >
                 Edit todo
               </h2>
@@ -363,20 +363,20 @@ export function BoxSection({ userId }: BoxSectionProps) {
                   onFocus={lockBodyScroll}
                   onBlur={unlockBodyScroll}
                   placeholder="Todo title"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                 />
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
                 >
                   Save
                 </button>

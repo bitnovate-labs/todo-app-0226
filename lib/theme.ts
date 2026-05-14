@@ -4,5 +4,11 @@
  */
 export const THEME = {
   /** Primary brand color (hex). Used for PWA theme_color, viewport themeColor, and Tailwind primary. */
-  primary: '#2563eb',
+  primary: "#2563eb",
 } as const;
+
+/** Browser chrome / PWA status bar when UI is light. */
+export const THEME_COLOR_LIGHT = "#f2f3f5";
+
+/** Browser chrome / PWA status bar when UI is dark. */
+export const THEME_COLOR_DARK = "#0c0c0f";

@@ -32,7 +32,7 @@ import { useHabits } from "@/hooks/useHabits";
 import { isHabitCompletedOn, type Habit } from "@/lib/habits";
 
 type HabitTrackerViewProps = { userId: string | undefined | null };
-type HabitTab = "daily" | "calendar";
+type HabitTab = "daily" | "progress";
 
 function monthTitle(d: Date): string {
   return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
@@ -48,10 +48,26 @@ const WEEKDAY_LABELS = [
   { short: "S", full: "Saturday" },
 ] as const;
 
+/** Supabase brand green (#3ecf8e) — shared progress card + heatmap so habits read as one family */
 const HABIT_CARD_FRAME =
-  "rounded-[1.25rem] border px-4 py-4 shadow-[0_2px_24px_rgba(15,15,20,0.055)] backdrop-blur-md sm:px-5 sm:py-5";
+  "rounded-[1.25rem] border border-[#3ecf8e]/45 bg-gradient-to-b from-[#ecfdf7] to-[#cffae8] px-4 py-4 shadow-card sm:px-5 sm:py-5 dark:border-[#3ecf8e]/35 dark:from-[#132922] dark:to-[#0f1f19]";
 
-const RIPPLE_CELL_EMPTY = "bg-white/55";
+const RIPPLE_CELL_EMPTY =
+  "bg-white/60 ring-1 ring-inset ring-[#3ecf8e]/25 shadow-[inset_0_0_0_1px_rgba(62,207,142,0.2)] dark:bg-white/[0.12] dark:shadow-[inset_0_0_0_1px_rgba(62,207,142,0.25)] dark:ring-white/15";
+
+type HabitHeatmapStyle = {
+  titleClass: string;
+  doneCellClass: string;
+  todayRingClass: string;
+};
+
+const HABIT_HEATMAP_STYLE: HabitHeatmapStyle = {
+  titleClass: "text-[#0b4637] dark:text-[#c8f5e6]",
+  doneCellClass:
+    "bg-[#3ecf8e] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] dark:bg-[#3ecf8e] dark:shadow-[inset_0_1px_0_rgba(0,0,0,0.12)]",
+  todayRingClass:
+    "ring-2 ring-[#26a978] ring-offset-1 ring-offset-transparent dark:ring-[#3ecf8e]",
+};
 
 /** Cast for React 19 JSX compatibility with @dnd-kit return type */
 const SortableList = SortableContext as unknown as React.JSX.ElementType;
@@ -88,9 +104,11 @@ function SortableHabitRow({
   };
 
   const rowClass = [
-    "flex items-center gap-3 rounded-xl px-3 py-3 shadow-md",
-    isDragging && "z-50 opacity-90 shadow-lg",
-    completed ? "bg-emerald-50" : "bg-white",
+    "flex items-center gap-3 rounded-xl border border-border-subtle px-3 py-3 shadow-card",
+    isDragging && "z-50 opacity-95 shadow-popover ring-2 ring-primary/15",
+    completed
+      ? "bg-emerald-50 dark:bg-emerald-950/30"
+      : "bg-row-default",
   ]
     .filter(Boolean)
     .join(" ");
@@ -99,7 +117,7 @@ function SortableHabitRow({
     <li ref={setNodeRef} style={style} className={rowClass}>
       <button
         type="button"
-        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+        className="touch-none shrink-0 cursor-grab active:cursor-grabbing rounded p-1.5 text-fg-subtle hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0"
         aria-label="Drag to reorder"
         {...attributes}
         {...listeners}
@@ -115,7 +133,7 @@ function SortableHabitRow({
         className={`flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors active:scale-95 disabled:pointer-events-none disabled:opacity-60 ${
           completed
             ? "bg-emerald-500 text-white hover:bg-emerald-600"
-            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            : "bg-muted text-fg-muted hover:bg-surface"
         }`}
         aria-label={
           completed
@@ -128,13 +146,13 @@ function SortableHabitRow({
 
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-[15px] font-medium ${completed ? "text-emerald-900" : "text-gray-900"}`}
+          className={`truncate text-[15px] font-medium ${completed ? "text-emerald-900 dark:text-emerald-200" : "text-fg"}`}
         >
           {habit.title}
         </p>
-        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-fg-muted">
           <Flame
-            className={`h-3.5 w-3.5 ${streak > 0 ? "text-orange-500" : "text-gray-400"}`}
+            className={`h-3.5 w-3.5 ${streak > 0 ? "text-orange-500" : "text-fg-subtle"}`}
           />
           {streak} day streak
         </p>
@@ -143,7 +161,7 @@ function SortableHabitRow({
       <button
         type="button"
         onClick={() => onEdit(habit)}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg"
         aria-label="Edit habit"
       >
         <Pencil className="h-4 w-4" />
@@ -152,7 +170,7 @@ function SortableHabitRow({
       <button
         type="button"
         onClick={() => onDelete(habit.id)}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-red-500"
         aria-label="Delete habit"
       >
         <Trash2 className="h-4 w-4" />
@@ -161,65 +179,14 @@ function SortableHabitRow({
   );
 }
 
-type HabitGridAccent = {
-  cardClass: string;
-  titleClass: string;
-  doneCellClass: string;
-  todayRingClass: string;
-};
-
-/** Pastel card shell + matching title / heatmap accents per habit. */
-const HABIT_GRID_ACCENTS: HabitGridAccent[] = [
-  {
-    cardClass:
-      "border-violet-200/90 bg-gradient-to-b from-violet-100/90 to-violet-50/55",
-    titleClass: "text-violet-900",
-    doneCellClass:
-      "bg-violet-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-violet-400/85",
-  },
-  {
-    cardClass: "border-sky-200/90 bg-gradient-to-b from-sky-100/90 to-sky-50/55",
-    titleClass: "text-sky-900",
-    doneCellClass: "bg-sky-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-sky-400/85",
-  },
-  {
-    cardClass: "border-teal-200/90 bg-gradient-to-b from-teal-100/90 to-teal-50/55",
-    titleClass: "text-teal-900",
-    doneCellClass: "bg-teal-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-teal-400/85",
-  },
-  {
-    cardClass:
-      "border-amber-200/90 bg-gradient-to-b from-amber-100/90 to-amber-50/55",
-    titleClass: "text-amber-950",
-    doneCellClass: "bg-amber-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-amber-400/85",
-  },
-  {
-    cardClass: "border-rose-200/90 bg-gradient-to-b from-rose-100/90 to-rose-50/55",
-    titleClass: "text-rose-900",
-    doneCellClass: "bg-rose-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-rose-400/85",
-  },
-  {
-    cardClass:
-      "border-indigo-200/90 bg-gradient-to-b from-indigo-100/90 to-indigo-50/55",
-    titleClass: "text-indigo-900",
-    doneCellClass: "bg-indigo-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]",
-    todayRingClass: "ring-indigo-400/85",
-  },
-];
-
 function HabitMonthCalendar({
   habit,
   month,
-  accent,
+  style,
 }: {
   habit: Habit;
   month: Date;
-  accent: HabitGridAccent;
+  style: HabitHeatmapStyle;
 }) {
   const todayKey = useMemo(() => dateKey(new Date()), []);
 
@@ -268,7 +235,7 @@ function HabitMonthCalendar({
           <span
             key={d.full}
             title={d.full}
-            className="flex min-h-[0.875rem] items-center justify-center text-[8px] font-medium leading-none text-zinc-400 sm:min-h-[0.9375rem] sm:text-[9px]"
+            className="flex min-h-[0.875rem] items-center justify-center text-[8px] font-medium leading-none text-[#1a7a5f]/80 dark:text-[#7ddcc4]/85 sm:min-h-[0.9375rem] sm:text-[9px]"
           >
             {d.short}
           </span>
@@ -286,8 +253,8 @@ function HabitMonthCalendar({
             <div
               key={cell.date}
               className={`${dayCellClass} transition-[transform,box-shadow] duration-200 ${
-                cell.done ? accent.doneCellClass : RIPPLE_CELL_EMPTY
-              } ${isToday ? `relative z-[1] ring-1 ring-offset-1 ring-offset-white ${accent.todayRingClass}` : ""}`}
+                cell.done ? style.doneCellClass : RIPPLE_CELL_EMPTY
+              } ${isToday ? `relative z-[1] ring-1 ring-offset-1 ring-offset-transparent ${style.todayRingClass}` : ""}`}
               title={`${cell.date}: ${cell.done ? "Completed" : "No check-in"} · ${habit.title}`}
             />
           );
@@ -375,7 +342,7 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
 
   if (loading) {
     return (
-      <div className="min-w-0 animate-page-load py-8 text-center text-gray-500">
+      <div className="min-w-0 animate-page-load py-8 text-center text-fg-muted">
         Loading habits…
       </div>
     );
@@ -383,28 +350,28 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
 
   return (
     <section className="min-w-0 animate-page-load">
-      <div className="mb-4 grid grid-cols-2 rounded-xl bg-gray-100 p-1">
+      <div className="mb-4 grid grid-cols-2 rounded-xl bg-muted p-1">
         <button
           type="button"
           onClick={() => setTab("daily")}
           className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             tab === "daily"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600"
+              ? "bg-surface text-fg shadow-card"
+              : "text-fg-muted"
           }`}
         >
           Daily
         </button>
         <button
           type="button"
-          onClick={() => setTab("calendar")}
+          onClick={() => setTab("progress")}
           className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            tab === "calendar"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600"
+            tab === "progress"
+              ? "bg-surface text-fg shadow-card"
+              : "text-fg-muted"
           }`}
         >
-          Calendar
+          Progress
         </button>
       </div>
 
@@ -420,7 +387,7 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
 
           <ul className="space-y-3 pb-6">
             {sortedHabits.length === 0 ? (
-              <li className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 py-8 text-center text-sm text-gray-500">
+              <li className="rounded-xl border border-dashed border-border bg-muted/60 py-8 text-center text-sm text-fg-muted">
                 No habits yet. Tap the + button to add one.
               </li>
             ) : (
@@ -451,9 +418,9 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
             )}
           </ul>
         </>
-      ) : (
+      ) : tab === "progress" ? (
         <div className="space-y-4 pb-6">
-          <div className="grid grid-cols-3 items-center rounded-2xl border border-zinc-200/60 bg-white/90 px-1 py-1 shadow-[0_1px_12px_rgba(15,15,20,0.04)] backdrop-blur-sm">
+          <div className="grid grid-cols-3 items-center rounded-2xl border border-border bg-surface px-1 py-1 shadow-card backdrop-blur-sm">
             <button
               type="button"
               onClick={() => {
@@ -461,12 +428,12 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                 next.setMonth(next.getMonth() - 1);
                 setCalendarMonth(next);
               }}
-              className="justify-self-start rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="justify-self-start rounded-xl p-2 text-fg-subtle transition-colors hover:bg-muted hover:text-fg"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <p className="text-center text-sm font-medium tracking-tight text-gray-900">
+            <p className="text-center text-sm font-medium tracking-tight text-fg">
               {monthTitle(calendarMonth)}
             </p>
             <button
@@ -476,27 +443,24 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                 next.setMonth(next.getMonth() + 1);
                 setCalendarMonth(next);
               }}
-              className="justify-self-end rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="justify-self-end rounded-xl p-2 text-fg-subtle transition-colors hover:bg-muted hover:text-fg"
               aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
           {sortedHabits.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 py-8 text-center text-sm text-gray-500">
-              Add habits on the Daily tab to see a calendar for each one.
+            <p className="rounded-xl border border-dashed border-border bg-muted/60 py-8 text-center text-sm text-fg-muted">
+              Add habits on the Daily tab to see progress for each habit here.
             </p>
           ) : (
             <ul className="space-y-2">
-              {sortedHabits.map((habit, index) => {
-                const accent =
-                  HABIT_GRID_ACCENTS[index % HABIT_GRID_ACCENTS.length];
-                return (
+              {sortedHabits.map((habit) => (
                   <li key={habit.id}>
-                    <div className={`${HABIT_CARD_FRAME} ${accent.cardClass}`}>
+                    <div className={HABIT_CARD_FRAME}>
                       <div className="grid grid-cols-5 gap-2 sm:gap-3">
                         <h3
-                          className={`col-span-2 min-w-0 self-start text-left text-[15px] font-semibold leading-snug tracking-tight break-words ${accent.titleClass}`}
+                          className={`col-span-2 min-w-0 self-start text-left text-[15px] font-semibold leading-snug tracking-tight break-words ${HABIT_HEATMAP_STYLE.titleClass}`}
                         >
                           {habit.title}
                         </h3>
@@ -504,34 +468,33 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                           <HabitMonthCalendar
                             habit={habit}
                             month={calendarMonth}
-                            accent={accent}
+                            style={HABIT_HEATMAP_STYLE}
                           />
                         </div>
                       </div>
                     </div>
                   </li>
-                );
-              })}
+                ))}
             </ul>
           )}
         </div>
-      )}
+      ) : null}
 
       {editingHabit && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-4 px-5 sm:px-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 px-5 sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-habit-title"
         >
           <div
-            className="w-full max-w-[430px] shrink-0 rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-[430px] shrink-0 rounded-2xl border border-border bg-surface shadow-popover"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 pb-2">
               <h2
                 id="edit-habit-title"
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-fg"
               >
                 Edit habit
               </h2>
@@ -550,7 +513,7 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="Habit name"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-[15px] text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
                   autoFocus
                 />
               </div>
@@ -558,14 +521,14 @@ export function HabitTrackerView({ userId }: HabitTrackerViewProps) {
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-fg transition-colors hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateTitlePending}
-                  className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-2 focus:ring-offset-canvas disabled:opacity-50"
                 >
                   {updateTitlePending ? "Saving…" : "Save"}
                 </button>

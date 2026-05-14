@@ -9,14 +9,14 @@ export async function Navbar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 safe-area-t">
-      <header className="mx-auto max-w-[430px] border-b border-gray-200 bg-white">
+      <header className="mx-auto max-w-[430px] border-b border-border bg-surface backdrop-blur-md backdrop-saturate-150">
         <div className="w-full">
         {user ? (
           <nav className="grid min-h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 py-3">
             <div className="flex justify-start">
               <Link
                 href="/settings"
-                className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                className="rounded-full p-2 text-fg-muted transition-colors hover:bg-muted hover:text-fg"
                 aria-label="Settings"
               >
                 <Settings className="h-6 w-6" aria-hidden />
@@ -34,10 +34,10 @@ export async function Navbar() {
               <NavbarTitle />
             </div>
             <div className="flex justify-end gap-2">
-              <Link href="/sign-in" className="text-sm text-gray-600 hover:text-gray-900 whitespace-nowrap">
+              <Link href="/sign-in" className="text-sm text-fg-muted hover:text-fg whitespace-nowrap">
                 Sign in
               </Link>
-              <Link href="/sign-up" className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap">
+              <Link href="/sign-up" className="text-sm text-primary hover:text-primary-hover whitespace-nowrap">
                 Sign up
               </Link>
             </div>
