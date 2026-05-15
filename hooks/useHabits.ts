@@ -7,6 +7,7 @@ import {
   deleteHabitAction,
   reorderHabitsAction,
   toggleHabitTodayAction,
+  updateHabitNotesAction,
   updateHabitTitleAction,
 } from "@/app/actions/habits";
 import type { Habit } from "@/lib/habits";
@@ -49,6 +50,7 @@ export function useHabits(userId: string | undefined | null) {
         title: trimmed,
         createdAt: Date.now(),
         position: maxPos + 1,
+        notes: null,
         completedDates: [],
         currentStreak: 0,
         longestStreak: 0,
@@ -124,6 +126,20 @@ export function useHabits(userId: string | undefined | null) {
     },
   });
 
+  const updateNotesMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
+      const result = await updateHabitNotesAction(id, notes);
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
+    onSuccess: (result) => {
+      if (!result.data) return;
+      queryClient.setQueryData<Habit[]>(queryKey, (old) =>
+        old ? old.map((h) => (h.id === result.data!.id ? result.data! : h)) : [result.data!]
+      );
+    },
+  });
+
   const updateTitleMutation = useMutation({
     mutationFn: ({ id, title }: { id: string; title: string }) =>
       updateHabitTitleAction(id, title),
@@ -134,6 +150,13 @@ export function useHabits(userId: string | undefined | null) {
       );
     },
   });
+
+  const updateHabitNotes = useCallback(
+    async (id: string, notes: string) => {
+      await updateNotesMutation.mutateAsync({ id, notes });
+    },
+    [updateNotesMutation]
+  );
 
   const reorderHabitsMutation = useMutation({
     mutationFn: (habitIds: string[]) => reorderHabitsAction(habitIds),
@@ -228,6 +251,7 @@ export function useHabits(userId: string | undefined | null) {
     deleteHabit,
     toggleToday,
     updateHabitTitle,
+    updateHabitNotes,
     reorderHabits,
     isCompletedToday,
     addPending: addMutation.isPending,
@@ -235,5 +259,6 @@ export function useHabits(userId: string | undefined | null) {
     togglePending: togglePendingIds.size > 0,
     isTogglePending,
     updateTitlePending: updateTitleMutation.isPending,
+    updateNotesPending: updateNotesMutation.isPending,
   };
 }

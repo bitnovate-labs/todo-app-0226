@@ -1,17 +1,26 @@
 import { addDaysToDateKey, todayKey } from "@/lib/todos";
 
+/** Max length for optional habit notes (enforced in app + server). */
+export const HABIT_NOTES_MAX_LENGTH = 500;
+
 export type Habit = {
   id: string;
   title: string;
   createdAt: number;
   /** List order (0-based), persisted like todos. */
   position: number;
+  /** Optional short note from `habits.notes`; null when unset or blank. */
+  notes: string | null;
   completedDates: string[];
-  /** Consecutive days with a check-in ending today (also stored on `habits.current_streak`). */
+  /** Consecutive calendar days with a check-in; before today is checked off, streak still counts through yesterday (also stored on `habits.current_streak`). */
   currentStreak: number;
   /** Best consecutive-day run ever (also stored on `habits.longest_streak`). */
   longestStreak: number;
 };
+
+export function habitHasNotes(habit: Pick<Habit, "notes">): boolean {
+  return habit.notes != null && habit.notes.trim().length > 0;
+}
 
 export function sortHabitDatesAsc(dates: string[]): string[] {
   return [...dates].sort();
@@ -26,8 +35,15 @@ export function currentHabitStreak(
   /** Calendar day to treat as "today" for streak (use client local date when computing on the server). */
   asOfDateKey: string = todayKey()
 ): number {
+  let start = asOfDateKey;
+  if (!habit.completedDates.includes(start)) {
+    start = addDaysToDateKey(asOfDateKey, -1);
+    if (!habit.completedDates.includes(start)) {
+      return 0;
+    }
+  }
   let streak = 0;
-  let day = asOfDateKey;
+  let day = start;
   while (habit.completedDates.includes(day)) {
     streak += 1;
     day = addDaysToDateKey(day, -1);

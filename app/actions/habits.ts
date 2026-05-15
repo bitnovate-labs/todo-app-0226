@@ -5,6 +5,7 @@ import { todayKey } from '@/lib/todos';
 import type { Habit } from '@/lib/habits';
 import {
   currentHabitStreak,
+  HABIT_NOTES_MAX_LENGTH,
   longestHabitStreak,
   sortHabitDatesAsc,
 } from '@/lib/habits';
@@ -22,12 +23,19 @@ type HabitRow = {
   position: number;
   current_streak: number;
   longest_streak: number;
+  notes?: string | null;
 };
 
 type CheckinRow = {
   habit_id: string;
   date: string;
 };
+
+function normalizeHabitNotes(raw: string | null | undefined): string | null {
+  if (raw == null) return null;
+  const t = String(raw).trim();
+  return t.length > 0 ? t : null;
+}
 
 function buildHabit(row: HabitRow, dates: string[], streakAsOfDate?: string): Habit {
   const completedDates = sortHabitDatesAsc(dates);
@@ -41,6 +49,7 @@ function buildHabit(row: HabitRow, dates: string[], streakAsOfDate?: string): Ha
     title: row.title,
     createdAt: new Date(row.created_at).getTime(),
     position: row.position ?? 0,
+    notes: normalizeHabitNotes(row.notes),
     completedDates,
     currentStreak,
     longestStreak,
@@ -97,7 +106,7 @@ export async function getHabitsForUser(
 
   const { data: habitsData, error: habitsError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
+    .select('*')
     .eq('profile_id', userId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: true });
@@ -157,7 +166,7 @@ export async function addHabitAction(title: string): Promise<AddHabitResult> {
   const { data, error } = await supabase
     .from('habits')
     .insert({ profile_id: user.id, title: trimmed, position: nextPosition })
-    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
+    .select('*')
     .single();
 
   if (error) return { error: error.message };
@@ -202,7 +211,55 @@ export async function updateHabitTitleAction(
 
   const { data: habitData, error: habitError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
+    .select('*')
+    .eq('id', habitId)
+    .eq('profile_id', user.id)
+    .single();
+  if (habitError) return { error: habitError.message };
+
+  const { data: checkinsData, error: checkinsError } = await supabase
+    .from('habit_checkins')
+    .select('habit_id, date')
+    .eq('habit_id', habitId)
+    .eq('profile_id', user.id);
+  if (checkinsError) return { error: checkinsError.message };
+
+  const row = habitData as HabitRow;
+  const dates = ((checkinsData ?? []) as CheckinRow[]).map((c) => c.date);
+  const habit = buildHabit(row, dates);
+  await persistHabitStreaks(supabase, user.id, [row], [habit]);
+  return { data: habit };
+}
+
+export type UpdateHabitNotesResult = { data?: Habit; error?: string };
+
+export async function updateHabitNotesAction(
+  habitId: string,
+  notes: string
+): Promise<UpdateHabitNotesResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) return { error: authError?.message ?? 'Not authenticated' };
+
+  const trimmed = notes.trim();
+  if (trimmed.length > HABIT_NOTES_MAX_LENGTH) {
+    return { error: `Note must be ${HABIT_NOTES_MAX_LENGTH} characters or less` };
+  }
+  const stored = trimmed.length > 0 ? trimmed : null;
+
+  const { error: updateError } = await supabase
+    .from('habits')
+    .update({ notes: stored })
+    .eq('id', habitId)
+    .eq('profile_id', user.id);
+  if (updateError) return { error: updateError.message };
+
+  const { data: habitData, error: habitError } = await supabase
+    .from('habits')
+    .select('*')
     .eq('id', habitId)
     .eq('profile_id', user.id)
     .single();
@@ -294,7 +351,7 @@ export async function toggleHabitTodayAction(
 
   const { data: habitData, error: habitError } = await supabase
     .from('habits')
-    .select('id, profile_id, title, created_at, position, current_streak, longest_streak')
+    .select('*')
     .eq('id', habitId)
     .eq('profile_id', user.id)
     .single();
