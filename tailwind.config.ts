@@ -49,6 +49,8 @@ const config: Config = {
         },
         row: {
           DEFAULT: 'var(--color-row-default)',
+          /** Alias so `bg-row-default` works if used in class strings */
+          default: 'var(--color-row-default)',
           priority: 'var(--color-row-priority)',
           done: 'var(--color-row-done)',
           'done-text': 'var(--color-row-done-text)',

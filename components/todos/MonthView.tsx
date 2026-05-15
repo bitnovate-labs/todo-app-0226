@@ -22,6 +22,9 @@ import {
   getMonthCalendarGrid,
   monthLabel,
   addDaysToDateKey,
+  TODO_ROW_BG_CLASS,
+  TODO_ROW_DONE_CLASS,
+  TODO_ROW_PRIORITY_CLASS,
   type Todo,
 } from "@/lib/todos";
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
@@ -429,12 +432,12 @@ function MonthTodoRow({
 }) {
   return (
     <li
-      className={`flex items-center gap-1.5 rounded-xl border border-border-subtle px-3 py-2 shadow-card ${
+      className={`flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 shadow-card ${
         todo.completed
-          ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
+          ? TODO_ROW_DONE_CLASS
           : todo.priority
-            ? "bg-row-priority border-amber-200/50 dark:border-amber-500/20"
-            : "bg-row-default"
+            ? `${TODO_ROW_PRIORITY_CLASS} border-amber-200/50 dark:border-amber-500/20`
+            : TODO_ROW_BG_CLASS
       }`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">

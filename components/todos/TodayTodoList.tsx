@@ -40,14 +40,14 @@ import {
   formatDateDDMMMFromDate,
   dayNameFromDate,
   addDaysToDateKey,
+  TODO_ROW_BG_CLASS,
+  TODO_ROW_DONE_CLASS,
+  TODO_ROW_PRIORITY_CLASS,
 } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type TodayTodoListProps = { userId: string | undefined | null };
-
-/** Priority todo styling */
-const PRIORITY_ROW_CLASS = "bg-row-priority";
 
 const actionButtonClass =
   "flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-fg hover:bg-muted min-h-[44px] touch-manipulation";
@@ -100,13 +100,13 @@ function SortableTodoItem({
   };
 
   const rowClass = [
-    "flex items-center gap-1.5 rounded-xl border border-border-subtle py-2.5 pl-2 pr-1.5 shadow-card",
+    "flex items-center gap-1.5 rounded-xl border border-border py-2.5 pl-2 pr-1.5 shadow-card",
     isDragging && "z-50 opacity-95 shadow-popover ring-2 ring-primary/20",
     todo.completed
-      ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
+      ? TODO_ROW_DONE_CLASS
       : todo.priority
-        ? `${PRIORITY_ROW_CLASS} border-amber-200/50 dark:border-amber-500/20`
-        : "bg-row-default",
+        ? `${TODO_ROW_PRIORITY_CLASS} border-amber-200/50 dark:border-amber-500/20`
+        : TODO_ROW_BG_CLASS,
   ]
     .filter(Boolean)
     .join(" ");
@@ -286,13 +286,13 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
 
   if (loading && todos.length === 0) {
     return (
-      <div className="min-w-0 animate-page-load">
+      <div className="min-w-0 animate-page-load bg-canvas">
         {stickyHeader}
         <ul className="mt-2 space-y-3" aria-busy="true" aria-label="Loading todos">
           {[1, 2, 3, 4].map((i) => (
             <li
               key={i}
-              className="h-[52px] rounded-xl border border-border-subtle bg-muted animate-pulse shadow-card"
+              className={`h-[52px] rounded-xl border border-border-subtle ${TODO_ROW_BG_CLASS} animate-pulse shadow-card`}
             />
           ))}
         </ul>
@@ -301,7 +301,7 @@ export function TodayTodoList({ userId }: TodayTodoListProps) {
   }
 
   return (
-    <div className="min-w-0 animate-page-load">
+    <div className="min-w-0 animate-page-load bg-canvas">
       {stickyHeader}
       <ul className="mt-2 space-y-3">
         {dayTodos.length === 0 ? (

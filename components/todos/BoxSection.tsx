@@ -11,7 +11,7 @@ import {
 } from "@/hooks/useListFontSize";
 import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import type { Todo } from "@/lib/todos";
-import { todayKey, dateKey } from "@/lib/todos";
+import { todayKey, dateKey, TODO_ROW_BG_CLASS } from "@/lib/todos";
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type BoxRowProps = {
@@ -51,7 +51,7 @@ function BoxRow({
   listFontSizeClass,
 }: BoxRowProps) {
   return (
-    <li className="flex items-center gap-1 rounded-xl border border-border-subtle bg-row-default py-2 pl-4 pr-1 shadow-card">
+    <li className={`flex items-center gap-1 rounded-xl border border-border ${TODO_ROW_BG_CLASS} py-2 pl-4 pr-1 shadow-card`}>
       <span className={`min-w-0 flex-1 ${listFontSizeClass} text-fg`}>
         {todo.title}
       </span>
@@ -219,8 +219,8 @@ export function BoxSection({ userId }: BoxSectionProps) {
   };
 
   return (
-    <section className="pt-2">
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-surface pb-2 pt-4 backdrop-blur-md backdrop-saturate-150">
+    <section className="-mx-4 -my-6 bg-canvas px-4 py-6 pt-2">
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-canvas pb-2 pt-4 backdrop-blur-md backdrop-saturate-150">
         <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-fg">
           Box
         </h2>

@@ -12,6 +12,12 @@ export type Todo = {
   priority: boolean;
 };
 
+/** Default list row: white card in light mode, elevated surface in dark. */
+export const TODO_ROW_BG_CLASS = "bg-white dark:bg-elevated";
+export const TODO_ROW_PRIORITY_CLASS = "bg-row-priority";
+export const TODO_ROW_DONE_CLASS =
+  "bg-row-done border-emerald-200/40 dark:border-emerald-500/25";
+
 /** Format date as YYYY-MM-DD (local date) */
 export function dateKey(d: Date): string {
   const y = d.getFullYear();

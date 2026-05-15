@@ -16,7 +16,15 @@ import { useTodos } from "@/hooks/useTodos";
 import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
 import { useWeekViewLayout } from "@/hooks/useWeekViewLayout";
-import { weekDatesForWeekWithOffset, todayKey, addDaysToDateKey, formatWeekRangeLabel } from "@/lib/todos";
+import {
+  weekDatesForWeekWithOffset,
+  todayKey,
+  addDaysToDateKey,
+  formatWeekRangeLabel,
+  TODO_ROW_BG_CLASS,
+  TODO_ROW_DONE_CLASS,
+  TODO_ROW_PRIORITY_CLASS,
+} from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
@@ -160,16 +168,12 @@ export function WeekView({ userId }: WeekViewProps) {
             dayTodos.map((todo) => (
                 <li
                   key={todo.id}
-                  className={`flex items-center gap-1.5 rounded-xl border border-border-subtle px-3 py-2.5 shadow-card transition-shadow ${
+                  className={`flex items-center gap-1.5 rounded-xl border border-border px-3 py-2.5 shadow-card transition-shadow ${
                     todo.completed
-                      ? "bg-row-done border-emerald-200/40 dark:border-emerald-500/25"
+                      ? TODO_ROW_DONE_CLASS
                       : todo.priority
-                        ? "bg-row-priority border-amber-200/50 dark:border-amber-500/20"
-                        : isToday
-                          ? "bg-row-default"
-                          : isPast
-                            ? "bg-muted/50"
-                            : "bg-row-default"
+                        ? `${TODO_ROW_PRIORITY_CLASS} border-amber-200/50 dark:border-amber-500/20`
+                        : TODO_ROW_BG_CLASS
                   }`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -249,8 +253,8 @@ export function WeekView({ userId }: WeekViewProps) {
   const isCurrentWeek = weekOffset === 0;
 
   return (
-    <div className={`min-w-0 animate-page-load ${isCurrentWeek ? "" : "-mx-4 -my-6 min-h-screen bg-canvas px-4 py-6"}`}>
-      <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 pb-2 -mt-8 pt-6 ${isCurrentWeek ? "bg-surface" : "bg-canvas"}`}>
+    <div className="min-w-0 animate-page-load -mx-4 -my-6 min-h-screen bg-canvas px-4 py-6">
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-canvas pb-2 -mt-8 pt-6 backdrop-blur-md backdrop-saturate-150">
         <div className="flex flex-nowrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center justify-start gap-2 text-left">

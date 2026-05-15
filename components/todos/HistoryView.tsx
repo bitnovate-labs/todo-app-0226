@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTodos } from "@/hooks/useTodos";
 import { useListFontSize, LIST_FONT_SIZE_CLASSES } from "@/hooks/useListFontSize";
 import { useWeekStartsOn } from "@/hooks/useWeekStartsOn";
-import type { Todo } from "@/lib/todos";
+import { TODO_ROW_BG_CLASS, TODO_ROW_DONE_CLASS, type Todo } from "@/lib/todos";
 import {
   currentWeekDateKeys,
   monthDateKeys,
@@ -137,8 +137,8 @@ function TodoHistoryItem({
     <li
       className={`flex cursor-pointer items-center gap-3 rounded-lg border py-2.5 pl-3 pr-2 shadow-card ${
         isIncomplete
-          ? "border-border bg-accent-soft hover:bg-muted"
-          : "border-emerald-200/40 bg-row-done hover:opacity-90 dark:border-emerald-500/25"
+          ? `border-border ${TODO_ROW_BG_CLASS} hover:bg-muted`
+          : `${TODO_ROW_DONE_CLASS} hover:opacity-90`
       }`}
       onClick={() =>
         isIncomplete ? onReAdd(todo) : onUndoComplete(todo.id)
