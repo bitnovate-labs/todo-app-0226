@@ -36,8 +36,17 @@ export function useTodos(userId: string | undefined | null) {
   const error = queryError ? String(queryError) : null;
 
   const addTodoMutation = useMutation({
-    mutationFn: ({ title, date, priority }: { title: string; date: string | null; priority?: boolean }) =>
-      addTodoAction(title, date, priority ?? false),
+    mutationFn: ({
+      title,
+      date,
+      priority,
+      time,
+    }: {
+      title: string;
+      date: string | null;
+      priority?: boolean;
+      time?: string | null;
+    }) => addTodoAction(title, date, priority ?? false, time ?? null),
     retry: 2,
     onSuccess: (result) => {
       if (result.data) {
@@ -156,12 +165,18 @@ export function useTodos(userId: string | undefined | null) {
   });
 
   const addTodo = useCallback(
-    async (title: string, date: string | null, priority?: boolean) => {
+    async (
+      title: string,
+      date: string | null,
+      priority?: boolean,
+      time?: string | null
+    ) => {
       if (!userId) return;
       const result = await addTodoMutation.mutateAsync({
         title,
         date,
         priority: priority ?? false,
+        time: time ?? null,
       });
       if (result.error) throw new Error(result.error);
     },

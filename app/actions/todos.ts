@@ -11,6 +11,7 @@ type DbRow = {
   completed: boolean;
   position: number;
   priority: boolean;
+  time: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -24,6 +25,7 @@ function mapRowToTodo(row: DbRow): Todo {
     createdAt: new Date(row.created_at).getTime(),
     position: row.position ?? 0,
     priority: row.priority ?? false,
+    time: row.time ?? null,
   };
 }
 
@@ -37,7 +39,7 @@ export async function getTodosForUser(userId: string): Promise<GetTodosResult> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('todos')
-    .select('id, profile_id, title, date, completed, position, priority, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, priority, time, created_at, updated_at')
     .eq('profile_id', userId)
     .order('date', { ascending: true, nullsFirst: true })
     .order('position', { ascending: true })
@@ -64,7 +66,8 @@ export type AddTodoResult = { data?: Todo; error?: string };
 export async function addTodoAction(
   title: string,
   date: string | null,
-  priority: boolean = false
+  priority: boolean = false,
+  time: string | null = null
 ): Promise<AddTodoResult> {
   const supabase = await createClient();
   const {
@@ -84,8 +87,9 @@ export async function addTodoAction(
       completed: false,
       position: 0,
       priority: !!priority,
+      time: time || null,
     })
-    .select('id, profile_id, title, date, completed, position, priority, created_at, updated_at')
+    .select('id, profile_id, title, date, completed, position, priority, time, created_at, updated_at')
     .single();
 
   if (error) return { error: error.message };

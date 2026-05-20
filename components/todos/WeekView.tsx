@@ -27,6 +27,7 @@ import {
 } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
+import { TodoTitleBlock } from "@/components/todos/TodoTitleBlock";
 
 type WeekViewProps = { userId: string | undefined | null };
 
@@ -176,14 +177,16 @@ export function WeekView({ userId }: WeekViewProps) {
                         : TODO_ROW_BG_CLASS
                   }`}
                 >
-                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <div
+                    className={`flex min-w-0 flex-1 gap-2 ${todo.time ? "items-start" : "items-center"}`}
+                  >
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleTodo(todo.id);
                       }}
-                      className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0 touch-manipulation"
+                      className={`shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-fg-subtle transition-colors hover:bg-muted hover:text-fg-muted focus:outline-none focus:ring-2 focus:ring-primary-focus focus:ring-offset-0 touch-manipulation ${todo.time ? "mt-0.5" : ""}`}
                       aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
                     >
                       {todo.completed ? (
@@ -194,15 +197,13 @@ export function WeekView({ userId }: WeekViewProps) {
                         <span className="h-5 w-5 rounded-full border-2 border-border-strong" />
                       )}
                     </button>
-                    <span
-                      className={`min-w-0 flex-1 break-words font-medium leading-snug ${listFontSizeClass} ${
-                        todo.completed
-                          ? "text-row-done-text line-through opacity-90"
-                          : "text-fg"
-                      }`}
-                    >
-                      {todo.title}
-                    </span>
+                    <TodoTitleBlock
+                      title={todo.title}
+                      time={todo.time}
+                      completed={todo.completed}
+                      listFontSizeClass={listFontSizeClass}
+                      titleClassName="font-medium"
+                    />
                   </div>
                   <div className="relative shrink-0">
                     <button

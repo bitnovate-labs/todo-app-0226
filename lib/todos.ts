@@ -10,7 +10,18 @@ export type Todo = {
   position: number;
   /** When true, shown at top with highlight background. */
   priority: boolean;
+  /** Optional local time HH:mm; null = no specific time */
+  time: string | null;
 };
+
+/** Format HH:mm for display (e.g. "1:00 pm", "2:30 pm"). */
+export function formatTodoTime(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return time;
+  const period = h >= 12 ? "pm" : "am";
+  const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
 
 /** Default list row: white card in light mode, elevated surface in dark. */
 export const TODO_ROW_BG_CLASS = "bg-white dark:bg-elevated";

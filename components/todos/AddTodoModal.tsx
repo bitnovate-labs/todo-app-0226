@@ -29,6 +29,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
   const [useToday, setUseToday] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKey());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [time, setTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const datePickerRef = useRef<HTMLDivElement>(null);
@@ -47,8 +48,9 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
     setSubmitting(true);
     try {
       const date = defaultDate ?? (useToday ? todayKey() : selectedDate);
-      await addTodo(t, date);
+      await addTodo(t, date, false, time.trim() || null);
       setTitle("");
+      setTime("");
       setUseToday(true);
       setSelectedDate(todayKey());
       setDatePickerOpen(false);
@@ -61,6 +63,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
 
   const handleClose = () => {
     setTitle("");
+    setTime("");
     setUseToday(true);
     setSelectedDate(todayKey());
     setDatePickerOpen(false);
@@ -136,6 +139,18 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
               className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
               required
               autoComplete="off"
+            />
+          </div>
+          <div>
+            <label htmlFor="modal-time" className="mb-1 block text-sm font-medium text-fg-muted">
+              Time <span className="font-normal text-fg-subtle">(optional)</span>
+            </label>
+            <input
+              id="modal-time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
             />
           </div>
           {!defaultDate && (
