@@ -10,8 +10,6 @@ import {
 } from "@/components/layout/DashboardPathnameContext";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { TodayTodoList } from "@/components/todos/TodayTodoList";
-import { TimeBlockView } from "@/components/todos/TimeBlockView";
-import { HabitTrackerView } from "@/components/habits/HabitTrackerView";
 import { useCalendarView } from "@/hooks/useCalendarView";
 import { todosQueryKey } from "@/lib/todos-query";
 import {
@@ -38,6 +36,22 @@ const WeekView = dynamic(
 
 const MonthView = dynamic(
   () => import("@/components/todos/MonthView").then((m) => ({ default: m.MonthView })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
+
+const TimeBlockView = dynamic(
+  () =>
+    import("@/components/todos/TimeBlockView").then((m) => ({
+      default: m.TimeBlockView,
+    })),
+  { ssr: false, loading: () => dashboardViewLoading }
+);
+
+const HabitTrackerView = dynamic(
+  () =>
+    import("@/components/habits/HabitTrackerView").then((m) => ({
+      default: m.HabitTrackerView,
+    })),
   { ssr: false, loading: () => dashboardViewLoading }
 );
 
@@ -88,7 +102,7 @@ export function DashboardContent({ userId }: { userId: string }) {
         <WeekView userId={userId} />
       )
     ) : pathname === "/box" ? (
-      <div className="min-w-0 animate-page-load pt-2 pb-8">
+      <div className="flex min-h-0 flex-1 flex-col bg-canvas -mx-4 -my-6 px-4 py-6">
         <BoxSection userId={userId} />
       </div>
     ) : pathname === "/timeblock" ? (

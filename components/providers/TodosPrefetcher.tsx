@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { todosQueryKey } from "@/lib/todos-query";
+import { todosQueryKey, fetchTodosForUser } from "@/lib/todos-query";
 import { habitsQueryKey, fetchHabits } from "@/lib/habits-query";
 import {
   timeBlocksQueryKey,
@@ -11,18 +11,23 @@ import {
 import { todayKey } from "@/lib/todos";
 
 /**
- * Prefetch today's time blocks if the cache is empty (todos are usually requested by
- * useTodos in the same frame). Skips when the cache is already seeded to avoid duplicate
- * fetches. On visibility return, invalidates queries so the UI refetches. Offline: skip
- * retry; cached data remains visible.
+ * Prefetch todos, habits, and today's time blocks when the cache is empty (e.g. after
+ * persist restore miss). Skips when server-seeded. On visibility return, invalidates.
  */
 export function TodosPrefetcher({ userId }: { userId: string | null }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!userId) return;
+    const todosKey = todosQueryKey(userId);
     const habitsKey = habitsQueryKey(userId);
     const timeBlocksKey = timeBlocksQueryKey(userId, todayKey());
+    if (queryClient.getQueryData(todosKey) == null) {
+      queryClient.prefetchQuery({
+        queryKey: todosKey,
+        queryFn: () => fetchTodosForUser(userId),
+      });
+    }
     if (queryClient.getQueryData(habitsKey) == null) {
       queryClient.prefetchQuery({
         queryKey: habitsKey,

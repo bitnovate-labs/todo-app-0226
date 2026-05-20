@@ -61,6 +61,22 @@ export async function getTodosAction(): Promise<GetTodosResult> {
   return getTodosForUser(user.id);
 }
 
+/** Client fetch when userId is already known (one auth check, no duplicate getUser in queryFn). */
+export async function getTodosForUserAction(userId: string): Promise<GetTodosResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { data: [], error: authError?.message ?? 'Not authenticated' };
+  }
+  if (user.id !== userId) {
+    return { data: [], error: 'Forbidden' };
+  }
+  return getTodosForUser(userId);
+}
+
 export type AddTodoResult = { data?: Todo; error?: string };
 
 export async function addTodoAction(

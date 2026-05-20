@@ -12,6 +12,8 @@ import {
 import { useLockBodyScrollForKeyboard } from "@/hooks/useLockBodyScrollForKeyboard";
 import type { Todo } from "@/lib/todos";
 import { todayKey, dateKey, TODO_ROW_BG_CLASS } from "@/lib/todos";
+
+const quickAddInputClass = `min-w-0 flex-1 rounded-xl border border-border ${TODO_ROW_BG_CLASS} px-4 py-2.5 text-[15px] text-fg shadow-card placeholder:text-fg-subtle focus:border-border-strong focus:outline-none focus:ring-2 focus:ring-primary-focus/25`;
 import { TodoActionsModal } from "@/components/ui/TodoActionsModal";
 
 type BoxRowProps = {
@@ -219,8 +221,8 @@ export function BoxSection({ userId }: BoxSectionProps) {
   };
 
   return (
-    <section className="-mx-4 -my-6 bg-canvas px-4 py-6 pt-2">
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 -mt-8 shrink-0 bg-canvas pb-2 pt-4 backdrop-blur-md backdrop-saturate-150">
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col animate-page-load">
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-10 shrink-0 bg-canvas pb-3 pt-2 backdrop-blur-md backdrop-saturate-150">
         <h2 className="mb-0.5 text-lg font-semibold tracking-tight text-fg">
           Box
         </h2>
@@ -236,7 +238,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
             onBlur={unlockBodyScroll}
             placeholder="Quick add…"
             disabled={!mounted}
-            className="min-w-0 flex-1 rounded-xl border border-border bg-muted px-4 py-2.5 text-[15px] text-fg placeholder:text-fg-subtle focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
+            className={quickAddInputClass}
             aria-label="Add to Box"
           />
           <button
@@ -248,7 +250,7 @@ export function BoxSection({ userId }: BoxSectionProps) {
           </button>
         </form>
       </div>
-      <ul className="mt-2 space-y-3">
+      <ul className="mt-1 space-y-3 pb-4">
         {boxTodos.length === 0 ? (
           <li className="rounded-xl border border-dashed border-border bg-muted/60 py-6 text-center text-sm text-fg-muted">
             Nothing in Box yet. Type above to capture tasks and schedule them

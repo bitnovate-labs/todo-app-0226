@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   // Next.js 16: set workspace root to silence multi-lockfile warning
   turbopack: { root: __dirname },
   // PWA: serve manifest and sw from public; use headers for caching

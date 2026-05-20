@@ -13,6 +13,9 @@ import { PostHogPageView } from "@/app/providers";
 import { AuthEventTracker } from "@/components/analytics/AuthEventTracker";
 import { IdentifyUser } from "@/components/analytics/IdentifyUser";
 import { AppContentReadyNotifier } from "@/components/pwa/AppContentReadyNotifier";
+import { getTodosForUser } from "@/app/actions/todos";
+import { getTimeBlocksForUser } from "@/app/actions/time-blocks";
+import { todayKey } from "@/lib/todos";
 import type { User } from "@supabase/supabase-js";
 
 type Props = {
@@ -21,13 +24,23 @@ type Props = {
 };
 
 /**
- * Renders the logged-in shell immediately. Todos and time blocks load on the client
- * (React Query + TodosPrefetcher) so the PWA does not wait for server DB round-trips
- * before showing the UI.
+ * Fetches todos and today's time blocks on the server (parallel) so the home list
+ * and React Query cache are warm on first paint. Shell still streams via AuthBoundary Suspense.
  */
-export function InitialDataFetcher({ user, children }: Props) {
+export async function InitialDataFetcher({ user, children }: Props) {
+  const today = todayKey();
+  const [todosResult, timeBlocksResult] = await Promise.all([
+    getTodosForUser(user.id),
+    getTimeBlocksForUser(user.id, today),
+  ]);
+
   return (
-    <QueryProvider userId={user.id}>
+    <QueryProvider
+      userId={user.id}
+      initialTodos={todosResult.data ?? []}
+      initialTimeBlocks={timeBlocksResult.data ?? []}
+      initialTimeBlocksDate={today}
+    >
       <UserProvider user={{ id: user.id, email: user.email ?? undefined }}>
       <AppContentReadyNotifier />
       <TodosPrefetcher userId={user.id} />

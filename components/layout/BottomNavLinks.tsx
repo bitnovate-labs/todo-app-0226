@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Home, Package, Calendar, LayoutGrid, Flame, Plus } from "lucide-react";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
 import { useAddDrawer } from "@/components/layout/AddDrawerContext";
 import { AddHabitModal } from "@/components/habits/AddHabitModal";
-import { AddTodoModal } from "@/components/todos/AddTodoModal";
+
+const AddTodoModal = dynamic(
+  () => import("@/components/todos/AddTodoModal").then((m) => ({ default: m.AddTodoModal })),
+  { ssr: false }
+);
 
 const navItemClass =
   "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold tracking-tight transition-colors duration-200 min-h-[52px] touch-manipulation";
@@ -108,7 +113,7 @@ export function BottomNavLinks({ userId }: { userId: string }) {
         onClose={() => setAddHabitOpen(false)}
         userId={userId}
       />
-      {addDrawer && (
+      {addDrawer?.open && (
         <AddTodoModal
           open={addDrawer.open}
           onClose={addDrawer.closeDrawer}

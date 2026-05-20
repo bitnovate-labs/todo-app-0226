@@ -1,11 +1,11 @@
 import { requireUser } from "@/lib/auth";
-import { WeekView } from "@/components/todos/WeekView";
 
 export const metadata = {
   title: "Week",
 };
 
+/** Route for /week; MainContent renders WeekView/MonthView when pathname is /week. */
 export default async function WeekPage() {
-  const user = await requireUser();
-  return <WeekView userId={user.id} />;
+  await requireUser();
+  return null;
 }

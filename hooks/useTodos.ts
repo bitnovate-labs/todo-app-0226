@@ -12,7 +12,7 @@ import {
   updateTodoPriorityAction,
 } from "@/app/actions/todos";
 import type { Todo } from "@/lib/todos";
-import { todosQueryKey, fetchTodos } from "@/lib/todos-query";
+import { todosQueryKey, fetchTodosForUser } from "@/lib/todos-query";
 
 export function useTodos(userId: string | undefined | null) {
   const [mounted, setMounted] = useState(false);
@@ -29,7 +29,7 @@ export function useTodos(userId: string | undefined | null) {
     error: queryError,
   } = useQuery({
     queryKey,
-    queryFn: fetchTodos,
+    queryFn: () => fetchTodosForUser(userId!),
     enabled: !!userId,
   });
 
