@@ -204,13 +204,16 @@ nav[class*="fixed"][role="navigation"] {
   animation: page-load-ease-in 0.25s ease-in forwards;
 }
 
-/* Prevent date input from overflowing on mobile (iOS Safari gives it a large min-width) */
-input[type="date"] {
+/* Prevent date/time inputs from overflowing on mobile (iOS Safari gives them a large min-width) */
+input[type="date"],
+input[type="time"] {
   max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
 }
 
-input[type="date"]::-webkit-date-and-time-value {
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
   min-width: 0;
   display: block;
 }

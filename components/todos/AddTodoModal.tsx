@@ -113,7 +113,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
       aria-labelledby="add-todo-modal-title"
     >
       <div
-        className="safe-area-b flex max-h-[90dvh] w-full max-w-[430px] flex-col rounded-2xl border border-border bg-surface text-fg shadow-popover"
+        className="safe-area-b flex max-h-[90dvh] w-full min-w-0 max-w-[430px] flex-col overflow-hidden rounded-2xl border border-border bg-surface text-fg shadow-popover"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 px-4 pb-2 pt-4">
@@ -123,7 +123,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
         </div>
         <form
           onSubmit={handleSubmit}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6"
+          className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto px-4 pb-6"
         >
           <div>
             <label htmlFor="modal-title" className="mb-1 block text-sm font-medium text-fg-muted">
@@ -141,7 +141,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
               autoComplete="off"
             />
           </div>
-          <div>
+          <div className="min-w-0 max-w-full">
             <label htmlFor="modal-time" className="mb-1 block text-sm font-medium text-fg-muted">
               Time <span className="font-normal text-fg-subtle">(optional)</span>
             </label>
@@ -150,7 +150,7 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
+              className="box-border block w-full max-w-full min-w-0 rounded-xl border border-border bg-muted px-4 py-3 text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
             />
           </div>
           {!defaultDate && (
