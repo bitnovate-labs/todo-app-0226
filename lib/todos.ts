@@ -23,6 +23,24 @@ export function formatTodoTime(time: string): string {
   return `${hour}:${String(m).padStart(2, "0")} ${period}`;
 }
 
+export type Time12Parts = { hour12: number; minute: number; period: "am" | "pm" };
+
+/** Parse stored HH:mm into 12-hour parts. */
+export function hhmmToTime12Parts(hhmm: string): Time12Parts | null {
+  const [h, m] = hhmm.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  const period: "am" | "pm" = h >= 12 ? "pm" : "am";
+  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return { hour12, minute: m, period };
+}
+
+/** Convert 12-hour parts to stored HH:mm. */
+export function time12PartsToHhmm(parts: Time12Parts): string {
+  let h = parts.hour12 % 12;
+  if (parts.period === "pm") h += 12;
+  return `${String(h).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
+}
+
 /** Default list row: white card in light mode, elevated surface in dark. */
 export const TODO_ROW_BG_CLASS = "bg-white dark:bg-elevated";
 export const TODO_ROW_PRIORITY_CLASS = "bg-row-priority";

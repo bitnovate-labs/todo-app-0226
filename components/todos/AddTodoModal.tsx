@@ -7,6 +7,7 @@ import "react-day-picker/style.css";
 import { useTodos } from "@/hooks/useTodos";
 import { todayKey, dateKey, dayNameFromDate, formatDateDDMMMFromDate } from "@/lib/todos";
 import { useDashboardPathname } from "@/components/layout/DashboardPathnameContext";
+import { TimePicker } from "@/components/ui/TimePicker";
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -142,16 +143,10 @@ export function AddTodoModal({ open, onClose, userId, next, defaultDate }: AddTo
             />
           </div>
           <div className="min-w-0 max-w-full">
-            <label htmlFor="modal-time" className="mb-1 block text-sm font-medium text-fg-muted">
+            <span className="mb-1 block text-sm font-medium text-fg-muted">
               Time <span className="font-normal text-fg-subtle">(optional)</span>
-            </label>
-            <input
-              id="modal-time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="box-border block w-full max-w-full min-w-0 rounded-xl border border-border bg-muted px-4 py-3 text-fg focus:border-border-strong focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-focus/25"
-            />
+            </span>
+            <TimePicker id="modal-time" value={time} onChange={setTime} />
           </div>
           {!defaultDate && (
             <div>
